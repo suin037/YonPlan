@@ -1,9 +1,11 @@
 /* Layout: 데스크톱은 393px 폰 프레임(?ut 모드에서는 옆에 UT 진행 패널), 폰 폭에서는 앱이 화면을 꽉 채움
-   Color: 로열블루(#4169e1) 한 가지 색의 진하기 차이로 상태를 구분하고, 아이콘·글자를 함께 써요. */
+   Color: 흰 배경 + 로열블루(#4169e1) 진하기 단계만 사용. 상태는 진하기·아이콘·글자로 함께 구분해요. */
 :root{
-  --page:#eef1f8; --bg:#ffffff; --surface:#f3f5fb; --line:#d8deec; --fg:#121a33; --muted:#5f6880; --faint:#9aa2b8;
-  --ink:#4169e1; --on-ink:#ffffff;
-  --b900:#14246b; --b700:#2a4bc4; --b500:#4169e1; --b300:#9db1f0; --b200:#c9d5f8; --b100:#e6ecfc;
+  /* 배경은 흰색, 나머지 색은 모두 로열블루(#4169e1)의 진하기 단계로만 써요. 다크 모드는 없어요. */
+  --b950:#0d1640; --b900:#14246b; --b800:#1d3596; --b700:#2a4bc4; --b500:#4169e1; --b400:#7390ea;
+  --b300:#9db1f0; --b200:#c9d5f8; --b100:#e6ecfc; --b50:#f4f7fe;
+  --page:#ffffff; --bg:#ffffff; --surface:var(--b50); --line:var(--b200); --fg:var(--b950); --muted:#5a6aa3; --faint:var(--b300);
+  --ink:var(--b500); --on-ink:#ffffff;
   --accent:var(--b500); --accent-soft:var(--b100); --accent-on:var(--b900);
   --done:var(--b700); --done-soft:var(--b700); --done-on:#ffffff;
   --now:var(--b500); --now-soft:var(--b500); --now-on:#ffffff;
@@ -13,31 +15,8 @@
   --stripe:var(--b300);
   --font:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
   --r:14px;
+  color-scheme:light;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --page:#0b0f1c; --bg:#121829; --surface:#1a2136; --line:#2a3350; --fg:#e9edf8; --muted:#a4acc4; --faint:#6c7593;
-  --ink:#4f77ea; --on-ink:#ffffff;
-  --b900:#0f1a4d; --b700:#2a4bc4; --b500:#4f77ea; --b300:#8fa6ee; --b200:#c9d5f8; --b100:#1f2b57;
-  --accent:var(--b300); --accent-soft:var(--b100); --accent-on:#dfe6fb;
-  --done:var(--b700); --done-soft:var(--b700); --done-on:#ffffff;
-  --now:var(--b500); --now-soft:var(--b500); --now-on:#ffffff;
-  --plan:var(--b300); --plan-soft:var(--b200); --plan-on:#14246b;
-  --rec:var(--b300); --rec-soft:var(--b100); --rec-on:#c9d5f8;
-  --bad:#dfe6fb; --bad-soft:#dfe6fb; --bad-on:#14246b;
-  --stripe:var(--b300);
-  color-scheme:dark}}
-:root[data-theme="dark"]{
-  --page:#0b0f1c; --bg:#121829; --surface:#1a2136; --line:#2a3350; --fg:#e9edf8; --muted:#a4acc4; --faint:#6c7593;
-  --ink:#4f77ea; --on-ink:#ffffff;
-  --b900:#0f1a4d; --b700:#2a4bc4; --b500:#4f77ea; --b300:#8fa6ee; --b200:#c9d5f8; --b100:#1f2b57;
-  --accent:var(--b300); --accent-soft:var(--b100); --accent-on:#dfe6fb;
-  --done:var(--b700); --done-soft:var(--b700); --done-on:#ffffff;
-  --now:var(--b500); --now-soft:var(--b500); --now-on:#ffffff;
-  --plan:var(--b300); --plan-soft:var(--b200); --plan-on:#14246b;
-  --rec:var(--b300); --rec-soft:var(--b100); --rec-on:#c9d5f8;
-  --bad:#dfe6fb; --bad-soft:#dfe6fb; --bad-on:#14246b;
-  --stripe:var(--b300);
-  color-scheme:dark}
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;background:var(--page);color:var(--fg);font-family:var(--font);font-size:14px;-webkit-font-smoothing:antialiased}
@@ -45,7 +24,7 @@ button,select,input{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--b500);outline-offset:2px}
 .stage{min-height:100%;display:flex;justify-content:center;align-items:flex-start;gap:28px;padding-block:24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.phone{width:393px;max-width:100%;height:min(852px,calc(100vh - 48px));background:var(--bg);border-radius:36px;border:1px solid var(--line);box-shadow:0 20px 60px rgba(20,22,27,.18);overflow:hidden;position:relative;display:flex;flex-direction:column}
+.phone{width:393px;max-width:100%;height:min(852px,calc(100vh - 48px));background:var(--bg);border-radius:36px;border:1px solid var(--line);box-shadow:0 20px 60px rgba(20,36,107,.12);overflow:hidden;position:relative;display:flex;flex-direction:column}
 .screen{flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
 .scroll{flex:1;min-height:0;overflow-y:auto;padding:8px max(18px,env(safe-area-inset-right,0px)) 24px max(18px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px}
 .foot{padding:10px 18px 12px;border-top:1px solid var(--line);background:var(--bg);display:flex;flex-direction:column;gap:8px}
@@ -188,7 +167,7 @@ button{cursor:pointer}
 .toast .grow{flex:1}
 .toast button{border:0;background:transparent;color:var(--on-ink);font-weight:800;text-decoration:underline;padding:4px}
 @keyframes tin{from{transform:translateY(-10px);opacity:0}}
-.dim{position:absolute;inset:0;background:rgba(10,12,16,.45);z-index:40;display:flex;align-items:flex-end}
+.dim{position:absolute;inset:0;background:rgba(13,22,64,.45);z-index:40;display:flex;align-items:flex-end}
 .sheet{background:var(--bg);width:100%;border-radius:20px 20px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px;max-height:85%;overflow:auto}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
