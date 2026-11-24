@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#4169e1">
+<meta name="description" content="연세대 신촌캠퍼스 학생을 위한 졸업요건·학사 로드맵·시간표 플래너">
+<title>연플랜</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
+</head>
+<body>
+<div class="stage">
+  <div class="phone" id="phone">
+    <div class="screen" id="screen"></div>
+    <nav class="tabs" id="tabs" aria-label="하단 메뉴"></nav>
+    <div id="layer"></div>
+  </div>
+  <aside class="ut" aria-label="UT 진행 도구">
+    <h2>UT 과제 바로 시작</h2>
+    <div class="task"><b>T1 학적 설정</b><p>24학번, 3학년, 경제학 본전공, 심리학 복수전공, 목표 졸업 2027년 2학기로 학적을 설정하세요.</p><button data-ut="1">T1 시작 상태로</button></div>
+    <div class="task"><b>T2 이수 과목 등록</b><p>경제학원론과 심리학개론을 들은 과목으로 등록하세요.</p><button data-ut="2">T2 시작 상태로</button></div>
+    <div class="task"><b>T3 남은 필수 요건</b><p>심리학 복수전공에서 아직 듣지 않은 전공필수 과목을 찾아보세요.</p><button data-ut="3">T3 시작 상태로</button></div>
+    <div class="task"><b>T4 노동경제학 계획</b><p>2027년 1학기(4학년 1학기)에 노동경제학을 듣기로 했어요. 로드맵 계획에 추가하세요.</p><button data-ut="4">T4 시작 상태로</button></div>
+    <div class="task"><b>T5 시간 충돌 해결</b><p>2026-2 시간표 1안에 시간이 겹치는 과목이 있어요. 충돌을 해결하세요.</p><button data-ut="5">T5 시작 상태로</button></div>
+    <details><summary>U1·U2 이후 바뀐 점</summary><ul>
+      <li>하단 탭에 졸업요건 추가, 홈 링크는 "남은 졸업요건 보기"</li>
+      <li>로드맵 학기를 "2027-1 · 4학년 1학기"처럼 연도와 함께 표기, 학기 바로가기</li>
+      <li>학기 카드마다 "+ 과목 추가", 추가하면 해당 학기로 돌아와 강조와 안내</li>
+      <li>시간표 추가·교체 후 맥락에 맞는 안내, 갱신된 시간표로 이동</li>
+      <li>대안에 같은 과목 다른 분반과 같은 요건을 채우는 다른 과목</li>
+      <li>이수·수강 중·계획·추천을 색, 아이콘, 글자, 테두리로 함께 구분</li>
+      <li>학적 설정과 이수 등록은 빈 상태로 시작(미리 선택된 값 없음)</li>
+      <li>시간표 칸에 실제 과목명 표기</li>
+    </ul></details>
+  </aside>
+</div>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
