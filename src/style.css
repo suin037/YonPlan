@@ -1,7 +1,7 @@
 /* ============================================================
    연플랜 스타일
    - 기본: 흰 배경 + 검정·회색 (무채색)
-   - 강조: 연세블루 한 가지 (연세대 엠블렘 PANTONE 281C · CMYK 100/72/0/38 → #002C9E)
+   - 강조: 연세블루 한 가지 (#003876)
    - 상태(이수·수강 중·계획·추천)는 채움/테두리/아이콘/글자로 함께 구분해요.
    - 레이아웃: 데스크톱은 가운데 앱 화면(최대 440px), 폰에서는 화면을 꽉 채워요.
      ?ut 모드에서는 오른쪽에 UT 진행 패널이 보여요.
@@ -11,7 +11,7 @@
   --white:#ffffff; --g50:#f7f8fa; --g100:#f1f3f5; --g200:#e5e8eb; --g300:#d1d6db; --g400:#b0b8c1;
   --g500:#8b95a1; --g600:#6b7684; --g700:#4e5968; --g800:#333d4b; --g900:#191f28;
   /* 연세블루 */
-  --yb:#002c9e; --yb-strong:#00217a; --yb-soft:#e8edfa; --yb-mid:#9fb1e0;
+  --yb:#003876; --yb-strong:#002a59; --yb-soft:#e6ebf1; --yb-mid:#99afc8;
 
   --page:#ffffff; --bg:#ffffff; --surface:var(--g50); --line:var(--g200); --fg:var(--g900); --muted:var(--g600); --faint:var(--g400);
   --ink:var(--yb); --on-ink:#ffffff;
@@ -192,7 +192,7 @@ button{cursor:pointer}
 /* toast + sheet */
 .toast{position:absolute;left:16px;right:16px;bottom:84px;background:var(--g900);color:#fff;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:10px;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:30;animation:tin .25s ease}
 .toast .grow{flex:1}
-.toast button{border:0;background:transparent;color:#8fa6ff;font-weight:700;padding:4px}
+.toast button{border:0;background:transparent;color:var(--yb-mid);font-weight:700;padding:4px}
 @keyframes tin{from{transform:translateY(10px);opacity:0}}
 .dim{position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:40;display:flex;align-items:flex-end}
 .sheet{background:var(--bg);width:100%;border-radius:24px 24px 0 0;padding:24px 20px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px;max-height:85%;overflow:auto}
