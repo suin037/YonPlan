@@ -3,13 +3,19 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "연플랜 - 연세대 신촌캠퍼스 졸업요건·학사 로드맵·시간표 플래너",
+  "description": "연플랜 - 연세대 신촌캠퍼스 졸업요건·학사 로드맵 관리",
   "scripts": {
+    "predev": "node scripts/copy_ocr.mjs",
     "dev": "vite",
+    "prebuild": "node scripts/copy_ocr.mjs",
     "build": "vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
     "vite": "^6.3.5"
+  },
+  "dependencies": {
+    "@tesseract.js-data/eng": "^1.0.0",
+    "tesseract.js": "^7.0.0"
   }
 }
