@@ -548,16 +548,44 @@ function manualAdd(p, sems) {
 }
 
 /* ---------- 캡처 방법 안내 (다음 → 다음) ---------- */
+/* 각 단계: 화면 전체(img)를 먼저 보여 주고 focus 영역으로 확대한 뒤 hi 영역을 강조해요.
+   좌표는 그림 크기에 대한 비율 [x, y, 너비, 높이]예요. */
 const GUIDE = [
-  { t: '런어스에 로그인해요', d: '컴퓨터에서 런어스(ys.learnus.org)에 로그인하면 첫 화면에 "나의강좌"와 이번 학기 강좌가 보여요.', art: 'home' },
-  { t: '"과거강좌조회"를 눌러요', d: '"나의강좌" 제목 오른쪽 버튼 네 개 중 두 번째, "과거강좌조회"를 눌러요.', art: 'button' },
-  { t: '연도와 학기를 골라 검색해요', d: '"학위과정 조회" 화면에서 연도와 학기를 고르고 "검색"을 누르면 그 학기 강좌명과 학수번호가 표로 나와요. 1학년 1학기부터 이번 학기까지 차례로 해요.', art: 'search' },
-  { t: '표가 보이게 화면을 캡처해요', d: '점선 부분처럼 표 전체가 들어가게 캡처해요. 윈도우는 Win + Shift + S, 맥은 Cmd + Shift + 4예요. 학기마다 한 장씩이에요.', art: 'shot', tips: ['강좌명 옆 학수번호(예: ABC1234.01-00)가 잘리지 않게', '휴대폰으로 모니터를 찍으면 잘 안 읽혀요', '글자가 작으면 화면을 확대한 뒤 캡처'] },
-  { t: '캡처를 올리고 확인해요', d: '여러 장을 한 번에 올릴 수 있어요. 이렇게 읽은 과목이 학기별로 나오면, 수강철회했거나 F를 받은 과목은 체크를 풀고 등록해요.', art: 'check', tips: ['사진은 서버로 보내지 않고 이 기기 안에서만 읽어요', '처음 한 번 인식 엔진(약 7MB)을 내려받아요'] }
+  { t: '런어스에 로그인해요', d: '컴퓨터에서 런어스(ys.learnus.org)에 로그인하면 첫 화면에 "나의강좌"와 이번 학기 강좌가 보여요.', img: 'learnus-main.jpg', focus: [0, 0.02, 0.5, 0.5], hi: [0.02, 0.2, 0.12, 0.11] },
+  { t: '"과거강좌조회"를 눌러요', d: '"나의강좌" 제목 오른쪽 버튼 네 개 중 두 번째, "과거강좌조회"를 눌러요.', img: 'learnus-main.jpg', focus: [0.61, 0.17, 0.27, 0.15], hi: [0.682, 0.218, 0.095, 0.078] },
+  { t: '연도와 학기를 골라 검색해요', d: '"학위과정 조회" 화면에서 연도와 학기를 고르고 "검색"을 누르면 그 학기 강좌명과 학수번호가 표로 나와요. 1학년 1학기부터 이번 학기까지 차례로 해요.', img: 'learnus-past.jpg', focus: [0.2, 0.1, 0.34, 0.15], hi: [0.255, 0.145, 0.21, 0.09] },
+  { t: '표가 보이게 화면을 캡처해요', d: '강조한 표 전체가 들어가게 캡처해요. 윈도우는 Win + Shift + S, 맥은 Cmd + Shift + 4예요. 학기마다 한 장씩이에요.', img: 'learnus-past.jpg', focus: [0, 0.3, 0.6, 0.66], hi: [0.012, 0.345, 0.975, 0.625], keys: true, tips: ['강좌명 옆 학수번호(예: ABC1234.01-00)가 잘리지 않게', '휴대폰으로 모니터를 찍으면 잘 안 읽혀요', '글자가 작으면 화면을 확대한 뒤 캡처'] },
+  { t: '캡처를 올리고 확인해요', d: '여러 장을 한 번에 올릴 수 있어요. 이렇게 읽은 과목이 학기별로 나오면, 수강철회했거나 F를 받은 과목은 체크를 풀고 등록해요.', img: 'app-check.jpg', focus: [0, 0.4, 1, 0.33], hi: [0.04, 0.527, 0.92, 0.104], tips: ['사진은 서버로 보내지 않고 이 기기 안에서만 읽어요', '처음 한 번 인식 엔진(약 7MB)을 내려받아요'] }
 ];
 function guideArt(i) {
-  const src = import.meta.env.BASE_URL + `guide/step${i + 1}.jpg`;
-  return `<button type="button" class="guide-img ${i === 4 ? 'tall' : ''}" data-act="zoom" data-src="${src}" aria-label="그림 크게 보기"><img src="${src}" alt="${GUIDE[i].t} 화면 예시"><span>눌러서 크게 보기</span></button>`;
+  const g = GUIDE[i], src = import.meta.env.BASE_URL + 'guide/' + g.img;
+  const [x, y, w, h] = g.hi;
+  return `<div class="gz" id="gz" data-i="${i}"><div class="gz-layer"><img src="${src}" alt="${g.t} 화면 예시">
+    <div class="gz-hi" style="left:${x * 100}%;top:${y * 100}%;width:${w * 100}%;height:${h * 100}%"><svg preserveAspectRatio="none"><rect x="0" y="0" width="100%" height="100%" rx="8" ry="8"/></svg></div></div>
+    ${g.keys ? '<div class="gz-keys"><kbd>Win</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></div>' : ''}
+    <button type="button" class="gz-replay" data-act="guideReplay" aria-label="다시 보기">↻ 다시 보기</button></div>`;
+}
+/* 전체 화면 → 강조 영역으로 확대하는 움직임 */
+function animateGuide() {
+  const box = document.getElementById('gz'); if (!box) return;
+  const g = GUIDE[+box.dataset.i]; const layer = box.querySelector('.gz-layer'); const img = layer.querySelector('img');
+  const run = () => {
+    const W = box.clientWidth, H = box.clientHeight, iw = img.naturalWidth, ih = img.naturalHeight;
+    const s0 = Math.min(W / iw, H / ih), dw = iw * s0, dh = ih * s0, x0 = (W - dw) / 2, y0 = (H - dh) / 2;
+    Object.assign(layer.style, { left: x0 + 'px', top: y0 + 'px', width: dw + 'px', height: dh + 'px' });
+    const [fx, fy, fw, fh] = g.focus;
+    const z = Math.min(W / (fw * dw), H / (fh * dh)) * 0.92;
+    const tx = W / 2 - x0 - (fx + fw / 2) * dw * z, ty = H / 2 - y0 - (fy + fh / 2) * dh * z;
+    box.style.setProperty('--z', z);
+    const end = `translate(${tx}px, ${ty}px) scale(${z})`;
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    box.classList.remove('zoomed');
+    if (reduce || !layer.animate) { layer.style.transform = end; box.classList.add('zoomed'); return; }
+    layer.style.transform = '';
+    const an = layer.animate([{ transform: 'translate(0px, 0px) scale(1)' }, { transform: end }], { duration: 1300, delay: 900, easing: 'cubic-bezier(.45,0,.2,1)', fill: 'forwards' });
+    an.onfinish = () => box.classList.add('zoomed');
+  };
+  if (img.complete && img.naturalWidth) run(); else img.onload = run;
 }
 function vGuide(p) {
   const i = Math.max(0, Math.min(GUIDE.length - 1, p.i || 0)); const g = GUIDE[i]; const last = i === GUIDE.length - 1;
@@ -616,6 +644,7 @@ function render(y) {
   if (active && /^(addQ|rQ)$/.test(active)) { const el = document.getElementById(active); if (el) { el.focus(); try { el.setSelectionRange(caret, caret); } catch (e) { /* noop */ } } }
   if (c.s === 'roadmap' && c.p && c.p.scrollTo) { const el = document.getElementById('sem-' + c.p.scrollTo); if (el && sc) { sc.scrollTop = el.offsetTop - sc.offsetTop - 8; } delete c.p.scrollTo; }
   if (S.flash.length) { setTimeout(() => { S.flash = []; }, 3500); }
+  if (cur().s === 'guide') requestAnimationFrame(animateGuide);
   save();
 }
 function rerender() { saveScroll(); render(cur().y); }
@@ -746,7 +775,7 @@ document.addEventListener('click', e => {
     case 'regRemove': { const k = t.dataset.c; const old = S.taken.find(x => x.c === k); S.taken = S.taken.filter(x => x.c !== k); rerender(); toast(`${esc(CC(k).n)}을(를) 이수 내역에서 뺐어요`, { t: '되돌리기', fn: () => { S.taken.push(old); rerender(); } }); break; }
     case 'regFinish': if (p.onboard) { S.stack = [{ s: 'home' }]; render(0); toast(S.taken.length ? `${S.taken.length}과목을 바탕으로 졸업요건을 정리했어요` : '들은 과목은 내 정보에서 언제든 등록할 수 있어요'); } else back(); break;
     case 'openGuide': go('guide', { i: 0 }); break;
-    case 'zoom': $layer.innerHTML = `<div class="dim zoom" data-act="closeSheet"><div class="zoom-box"><img src="${t.dataset.src}" alt="크게 보기"></div><button type="button" class="zoom-x" data-act="closeSheet" aria-label="닫기">✕</button></div>`; break;
+    case 'guideReplay': animateGuide(); break;
     case 'guideNext': p.i = (p.i || 0) + 1; render(0); break;
     case 'guidePrev': p.i = Math.max(0, (p.i || 0) - 1); render(0); break;
     case 'pickImages': S.guideSeen = true; save(); pickImages(); break;
