@@ -214,3 +214,19 @@ body.ut-mode .ut{display:flex}
   .stage{gap:0;height:100%;min-height:0;background:var(--bg)}
   .phone{width:100%;box-shadow:none}
 }
+
+/* 체험 중 표시 */
+.demo-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--yb-soft);color:var(--yb);border-radius:12px;padding:8px 8px 8px 14px;font-size:13px;font-weight:600}
+.demo-bar button{border:0;background:var(--bg);color:var(--yb);border-radius:9px;padding:6px 10px;font-size:12.5px;font-weight:700}
+/* 처음 방문 안내 */
+.dim.center{align-items:center;justify-content:center;padding:20px}
+.sheet.modal{border-radius:24px;max-width:400px}
+.sheet .opt{align-items:center}
+.sheet .opt .grow{gap:2px}
+/* 분반 줄 */
+.secrow{width:100%;border:0;background:transparent;padding:8px 0;border-top:1px dashed var(--line);text-align:left}
+.secrow:hover{background:var(--g100)}
+button.pill{border:0;cursor:pointer}
+.tt .tm b{font-size:11px;color:var(--g700)}
+.field input.search{font-size:16px}
+.scroll > *{flex-shrink:0}
