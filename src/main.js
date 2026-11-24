@@ -174,10 +174,10 @@ function vHome() {
   const d = pastCodes(), t = nowCodes();
   const A0 = assign(R, d), A1 = assign(R, d.concat(t));
   const need = R.ok ? R.total : 0, tot = A0.total, after = A1.total;
-  // 요건별 이수율 (팀 디자인: 그룹마다 "이수 → 수강 중 반영 / 기준")
+  // 졸업요건 이수율 (팀 디자인: 그룹마다 "이수 → 수강 중 반영 / 기준")
   const reqRow = (label, a, b, n, go) => `<button type="button" class="hr-row" ${go}><span class="between"><b>${label}</b><span class="num">${fmt(a)} → ${fmt(b)} / ${n}학점</span></span>${barHtml(a, b, n)}</button>`;
   const reqBlock = !R.ok ? pendingCard(R) : `<section class="hsec">
-      <div class="between"><div class="h2">요건별 이수율</div><button type="button" class="link" data-go="req">졸업요건 자세히 ›</button></div>
+      <div class="between"><div class="h2">졸업요건 이수율</div><button type="button" class="link" data-go="req">졸업요건 자세히 ›</button></div>
       ${R.groups.map(g => g.pending ? `<div class="hr-row"><span class="between"><b>${esc(g.n)}</b><span class="pill gray">준비 중</span></span></div>` : reqRow(esc(g.n), A0.groupCr[g.k], A1.groupCr[g.k], g.need, 'data-go="req"')).join('')}
       ${reqRow('3·4000단위', A0.u3, A1.u3, R.u3000, 'data-go="area" data-a="U3000"')}
     </section>`;
@@ -204,8 +204,8 @@ function vHome() {
       <div class="hc-legend"><span><i></i>이수</span><span><i class="p"></i>이번 학기 수강 중</span></div>
       ${S.taken.length ? '' : '<button type="button" class="hc-btn" data-go="register">런어스 캡처로 들은 과목 등록하기</button>'}
     </div>
-    ${miss.length ? `<div class="hmiss"><div class="between"><div class="h3">놓치기 쉬운 항목</div><button type="button" class="link" data-go="roadmap">로드맵에서 보기 ›</button></div>${miss.join('')}</div>` : ''}
     ${reqBlock}
+    ${miss.length ? `<div class="hmiss"><div class="between"><div class="h3">놓치기 쉬운 항목</div><button type="button" class="link" data-go="roadmap">로드맵에서 보기 ›</button></div>${miss.join('')}</div>` : ''}
     <div class="hmiss">
       <div class="between"><div class="h3">${NOW_TERM} 수강 중</div><span class="muted small">${t.length}과목 · ${fmt(sumCr(t))}학점</span></div>
       ${t.length ? `<p class="note" style="margin:0">${t.map(k => esc(CC(k).n)).join(', ')}</p>` : '<p class="note" style="margin:0">이번 학기 런어스 강좌를 캡처해 올리면 수강 중 과목으로 들어가요.</p>'}
