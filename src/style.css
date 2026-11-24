@@ -360,3 +360,66 @@ kbd{border:1px solid var(--g300);border-bottom-width:2px;border-radius:6px;paddi
 .gz.zoomed .gz-keys{opacity:1}
 .gz-replay{position:absolute;right:8px;bottom:8px;border:0;border-radius:999px;background:rgba(25,31,40,.75);color:#fff;font-size:11.5px;font-weight:600;padding:5px 10px;opacity:0;transition:opacity .4s}
 .gz.zoomed .gz-replay{opacity:1}
+
+/* ---------- 팀 디자인 v2: 하단 탭 ---------- */
+.tabs{grid-template-columns:repeat(3,1fr);padding:8px 18px 6px;box-shadow:0 -1px 0 var(--g200)}
+.tabs button{padding:0;color:var(--g900);font-size:12px;font-weight:700}
+.tab-pill{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;width:92px;border-radius:999px;transition:background .2s}
+.tabs button svg{color:var(--yb-mid);width:24px;height:24px}
+.tabs button[aria-current="page"] .tab-pill{background:var(--yb);color:#fff}
+.tabs button[aria-current="page"] svg{color:#fff}
+.tabs button:not([aria-current]) .tab-pill{color:var(--g800)}
+/* ---------- 팀 디자인 v2: 홈 ---------- */
+.home{gap:22px}
+.hhead{display:flex;align-items:center;gap:12px;padding-top:8px}
+.havatar{width:52px;height:52px;border-radius:50%;border:1.6px solid var(--yb);color:var(--yb);display:grid;place-items:center;flex:none}
+.havatar svg{width:34px;height:34px}
+.hhead h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.5px}
+.hhead p{margin:2px 0 0;font-size:12.5px;color:var(--g700)}
+.hcard{background:var(--yb);color:#fff;border-radius:18px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:8px}
+.hc-l{font-size:13px;opacity:.85}
+.hc-pct{font-size:30px;font-weight:800;line-height:1}
+.hc-r{text-align:right;font-size:12.5px;opacity:.9;line-height:1.5}
+.hc-r b{font-size:13.5px;opacity:1}
+.hbar{display:flex;height:11px;border-radius:999px;background:rgba(255,255,255,.22);overflow:hidden;margin-top:4px}
+.hbar i{background:#fff;height:100%}
+.hbar i.p{background:var(--yb-mid)}
+.hc-legend{display:flex;gap:14px;font-size:12px;opacity:.9}
+.hc-legend span{display:flex;align-items:center;gap:5px}
+.hc-legend i{width:8px;height:8px;border-radius:2px;background:#fff}
+.hc-legend i.p{background:var(--yb-mid)}
+.hc-btn{margin-top:4px;align-self:flex-start;border:0;border-radius:10px;background:#fff;color:var(--yb);font-weight:700;font-size:13px;padding:8px 12px}
+.hmiss{background:var(--g100);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.hm-item{display:flex;align-items:center;gap:10px;border:0;background:transparent;text-align:left;padding:6px 0 6px 14px;position:relative}
+.hm-item::before{content:"";position:absolute;left:2px;top:15px;width:4px;height:4px;border-radius:50%;background:var(--g700)}
+.hm-item .grow{display:flex;flex-direction:column;gap:3px}
+.hm-item b{font-size:13.5px}
+.hm-item span span,.hm-item .grow>span{font-size:12.5px;color:var(--g700)}
+.hsec{display:flex;flex-direction:column;gap:14px}
+.hr-row{display:flex;flex-direction:column;gap:8px;border:0;background:transparent;padding:0;text-align:left;font-size:13px}
+.hr-row b{font-weight:700}
+.hr-row .num{color:var(--g700)}
+.hr-row .bar{height:10px}
+/* ---------- 팀 디자인 v2: 로드맵 ---------- */
+.rm-sum.blue{background:var(--yb);border:0;color:#fff}
+.rm-sum.blue .ring circle:first-child{stroke:rgba(255,255,255,.25)}
+.rm-sum.blue .ring circle:nth-child(2){stroke:#fff}
+.rm-sum.blue .ring text{fill:#fff}
+.rm-sum.blue .bar{background:rgba(255,255,255,.25)}
+.rm-sum.blue .bar i{background:#fff}
+.rm-sum.blue .bar i.plan{background:var(--yb-mid);background-image:none}
+.rm-sum.blue .num{color:#fff}
+.rsem-h{background:var(--g100)}
+.rsem-cr{background:var(--yb-mid);color:#fff;font-weight:700}
+.rsem:not(.open) .rsem-cr{background:var(--yb-mid)}
+.chev2{color:var(--yb)}
+.cr.on{border:1.5px solid var(--yb);background:var(--bg)}
+.tip{background:rgba(0,56,118,.94);border:0;color:#fff;box-shadow:0 10px 28px rgba(0,42,89,.28)}
+.tip-h{color:rgba(255,255,255,.8)}
+.tip-row,.tip-miss{color:#fff}
+.tip-row small{color:rgba(255,255,255,.75)}
+.tip-tag{background:var(--yb-mid);color:#fff}
+.tip-tag.now{background:#fff;color:var(--yb)}
+.tip-tag.plan{background:rgba(255,255,255,.2);color:#fff}
+.tip-tag.bad{background:#fff;color:var(--g900)}
+.cr.on .cr-info{background:var(--g100)}

@@ -142,10 +142,10 @@ const ICONS = {
   roadmap: '<rect x="4" y="12" width="4" height="8" rx="1"/><rect x="10" y="7" width="4" height="13" rx="1"/><rect x="16" y="4" width="4" height="16" rx="1"/>',
   me: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6z"/>'
 };
-const TABS = [['home', '홈'], ['roadmap', '로드맵'], ['me', '내 정보']];
+const TABS = [['roadmap', '로드맵'], ['home', '홈'], ['me', '내 정보']];
 function renderTabs() {
   const active = TAB_OF[cur().s];
-  $tabs.innerHTML = TABS.map(([k, n]) => `<button type="button" data-tab="${k}" ${active === k ? 'aria-current="page"' : ''}><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${ICONS[k]}</svg>${n}</button>`).join('');
+  $tabs.innerHTML = TABS.map(([k, n]) => `<button type="button" data-tab="${k}" ${active === k ? 'aria-current="page"' : ''}><span class="tab-pill"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${ICONS[k]}</svg>${n}</span></button>`).join('');
 }
 
 /* ---------- 공통 조각 ---------- */
@@ -174,46 +174,42 @@ function vHome() {
   const d = pastCodes(), t = nowCodes();
   const A0 = assign(R, d), A1 = assign(R, d.concat(t));
   const need = R.ok ? R.total : 0, tot = A0.total, after = A1.total;
-    const hi = S.name ? `안녕하세요, ${esc(S.name)}님` : '안녕하세요';
-  let reqCard = '';
-  if (!R.ok) reqCard = pendingCard(R);
-  else {
-    const unmet = allAreas(R).filter(a => (A0.cr[a.id] || 0) < a.need || a.must.some(k => !d.includes(k)));
-    reqCard = `<div class="between"><div class="h2">졸업요건 이수율</div></div>
-    <div class="card" style="display:flex;flex-direction:column;gap:14px">
-      ${R.groups.map(g => g.pending ? `<div class="between"><b>${esc(g.n)}</b><span class="pill gray">준비 중</span></div>` : `<div style="display:flex;flex-direction:column;gap:6px"><div class="between"><b>${esc(g.n)}</b><span class="muted small num">${fmt(A0.groupCr[g.k])} → ${fmt(A1.groupCr[g.k])} / ${g.need}학점</span></div>${barHtml(A0.groupCr[g.k], A1.groupCr[g.k], g.need)}</div>`).join('')}
-      <div style="display:flex;flex-direction:column;gap:6px"><div class="between"><b>3·4000단위</b><span class="muted small num">${fmt(A0.u3)} → ${fmt(A1.u3)} / ${R.u3000}학점</span></div>${barHtml(A0.u3, A1.u3, R.u3000)}</div>
-      <div class="legend"><span><i class="sw"></i>현재 이수</span><span><i class="sw plan"></i>${NOW_TERM} 수강 중 반영 후</span></div>
-      <button type="button" class="btn cta" data-go="req"><span>남은 졸업요건 보기</span><span class="cta-sub">${unmet.length}개 영역 · ${fmt(Math.max(0, need - tot))}학점 남음</span></button>
-    </div>`;
-  }
+  // 요건별 이수율 (팀 디자인: 그룹마다 "이수 → 수강 중 반영 / 기준")
+  const reqRow = (label, a, b, n, go) => `<button type="button" class="hr-row" ${go}><span class="between"><b>${label}</b><span class="num">${fmt(a)} → ${fmt(b)} / ${n}학점</span></span>${barHtml(a, b, n)}</button>`;
+  const reqBlock = !R.ok ? pendingCard(R) : `<section class="hsec">
+      <div class="between"><div class="h2">요건별 이수율</div><button type="button" class="link" data-go="req">졸업요건 자세히 ›</button></div>
+      ${R.groups.map(g => g.pending ? `<div class="hr-row"><span class="between"><b>${esc(g.n)}</b><span class="pill gray">준비 중</span></span></div>` : reqRow(esc(g.n), A0.groupCr[g.k], A1.groupCr[g.k], g.need, 'data-go="req"')).join('')}
+      ${reqRow('3·4000단위', A0.u3, A1.u3, R.u3000, 'data-go="area" data-a="U3000"')}
+    </section>`;
   // 놓치기 쉬운 항목
   const miss = [];
   if (R.ok) {
-    miss.push(`<button type="button" class="li" data-go="area" data-a="U3000"><span class="grow"><b>3·4000단위 ${R.u3000}학점 중 ${fmt(A0.u3)}학점</b><br><span class="muted small">전공·교양 구분 없이 인정 · ${fmt(Math.max(0, R.u3000 - A0.u3))}학점 남음</span></span><span class="chev">›</span></button>`);
+    miss.push(`<button type="button" class="hm-item" data-go="area" data-a="U3000"><span class="grow"><b>3·4000단위 과목 ${R.u3000}학점 중 ${fmt(A0.u3)}학점</b><span>전공·교양 구분 없이 인정 가능 · ${fmt(Math.max(0, R.u3000 - A0.u3))}학점 남음</span></span><span class="chev">›</span></button>`);
     allAreas(R).forEach(a => a.must.filter(k => !d.includes(k)).forEach(k => {
       if (miss.length >= 4) return;
-      const inTT = t.includes(k), pl = S.plan.find(x => x.c === k);
-      miss.push(`<button type="button" class="li" data-go="area" data-a="${a.id}"><span class="grow"><b>${esc(a.label)} '${esc(CC(k).n)}' 미이수</b><br><span class="muted small">${CC(k).cr}학점 · ${inTT ? '이번 학기 수강 중이에요' : pl ? pl.sem + ' 계획에 있어요' : (D.secByCode[k] ? `${NOW_TERM} 개설 ${D.secByCode[k].length}개 분반` : `${NOW_TERM} 미개설`)}</span></span><span class="chev">›</span></button>`);
+      const inNow = t.includes(k), pl = S.plan.find(x => x.c === k);
+      miss.push(`<button type="button" class="hm-item" data-go="area" data-a="${a.id}"><span class="grow"><b>${esc(a.label)} '${esc(CC(k).n)}' 미이수</b><span>${CC(k).cr}학점 남음 · ${inNow ? '이번 학기 수강 중' : pl ? pl.sem + ' 계획' : offered(k) ? '이번 학기 수강 가능' : '계획에 담아 두세요'}</span></span><span class="chev">›</span></button>`);
     }));
   }
-  return `${top(hi, { big: true })}<div class="scroll">
+  const pct = need ? Math.round(tot / need * 100) : null;
+  const wbar = need ? `<div class="hbar" role="img" aria-label="${need}학점 중 ${fmt(tot)}학점 이수"><i style="width:${Math.min(tot, need) / need * 100}%"></i><i class="p" style="width:${Math.max(0, Math.min(after, need) - Math.min(tot, need)) / need * 100}%"></i></div>` : '';
+  return `<div class="scroll home">
     ${demoBar()}
-    <div class="muted small" style="margin-top:-8px">${profileText(S.profile)}</div>
-    <div class="card" style="display:flex;flex-direction:column;gap:10px">
-      <div class="between"><span class="muted small">전체 이수율</span><span class="muted small">목표 졸업 ${S.profile.grad}</span></div>
-      <div class="between"><span style="font-size:30px;font-weight:800" class="num">${need ? Math.round(tot / need * 100) + '%' : '—'}</span><span class="num"><b>${fmt(tot)}</b> / ${need || '—'}학점</span></div>
-      ${barHtml(tot, after, need)}
-      <div class="legend"><span><i class="sw"></i>이수 ${fmt(tot)}</span><span><i class="sw plan"></i>이번 학기 수강 중 반영 시 ${fmt(after)}</span></div>
-      ${S.taken.length ? '' : '<button type="button" class="btn sm" data-go="register" style="align-self:flex-start">런어스 캡처로 들은 과목 등록하기</button>'}
+    <header class="hhead"><span class="havatar" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="3.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5.5 19c1.2-3 3.8-4.4 6.5-4.4s5.3 1.4 6.5 4.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+      <div><h1>${esc(S.name) || '나의 졸업 계획'}</h1><p>${profileText(S.profile)}</p></div></header>
+    <div class="hcard">
+      <div class="between"><span class="hc-l">전체 이수율</span></div>
+      <div class="between" style="align-items:flex-end"><span class="hc-pct num">${pct === null ? '—' : pct + '%'}</span><span class="hc-r num"><b>${fmt(tot)} / ${need || '—'}학점</b><br>목표 졸업 ${S.profile.grad}</span></div>
+      ${wbar}
+      <div class="hc-legend"><span><i></i>이수</span><span><i class="p"></i>이번 학기 수강 중</span></div>
+      ${S.taken.length ? '' : '<button type="button" class="hc-btn" data-go="register">런어스 캡처로 들은 과목 등록하기</button>'}
     </div>
-    ${reqCard}
-    ${miss.length ? `<div class="card" style="display:flex;flex-direction:column;gap:4px">
-      <div class="between"><div class="h3">놓치기 쉬운 항목</div><button type="button" class="link" data-go="roadmap">로드맵에서 보기 ›</button></div>${miss.join('')}</div>` : ''}
-    <div class="card" style="display:flex;flex-direction:column;gap:10px">
-      <div class="between"><div class="h3">${NOW_TERM} 수강 중</div><span class="pill info">● ${t.length}과목 · ${fmt(sumCr(t))}학점</span></div>
+    ${miss.length ? `<div class="hmiss"><div class="between"><div class="h3">놓치기 쉬운 항목</div><button type="button" class="link" data-go="roadmap">로드맵에서 보기 ›</button></div>${miss.join('')}</div>` : ''}
+    ${reqBlock}
+    <div class="hmiss">
+      <div class="between"><div class="h3">${NOW_TERM} 수강 중</div><span class="muted small">${t.length}과목 · ${fmt(sumCr(t))}학점</span></div>
       ${t.length ? `<p class="note" style="margin:0">${t.map(k => esc(CC(k).n)).join(', ')}</p>` : '<p class="note" style="margin:0">이번 학기 런어스 강좌를 캡처해 올리면 수강 중 과목으로 들어가요.</p>'}
-      <button type="button" class="btn weak" data-go="register" data-sem="${NOW_TERM}">${t.length ? '이수 내역 관리' : '이번 학기 과목 등록하기'}</button>
+      <button type="button" class="link" data-go="register" data-sem="${NOW_TERM}" style="align-self:flex-start">${t.length ? '이수 내역 관리 ›' : '이번 학기 과목 등록하기 ›'}</button>
     </div>
   </div>`;
 }
@@ -324,8 +320,8 @@ function vRoadmap() {
     const mNeed = majors.reduce((t, g) => t + g.need, 0);
     const m0 = majors.reduce((t, g) => t + A0.groupCr[g.k], 0), m1 = majors.reduce((t, g) => t + A1.groupCr[g.k], 0);
     const line = (n, a, b, need) => `<div class="rs-line"><div class="between"><b>${n}</b><span class="num">${fmt(a)} / ${need}학점</span></div>${barHtml(a, b, need)}</div>`;
-    summary = `<div class="rm-sum">${ring(A0.total / R.total)}<div class="rs-lines">${line('전공', m0, m1, mNeed)}${line('교양', A0.groupCr.gen, A1.groupCr.gen, gen.need)}</div></div>
-      <div class="legend"><span><i class="sw"></i>이수</span><span><i class="sw plan"></i>수강 중·계획 반영 시</span><span class="muted">계획 포함 ${fmt(A1.total)} / ${R.total}학점</span></div>`;
+    summary = `<div class="rm-sum blue">${ring(A0.total / R.total)}<div class="rs-lines">${line('전공', m0, m1, mNeed)}${line('교양', A0.groupCr.gen, A1.groupCr.gen, gen.need)}</div></div>
+      <div class="muted small">밝은 막대는 수강 중·계획 과목까지 반영한 학점이에요 · 계획 포함 ${fmt(A1.total)} / ${R.total}학점</div>`;
   } else summary = `<div class="rm-sum"><div class="rs-lines"><div class="between"><b>이수 학점</b><span class="num">${fmt(A0.total)}학점</span></div><p class="note" style="margin:0">졸업요건은 준비 중이에요.</p></div></div>`;
   const semHtml = sem => {
     let items = [];
