@@ -531,25 +531,21 @@ function manualAdd(p, sems) {
 
 /* ---------- 캡처 방법 안내 (다음 → 다음) ---------- */
 const GUIDE = [
-  { t: '런어스에 로그인해요', d: '컴퓨터에서 런어스(ys.learnus.org)에 로그인하면 첫 화면에 "나의강좌"가 보여요.', art: 'home' },
-  { t: '"과거강좌조회"를 눌러요', d: '나의강좌 제목 오른쪽 버튼 중 "과거강좌조회"를 눌러요.', art: 'button' },
-  { t: '연도와 학기를 골라 검색해요', d: '들었던 학기를 골라 "검색"을 누르면 그 학기 강좌명과 학수번호가 표로 나와요. 1학년 1학기부터 이번 학기까지 차례로 해요.', art: 'search' },
-  { t: '표가 보이게 화면을 캡처해요', d: '윈도우는 Win + Shift + S, 맥은 Cmd + Shift + 4로 표 부분을 캡처해요. 학기마다 한 장씩이에요.', art: 'shot', tips: ['강좌명 옆 학수번호(예: ABC1234.01-00)가 잘리지 않게', '휴대폰으로 모니터를 찍으면 잘 안 읽혀요', '글자가 작으면 화면을 확대한 뒤 캡처'] },
-  { t: '캡처를 올리고 확인해요', d: '여러 장을 한 번에 올릴 수 있어요. 읽은 결과를 보여 드리면, 수강철회했거나 F를 받은 과목은 체크를 풀고 등록해요.', art: 'check', tips: ['사진은 서버로 보내지 않고 이 기기 안에서만 읽어요', '처음 한 번 인식 엔진(약 7MB)을 내려받아요'] }
+  { t: '런어스에 로그인해요', d: '컴퓨터에서 런어스(ys.learnus.org)에 로그인하면 첫 화면에 "나의강좌"와 이번 학기 강좌가 보여요.', art: 'home' },
+  { t: '"과거강좌조회"를 눌러요', d: '"나의강좌" 제목 오른쪽 버튼 네 개 중 두 번째, "과거강좌조회"를 눌러요.', art: 'button' },
+  { t: '연도와 학기를 골라 검색해요', d: '"학위과정 조회" 화면에서 연도와 학기를 고르고 "검색"을 누르면 그 학기 강좌명과 학수번호가 표로 나와요. 1학년 1학기부터 이번 학기까지 차례로 해요.', art: 'search' },
+  { t: '표가 보이게 화면을 캡처해요', d: '점선 부분처럼 표 전체가 들어가게 캡처해요. 윈도우는 Win + Shift + S, 맥은 Cmd + Shift + 4예요. 학기마다 한 장씩이에요.', art: 'shot', tips: ['강좌명 옆 학수번호(예: ABC1234.01-00)가 잘리지 않게', '휴대폰으로 모니터를 찍으면 잘 안 읽혀요', '글자가 작으면 화면을 확대한 뒤 캡처'] },
+  { t: '캡처를 올리고 확인해요', d: '여러 장을 한 번에 올릴 수 있어요. 이렇게 읽은 과목이 학기별로 나오면, 수강철회했거나 F를 받은 과목은 체크를 풀고 등록해요.', art: 'check', tips: ['사진은 서버로 보내지 않고 이 기기 안에서만 읽어요', '처음 한 번 인식 엔진(약 7MB)을 내려받아요'] }
 ];
-function guideArt(k) {
-  const bar = '<div class="ga-top"><b>LearnUs</b><span>학위과정 · 비교과과정 · My Page</span></div>';
-  if (k === 'home') return `<div class="ga">${bar}<div class="ga-body"><div class="ga-h">나의강좌</div><div class="ga-row"></div><div class="ga-row"></div><div class="ga-row short"></div></div></div>`;
-  if (k === 'button') return `<div class="ga">${bar}<div class="ga-body"><div class="between"><div class="ga-h">나의강좌</div><div class="ga-btns"><span>강의 시간표</span><span class="hi">과거강좌조회</span></div></div><div class="ga-row"></div><div class="ga-row short"></div></div></div>`;
-  if (k === 'search') return `<div class="ga">${bar}<div class="ga-body"><div class="ga-h">학위과정 조회</div><div class="ga-search"><span>연도 학기</span><span class="sel">2025 ▾</span><span class="sel">1학기 ▾</span><span class="hi">검색</span></div><div class="ga-table"><div><i>2025</i><i>1학기</i><i>미시경제원론 (ECO1103.01-00)</i></div><div><i>2025</i><i>1학기</i><i>글쓰기 (YCB1101.05-00)</i></div></div></div></div>`;
-  if (k === 'shot') return `<div class="ga">${bar}<div class="ga-body"><div class="ga-table shot"><div><i>2025</i><i>1학기</i><i>미시경제원론 (ECO1103.01-00)</i></div><div><i>2025</i><i>1학기</i><i>글쓰기 (YCB1101.05-00)</i></div><div><i>2025</i><i>1학기</i><i>심리학개론 (PSY2103.02-00)</i></div></div><div class="ga-keys"><kbd>Win</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></div></div></div>`;
-  return `<div class="ga"><div class="ga-body"><div class="ga-check"><span class="check on">✓</span>미시경제원론 · 2025-1</div><div class="ga-check"><span class="check on">✓</span>글쓰기 · 2025-1</div><div class="ga-check"><span class="check"></span><s>수강철회한 과목</s></div></div></div>`;
+function guideArt(i) {
+  const src = import.meta.env.BASE_URL + `guide/step${i + 1}.jpg`;
+  return `<button type="button" class="guide-img ${i === 4 ? 'tall' : ''}" data-act="zoom" data-src="${src}" aria-label="그림 크게 보기"><img src="${src}" alt="${GUIDE[i].t} 화면 예시"><span>눌러서 크게 보기</span></button>`;
 }
 function vGuide(p) {
   const i = Math.max(0, Math.min(GUIDE.length - 1, p.i || 0)); const g = GUIDE[i]; const last = i === GUIDE.length - 1;
   return `${top('캡처하는 방법')}<div class="scroll">
     <div class="steps">${GUIDE.map((_, k) => `<i class="${k <= i ? 'on' : ''}"></i>`).join('')}<span>${i + 1} / ${GUIDE.length}</span></div>
-    ${guideArt(g.art)}
+    ${guideArt(i)}
     <div><div style="font-size:21px;font-weight:800">${i + 1}. ${g.t}</div><p class="note" style="margin:6px 0 0;font-size:14.5px">${g.d}</p></div>
     ${g.tips ? `<ul class="tips">${g.tips.map(t => `<li>${t}</li>`).join('')}</ul>` : ''}
   </div>
@@ -729,6 +725,7 @@ document.addEventListener('click', e => {
     case 'regRemove': { const k = t.dataset.c; const old = S.taken.find(x => x.c === k); S.taken = S.taken.filter(x => x.c !== k); rerender(); toast(`${esc(CC(k).n)}을(를) 이수 내역에서 뺐어요`, { t: '되돌리기', fn: () => { S.taken.push(old); rerender(); } }); break; }
     case 'regFinish': if (p.onboard) { S.stack = [{ s: 'home' }]; render(0); toast(S.taken.length ? `${S.taken.length}과목을 바탕으로 졸업요건을 정리했어요` : '들은 과목은 내 정보에서 언제든 등록할 수 있어요'); } else back(); break;
     case 'openGuide': go('guide', { i: 0 }); break;
+    case 'zoom': $layer.innerHTML = `<div class="dim zoom" data-act="closeSheet"><div class="zoom-box"><img src="${t.dataset.src}" alt="크게 보기"></div><button type="button" class="zoom-x" data-act="closeSheet" aria-label="닫기">✕</button></div>`; break;
     case 'guideNext': p.i = (p.i || 0) + 1; render(0); break;
     case 'guidePrev': p.i = Math.max(0, (p.i || 0) - 1); render(0); break;
     case 'pickImages': S.guideSeen = true; save(); pickImages(); break;

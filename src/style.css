@@ -266,3 +266,34 @@ kbd{border:1px solid var(--g300);border-bottom-width:2px;border-radius:6px;paddi
 .ocr-edit input[type=text]{flex:1}
 .ocr-edit input[type=number]{width:60px}
 .field select[data-ocrsem]{min-height:46px}
+
+/* ---------- 휴대폰 프레임 (데스크톱에서만) ---------- */
+.stage{min-height:100vh;align-items:center;padding:24px 0;background:var(--g100)}
+.phone{width:390px;height:min(844px,calc(100dvh - 48px));border-radius:54px;border:12px solid #15181d;box-shadow:0 0 0 2px #2b3038,0 30px 60px rgba(0,0,0,.18);background:var(--bg)}
+.statusbar{flex:none;height:50px;display:flex;align-items:center;justify-content:space-between;padding:4px 26px 0 34px;font-size:15px;font-weight:700;color:var(--g900);position:relative}
+.statusbar .island{position:absolute;left:50%;top:10px;transform:translateX(-50%);width:112px;height:32px;border-radius:20px;background:#15181d}
+.sb-icons{display:flex;gap:5px;align-items:center}
+.sb-icons svg{height:11px;width:auto;fill:currentColor}
+.homebar{flex:none;height:22px;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+.homebar::after{content:"";width:130px;height:5px;border-radius:3px;background:var(--g900)}
+.tabs{padding-bottom:0}
+.dim{border-radius:42px}
+.toast{bottom:96px}
+.ut{align-self:center}
+@media (max-width:560px){
+  .stage{padding:0;min-height:100%;align-items:flex-start}
+  .phone{width:100%;height:100vh;height:100dvh;border:0;border-radius:0;box-shadow:none}
+  .statusbar,.homebar{display:none}
+  .tabs{padding-bottom:env(safe-area-inset-bottom,0px)}
+  .dim{border-radius:0}
+  .toast{bottom:84px}
+}
+/* 안내 그림 */
+.guide-img{border:1px solid var(--g200);border-radius:14px;padding:0;background:var(--bg);overflow:hidden;position:relative;display:block;width:100%}
+.guide-img img{display:block;width:100%;height:auto}
+.guide-img.tall img{max-height:340px;object-fit:cover;object-position:top}
+.guide-img span{position:absolute;right:8px;bottom:8px;background:rgba(25,31,40,.78);color:#fff;font-size:11.5px;font-weight:600;border-radius:8px;padding:4px 8px}
+.dim.zoom{align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.75)}
+.zoom-box{max-width:100%;max-height:100%;overflow:auto;border-radius:12px;background:#fff}
+.zoom-box img{display:block;width:720px;max-width:none}
+.zoom-x{position:absolute;top:18px;right:18px;width:36px;height:36px;border-radius:50%;border:0;background:#fff;font-size:16px;font-weight:700}
