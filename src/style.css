@@ -93,11 +93,11 @@ button{cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--bg);color:var(--g900);box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .bar{height:8px;border-radius:99px;background:var(--g200);overflow:hidden;display:flex}
 .bar i{display:block;height:100%;background:var(--yb)}
-.bar i.plan{background:repeating-linear-gradient(135deg,var(--stripe) 0 4px,transparent 4px 7px)}
+.bar i.plan{background:rgba(0,56,118,.42)}
 .legend{display:flex;gap:14px;font-size:12px;color:var(--muted);flex-wrap:wrap}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .sw{width:10px;height:10px;border-radius:3px;background:var(--yb);display:inline-block}
-.sw.plan{background:repeating-linear-gradient(135deg,var(--stripe) 0 3px,transparent 3px 5px);box-shadow:inset 0 0 0 1px var(--stripe)}
+.sw.plan{background:rgba(0,56,118,.42)}
 .list{display:flex;flex-direction:column}
 .li{display:flex;align-items:center;gap:12px;padding:14px 0;border-top:1px solid var(--g200);background:transparent;border-left:0;border-right:0;border-bottom:0;text-align:left;width:100%}
 .li:first-child{border-top:0}
@@ -423,3 +423,54 @@ kbd{border:1px solid var(--g300);border-bottom-width:2px;border-radius:6px;paddi
 .tip-tag.plan{background:rgba(255,255,255,.2);color:#fff}
 .tip-tag.bad{background:#fff;color:var(--g900)}
 .cr.on .cr-info{background:var(--g100)}
+
+/* ================= 팀 디자인 전체 적용 (파랑만 연플랜 색) ================= */
+:root{--surface:#f0f1f5;--g100:#f0f1f5;--line:#e3e5ec;--yb-plan:rgba(0,56,118,.42)}
+/* 막대: 빗금 대신 반투명 면 */
+.bar{height:10px;background:#e3e5ec}
+.bar i{background:var(--yb)}
+.bar i.plan{background:var(--yb-plan);background-image:none}
+.sw{background:var(--yb)}
+.sw.plan{background:var(--yb-plan);box-shadow:none}
+.rm-sum.blue .bar i.plan,.hbar i.p,.hc-legend i.p{background:rgba(255,255,255,.55)}
+/* 머리말 */
+.top.big{padding:28px 22px 12px}
+.top.big h1{font-size:26px}
+.top h1{font-weight:800}
+/* 카드·버튼·칩 */
+.card{border-radius:16px;background:var(--surface)}
+.card.soft{background:var(--surface)}
+.btn{border-radius:16px}
+.chip{background:var(--surface);color:var(--g800)}
+.chip[aria-pressed="true"]{background:var(--yb);color:#fff}
+.seg{background:var(--surface)}
+.pill.info{background:var(--yb-mid);color:#fff}
+.pill.ok,.pill.gray{background:var(--surface);color:var(--g700)}
+.card .pill.gray,.card .pill.ok{background:#fff}
+.banner.ok{background:var(--surface);color:var(--g900)}
+.banner.ok > span{color:var(--yb);font-weight:800}
+.st-now{background:var(--yb-mid);color:#fff}
+.st-plan{background:#fff;color:var(--yb);box-shadow:inset 0 0 0 1px var(--yb)}
+.steps i.on{background:var(--yb)}
+/* 선택지 행: 로드맵 과목 행과 같은 모양 */
+.opt{border:1px solid var(--line);border-radius:12px;padding:13px 14px}
+.opt[aria-checked="true"]{border:1.5px solid var(--yb);background:#fff}
+.field select,.search{background-color:var(--surface);border-radius:14px}
+.demo-bar{background:var(--surface);color:var(--g800)}
+.demo-bar button{background:var(--yb);color:#fff}
+/* 로드맵 행: 모두 같은 회색 테두리, 추천만 점선 */
+.cr,.cr-now,.cr-plan{border:1px solid var(--line);border-style:solid}
+.cr-rec{border-style:dashed;border-color:var(--yb-mid)}
+.cr-rec-t{font-size:11px;font-weight:700;color:var(--yb);margin-left:4px}
+.cr.on{border:1.5px solid var(--yb)}
+.cr-info{background:#e8eaf1;color:var(--g800)}
+.rsem-h{background:var(--surface);border-radius:16px}
+/* 선수과목 말풍선: 반투명 */
+.tip{background:rgba(0,56,118,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.tip-tag{background:rgba(255,255,255,.28);color:#fff}
+.tip-tag.bad{background:#fff;color:var(--yb)}
+
+/* ⓘ에 마우스를 올리거나(데스크톱) 누르면(휴대폰) 선수과목 말풍선 */
+.cr-wrap .tip{display:none}
+.cr-wrap.hover .tip,.cr-wrap.pinned .tip{display:flex}
+.cr-wrap.hover .cr,.cr-wrap.pinned .cr{border:1.5px solid var(--yb)}

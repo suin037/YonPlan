@@ -297,9 +297,9 @@ function courseRow(code, st, opt) {
   opt = opt || {}; const x = CC(code); const on = S.rmSel === code;
   const tag = st === 'rec' ? '<span class="cr-tag">☆ 추천</span>' : st === 'plan' ? '<span class="cr-tag plan">◆ 계획</span>' : '';
   const warn = prereqs(code).some(([q, t]) => t === 'R' && statusOf(q) !== 'done' && statusOf(q) !== 'now') && st !== 'done' ? '<span class="cr-tag bad">! 선수과목</span>' : '';
-  return `<div class="cr-wrap">${on ? preTip(code) : ''}<div class="cr cr-${st} ${on ? 'on' : ''} ${opt.flash ? 'flash' : ''}">
-    <button type="button" class="cr-main" data-act="rmSel" data-c="${code}" aria-expanded="${on}" aria-label="${esc(x.n)} 선수과목 보기"><b>${esc(x.n)}</b><span>${x.cr}학점 (${code})${tag}${warn}</span></button>
-    <button type="button" class="cr-info" data-go="course" data-c="${code}" aria-label="${esc(x.n)} 자세히 보기"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10 9v5M10 6.2v.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+  return `<div class="cr-wrap ${on ? 'pinned' : ''}">${preTip(code)}<div class="cr cr-${st} ${opt.flash ? 'flash' : ''}">
+    <button type="button" class="cr-main" data-go="course" data-c="${code}" aria-label="${esc(x.n)} 자세히 보기"><b>${esc(x.n)}${st === 'rec' ? ' <small class="cr-rec-t">추천</small>' : ''}</b><span>${x.cr}학점 (${code})</span></button>
+    <button type="button" class="cr-info" data-act="rmSel" data-c="${code}" aria-expanded="${on}" aria-label="${esc(x.n)} 선수과목 보기"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10 9v5M10 6.2v.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
   </div></div>`;
 }
 function ring(pct) {
@@ -321,7 +321,7 @@ function vRoadmap() {
     const m0 = majors.reduce((t, g) => t + A0.groupCr[g.k], 0), m1 = majors.reduce((t, g) => t + A1.groupCr[g.k], 0);
     const line = (n, a, b, need) => `<div class="rs-line"><div class="between"><b>${n}</b><span class="num">${fmt(a)} / ${need}학점</span></div>${barHtml(a, b, need)}</div>`;
     summary = `<div class="rm-sum blue">${ring(A0.total / R.total)}<div class="rs-lines">${line('전공', m0, m1, mNeed)}${line('교양', A0.groupCr.gen, A1.groupCr.gen, gen.need)}</div></div>
-      <div class="muted small">밝은 막대는 수강 중·계획 과목까지 반영한 학점이에요 · 계획 포함 ${fmt(A1.total)} / ${R.total}학점</div>`;
+      `;
   } else summary = `<div class="rm-sum"><div class="rs-lines"><div class="between"><b>이수 학점</b><span class="num">${fmt(A0.total)}학점</span></div><p class="note" style="margin:0">졸업요건은 준비 중이에요.</p></div></div>`;
   const semHtml = sem => {
     let items = [];
@@ -342,7 +342,6 @@ function vRoadmap() {
   <div class="scroll" data-rm="1">
     ${demoBar()}
     ${summary}
-    <p class="note" style="margin:0">과목을 누르면 선수과목을, ⓘ를 누르면 자세한 정보를 볼 수 있어요.</p>
     ${SEMS.map(semHtml).join('')}
   </div>`;
 }
@@ -715,6 +714,10 @@ function fuzzyCode(code) {
   for (let i = 0; i < code.length; i++) for (const ch of (LOOKALIKE[code[i]] || '')) { const c = code.slice(0, i) + ch + code.slice(i + 1); if (D.courses[c]) hits.add(c); }
   return hits.size === 1 ? [...hits][0] : code;
 }
+
+/* 데스크톱: ⓘ에 마우스를 올리면 선수과목 말풍선 */
+document.addEventListener('mouseover', e => { const b = e.target.closest && e.target.closest('.cr-info'); if (b) b.closest('.cr-wrap').classList.add('hover'); });
+document.addEventListener('mouseout', e => { const b = e.target.closest && e.target.closest('.cr-info'); if (b && !b.contains(e.relatedTarget)) b.closest('.cr-wrap').classList.remove('hover'); });
 
 /* ---------- 동작 ---------- */
 function addPlans(codes, sem) {
