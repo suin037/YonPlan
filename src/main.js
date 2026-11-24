@@ -515,8 +515,7 @@ function vRegister(p) {
     <div class="card soft" style="display:flex;flex-direction:column;gap:10px">
       <div class="h3">런어스 캡처로 등록하기</div>
       <p class="note" style="margin:0">학기마다 한 장씩, 여러 장을 한 번에 올릴 수 있어요. 사진은 서버로 보내지 않고 이 기기 안에서만 읽어요.</p>
-      <button type="button" class="btn" data-act="${S.guideSeen ? 'pickImages' : 'openGuide'}">캡처 사진 올리기</button>
-      <button type="button" class="link" data-go="guide" style="align-self:flex-start">캡처하는 방법 보기 ›</button>
+      <button type="button" class="btn" data-act="openGuide">캡처 방법 보고 사진 올리기</button>
     </div>
     ${bySem.length || other.length ? bySem.map(([s, l]) => `<div class="between"><div class="h3">${s.id} · ${s.g}</div><span class="muted small">${s.k === 'now' ? badge('now') : ''} ${l.length}과목 · ${fmt(sumCr(l.map(x => x.c)))}학점</span></div>
       <div class="card" style="padding:4px 16px">${l.map(x => `<div class="li"><span class="grow"><b>${esc(CC(x.c).n)}</b><br><span class="muted small">${x.c} · ${CC(x.c).cr}학점 · ${esc(areaLabel(x.c))}</span></span><button type="button" class="pill gray" data-act="regRemove" data-c="${x.c}" aria-label="${esc(CC(x.c).n)} 빼기">빼기</button></div>`).join('')}</div>`).join('')
@@ -589,7 +588,7 @@ function animateGuide() {
 }
 function vGuide(p) {
   const i = Math.max(0, Math.min(GUIDE.length - 1, p.i || 0)); const g = GUIDE[i]; const last = i === GUIDE.length - 1;
-  return `${top('캡처하는 방법')}<div class="scroll">
+  return `${top('캡처하는 방법', { right: '<button type="button" class="act" data-act="pickImages">바로 사진 고르기</button>' })}<div class="scroll">
     <div class="steps">${GUIDE.map((_, k) => `<i class="${k <= i ? 'on' : ''}"></i>`).join('')}<span>${i + 1} / ${GUIDE.length}</span></div>
     ${guideArt(i)}
     <div><div style="font-size:21px;font-weight:800">${i + 1}. ${g.t}</div><p class="note" style="margin:6px 0 0;font-size:14.5px">${g.d}</p></div>
@@ -786,7 +785,7 @@ document.addEventListener('click', e => {
       const d = p.draft || Object.assign({}, S.profile); if (!hasSecond(d.track)) d.second = '';
       const nm = document.getElementById('f-name'); S.name = nm ? nm.value.trim() : S.name;
       S.profile = d;
-      if (!S.onboarded) { S.onboarded = true; S.stack = [{ s: 'register', p: { onboard: true } }]; render(0); } else { back(); toast('학적 정보를 저장했어요'); }
+      if (!S.onboarded) { S.onboarded = true; S.stack = [{ s: 'register', p: { onboard: true } }, { s: 'guide', p: { i: 0 } }]; render(0); } else { back(); toast('학적 정보를 저장했어요'); }
       break;
     }
     case 'manualToggle': p.manual = !p.manual; rerender(); break;
