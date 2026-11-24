@@ -282,53 +282,71 @@ function vArea(p) {
 }
 
 /* ---------- 화면: 로드맵 ---------- */
-function courseCard(code, st, opt) {
-  opt = opt || {}; const x = CC(code);
-  const pr = prereqs(code)[0];
-  const pre = S.showPre && pr ? `<span class="pre">선수 ${esc(CC(pr[0]).n)}${pr[1] === 'R' ? '' : '(권장)'} ${isTaken(pr[0]) ? '✓' : '!'}</span>` : '';
-  return `<button type="button" class="cc cc-${st} ${opt.flash ? 'flash' : ''}" data-go="course" data-c="${code}" aria-label="${esc(x.n)}, ${ST[st][1]}, ${esc(areaLabel(code))} ${x.cr}학점">${badge(st)}<span class="nm">${esc(x.n)}</span><span class="mt">${esc(areaLabel(code))} · ${x.cr}학점${x.u >= 3000 ? ' · 3000↑' : ''}</span>${pre}</button>`;
+/* 학기 라벨: "1-1"(학년-학기) + 연도 */
+const shortSem = sem => { const m = /^(\d+)학년 (\d)학기$/.exec(sem.g); return m ? `${m[1]}-${m[2]}` : sem.id; };
+const semShortById = id => { const x = semesters(S.profile).find(s => s.id === id); return x ? shortSem(x) : id; };
+/* 선수과목 말풍선: 과목 행을 누르면 위에 떠요 */
+function preTip(code) {
+  const pres = prereqs(code);
+  const row = ([q, t]) => {
+    const st = statusOf(q), sem = semOf(q), pl = S.plan.find(x => x.c === q);
+    const tag = st === 'done' ? `<span class="tip-tag">${semShortById(sem)} 이수 완료</span>`
+      : st === 'now' ? `<span class="tip-tag now">${semShortById(sem)} 수강 중</span>`
+        : pl ? `<span class="tip-tag plan">${semShortById(pl.sem)} 계획</span>` : '<span class="tip-tag bad">미이수</span>';
+    return `<div class="tip-row"><span class="${st === 'done' || st === 'now' ? '' : 'tip-miss'}">${esc(CC(q).n)}${t === 'R' ? ' <small>(필수)</small>' : ''}</span>${tag}</div>`;
+  };
+  return `<div class="tip" role="tooltip"><div class="tip-h">선수과목</div>${pres.length ? pres.map(row).join('') : '<div class="tip-row muted">등록된 선수과목이 없어요</div>'}</div>`;
+}
+function courseRow(code, st, opt) {
+  opt = opt || {}; const x = CC(code); const on = S.rmSel === code;
+  const tag = st === 'rec' ? '<span class="cr-tag">☆ 추천</span>' : st === 'plan' ? '<span class="cr-tag plan">◆ 계획</span>' : '';
+  const warn = prereqs(code).some(([q, t]) => t === 'R' && statusOf(q) !== 'done' && statusOf(q) !== 'now') && st !== 'done' ? '<span class="cr-tag bad">! 선수과목</span>' : '';
+  return `<div class="cr-wrap">${on ? preTip(code) : ''}<div class="cr cr-${st} ${on ? 'on' : ''} ${opt.flash ? 'flash' : ''}">
+    <button type="button" class="cr-main" data-act="rmSel" data-c="${code}" aria-expanded="${on}" aria-label="${esc(x.n)} 선수과목 보기"><b>${esc(x.n)}</b><span>${x.cr}학점 (${code})${tag}${warn}</span></button>
+    <button type="button" class="cr-info" data-go="course" data-c="${code}" aria-label="${esc(x.n)} 자세히 보기"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10 9v5M10 6.2v.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+  </div></div>`;
+}
+function ring(pct) {
+  const r = 26, c = 2 * Math.PI * r, v = Math.max(0, Math.min(1, pct));
+  return `<svg class="ring" viewBox="0 0 64 64" role="img" aria-label="전체 이수율 ${Math.round(v * 100)}%"><circle cx="32" cy="32" r="${r}" fill="none" stroke="var(--g200)" stroke-width="7"/><circle cx="32" cy="32" r="${r}" fill="none" stroke="var(--yb)" stroke-width="7" stroke-linecap="round" stroke-dasharray="${c * v} ${c}" transform="rotate(-90 32 32)"/><text x="32" y="36.5" text-anchor="middle">${Math.round(v * 100)}%</text></svg>`;
 }
 function vRoadmap() {
   if (!S.onboarded) return needSetup('학사 로드맵', '학기별 로드맵');
-  const f = S.rmFilter;
-  const majorGroups = R.groups.filter(g => g.k !== 'gen' && !g.pending);
-  const pass = code => { if (f === 'all') return true; const a = areaOf(R, code); if (f === 'gen') return !a || a.g === 'gen'; return a && a.g === f; };
-  const pc = planCredits(), tc = sumCr(nowCodes()), tot = sumCr(pastCodes()), pred = tot + tc + pc;
-  const vp = visiblePlan().map(x => ({ ...x, st: 'plan' })).concat(recs());
   const SEMS = semesters(S.profile);
-  const flash = S.flash, need = R.ok ? R.total : 0;
+  const vp = visiblePlan().map(x => ({ ...x, st: 'plan' })).concat(recs());
+  const past = pastCodes(), now = nowCodes();
+  const A0 = assign(R, past), A1 = assign(R, past.concat(now, visiblePlan().map(x => x.c)));
+  const flash = S.flash;
+  // 위쪽 요약: 전체 이수율 + 전공·교양
+  let summary;
+  if (R.ok) {
+    const majors = R.groups.filter(g => g.k !== 'gen' && !g.pending), gen = groupOf(R, 'gen');
+    const mNeed = majors.reduce((t, g) => t + g.need, 0);
+    const m0 = majors.reduce((t, g) => t + A0.groupCr[g.k], 0), m1 = majors.reduce((t, g) => t + A1.groupCr[g.k], 0);
+    const line = (n, a, b, need) => `<div class="rs-line"><div class="between"><b>${n}</b><span class="num">${fmt(a)} / ${need}학점</span></div>${barHtml(a, b, need)}</div>`;
+    summary = `<div class="rm-sum">${ring(A0.total / R.total)}<div class="rs-lines">${line('전공', m0, m1, mNeed)}${line('교양', A0.groupCr.gen, A1.groupCr.gen, gen.need)}</div></div>
+      <div class="legend"><span><i class="sw"></i>이수</span><span><i class="sw plan"></i>수강 중·계획 반영 시</span><span class="muted">계획 포함 ${fmt(A1.total)} / ${R.total}학점</span></div>`;
+  } else summary = `<div class="rm-sum"><div class="rs-lines"><div class="between"><b>이수 학점</b><span class="num">${fmt(A0.total)}학점</span></div><p class="note" style="margin:0">졸업요건은 준비 중이에요.</p></div></div>`;
   const semHtml = sem => {
     let items = [];
     if (sem.k === 'done') items = S.taken.filter(x => x.sem === sem.id).map(x => [x.c, 'done']);
-    else if (sem.k === 'now') items = nowCodes().map(k => [k, 'now']);
+    else if (sem.k === 'now') items = now.map(k => [k, 'now']);
     else items = vp.filter(x => x.sem === sem.id).map(x => [x.c, x.st]);
-    const shown = items.filter(([k]) => pass(k));
     const cr = items.filter(([, st]) => st !== 'rec').reduce((a, [k]) => a + CC(k).cr, 0);
     const open = S.open[sem.id] !== undefined ? !!S.open[sem.id] : sem.k !== 'done';
-    const tag = sem.k === 'now' ? '<span class="pill info">이번 학기</span>' : sem.k === 'done' ? '<span class="pill gray">이수 완료</span>' : '';
-    return `<section class="sem ${sem.k === 'now' ? 'now' : ''}" id="sem-${sem.id}">
-      <button type="button" class="sem-h" data-act="toggleSem" data-sem="${sem.id}" data-open="${open}" aria-expanded="${open}"><span style="flex:1;display:flex;flex-direction:column;gap:2px"><span class="row"><span class="yr num">${sem.id}</span><span class="gr">· ${sem.g}</span></span><span class="muted small">${sem.k === 'future' ? '계획 ' + fmt(cr) + '학점' : '총 ' + fmt(cr) + '학점'} · ${items.length}과목</span></span>${tag}<span class="chev" aria-hidden="true">${open ? '▴' : '▾'}</span></button>
-      ${open ? `<div class="sem-b"><div class="grid3">${shown.map(([k, st]) => courseCard(k, st, { flash: flash.includes(k) })).join('')}
-        ${sem.k === 'future' ? `<button type="button" class="addc" data-go="addplan" data-sem="${sem.id}"><b aria-hidden="true">+</b>과목 추가</button>` : ''}
-        ${sem.k !== 'future' ? `<button type="button" class="addc" data-go="register" data-sem="${sem.id}"><b aria-hidden="true">+</b>${sem.k === 'now' ? '수강 중 과목 등록' : '들은 과목 등록'}</button>` : ''}</div>
-        ${shown.length === 0 && items.length ? '<p class="note">이 필터에 해당하는 과목이 없어요.</p>' : ''}</div>` : ''}
+    return `<section class="rsem ${open ? 'open' : ''} rsem-${sem.k}" id="sem-${sem.id}">
+      <button type="button" class="rsem-h" data-act="toggleSem" data-sem="${sem.id}" data-open="${open}" aria-expanded="${open}">
+        <span class="rsem-t">${shortSem(sem)}</span><span class="rsem-y">${sem.id}${sem.k === 'now' ? ' · 이번 학기' : ''}</span>
+        <span class="rsem-cr">${fmt(cr)}학점</span><svg class="chev2" viewBox="0 0 16 16" aria-hidden="true"><path d="${open ? 'M4 10l4-4 4 4' : 'M4 6l4 4 4-4'}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      ${open ? `<div class="rsem-b">${items.map(([k, st]) => courseRow(k, st, { flash: flash.includes(k) })).join('')}
+        ${sem.k === 'future' ? `<button type="button" class="cr-add" data-go="addplan" data-sem="${sem.id}">+ 과목 추가</button>` : `<button type="button" class="cr-add" data-go="register" data-sem="${sem.id}">+ ${sem.k === 'now' ? '수강 중 과목' : '들은 과목'} 등록</button>`}</div>` : ''}
     </section>`;
   };
-  return `${top('학사 로드맵', { big: true, right: `<select class="jump" id="jump" aria-label="학기 바로가기"><option value="">학기 바로가기</option>${SEMS.map(s => `<option value="${s.id}">${s.id} · ${s.g}</option>`).join('')}</select>` })}
-  <div class="scroll">
+  return `${top('학사 로드맵', { big: true })}
+  <div class="scroll" data-rm="1">
     ${demoBar()}
-    <div class="card" style="display:flex;flex-direction:column;gap:8px">
-      <div class="between"><span class="muted small">계획 포함 졸업 예상</span><span class="muted small">목표 ${S.profile.grad}</span></div>
-      <div class="between"><b class="num" style="font-size:22px">${fmt(pred)} / ${need || '—'}학점</b>${!need ? '' : pred >= need ? '<span class="pill ok">✓ 졸업 학점 충족</span>' : `<span class="pill bad">${fmt(need - pred)}학점 더 계획 필요</span>`}</div>
-      ${barHtml(tot, pred, need)}
-      <div class="legend"><span><i class="sw"></i>이수 ${fmt(tot)}</span><span><i class="sw plan"></i>수강 중·계획 ${fmt(tc + pc)}</span></div>
-    </div>
-    <div class="legend" aria-label="과목 상태 범례">${badge('done')}${badge('now')}${badge('plan')}${badge('rec')}</div>
-    <div class="between" style="flex-wrap:wrap">
-      <div class="chips">${[['all', '전체'], ...majorGroups.map(g => [g.k, g.short]), ['gen', '교양·일반']].map(([k, n]) => `<button type="button" class="chip" data-act="rmFilter" data-f="${k}" aria-pressed="${f === k}">${n}</button>`).join('')}</div>
-      <button type="button" class="switch" role="switch" aria-checked="${S.showPre}" data-act="togglePre"><span class="knob" aria-hidden="true"></span>선수과목</button>
-    </div>
-    ${S.showPre ? '<p class="note" style="margin:-4px 0 0">카드 아래 "선수"는 먼저 들으면 좋은 과목이에요. ✓는 이미 들었거나 이번 학기에 듣는 과목, !는 아직 안 들은 과목이에요. 과목을 누르면 순서를 확인할 수 있어요.</p>' : ''}
+    ${summary}
+    <p class="note" style="margin:0">과목을 누르면 선수과목을, ⓘ를 누르면 자세한 정보를 볼 수 있어요.</p>
     ${SEMS.map(semHtml).join('')}
   </div>`;
 }
@@ -668,7 +686,9 @@ const ocrRow = t => { const p = cur().p; return p.items[+t.dataset.ii].rows[+t.d
 document.addEventListener('click', e => {
   const ut = e.target.closest('[data-ut]'); if (ut) { startUT(+ut.dataset.ut); return; }
   if (e.target.closest('.ocr-edit')) return;
-  const t = e.target.closest('[data-tab],[data-go],[data-act]'); if (!t || !t.closest('#phone')) return;
+  const t = e.target.closest('[data-tab],[data-go],[data-act]');
+  if (S.rmSel && (!t || t.dataset.act !== 'rmSel')) { S.rmSel = null; if (!t) { rerender(); return; } }
+  if (!t || !t.closest('#phone')) return;
   if (t.disabled) return;
   const c = cur(), p = c.p || (c.p = {});
   if (t.dataset.tab) { tab(t.dataset.tab); return; }
@@ -695,6 +715,7 @@ document.addEventListener('click', e => {
     case 'toggleSem': S.open[t.dataset.sem] = t.dataset.open !== 'true'; rerender(); break;
     case 'rmFilter': S.rmFilter = t.dataset.f; rerender(); break;
     case 'togglePre': S.showPre = !S.showPre; rerender(); break;
+    case 'rmSel': S.rmSel = S.rmSel === t.dataset.c ? null : t.dataset.c; rerender(); break;
     case 'addF': p.f = t.dataset.f; rerender(); break;
     case 'addReqOff': p.req = null; rerender(); break;
     case 'addToggle': { const k = t.dataset.c; p.sel = p.sel || []; p.sel = p.sel.includes(k) ? p.sel.filter(x => x !== k) : p.sel.concat(k); rerender(); break; }
