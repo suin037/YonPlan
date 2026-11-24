@@ -522,7 +522,7 @@ function vRegister(p) {
       <div class="card" style="padding:4px 16px">${l.map(x => `<div class="li"><span class="grow"><b>${esc(CC(x.c).n)}</b><br><span class="muted small">${x.c} · ${CC(x.c).cr}학점 · ${esc(areaLabel(x.c))}</span></span><button type="button" class="pill gray" data-act="regRemove" data-c="${x.c}" aria-label="${esc(CC(x.c).n)} 빼기">빼기</button></div>`).join('')}</div>`).join('')
       + (other.length ? `<div class="h3">입학 전·졸업 목표 밖 학기</div><div class="card" style="padding:4px 16px">${other.map(x => `<div class="li"><span class="grow"><b>${esc(CC(x.c).n)}</b><br><span class="muted small">${x.sem} · ${x.c}</span></span><button type="button" class="pill gray" data-act="regRemove" data-c="${x.c}">빼기</button></div>`).join('')}</div>` : '')
       : '<p class="note" style="margin:0">아직 등록한 과목이 없어요.</p>'}
-    <button type="button" class="link" data-act="manualToggle" style="align-self:flex-start">${manual ? '직접 추가 닫기 ▴' : '캡처가 어렵다면 직접 찾아서 추가하기 ▾'}</button>
+    <button type="button" class="cr-add" data-act="manualToggle">${manual ? '직접 추가 닫기 ▴' : '+ 과목 직접 추가'}</button>
     ${manual ? manualAdd(p, sems) : ''}
   </div>
   <div class="foot">${p.sel && p.sel.length ? `<button type="button" class="btn" data-act="regDone" data-sem="${manualSem(p, sems)}">${manualSem(p, sems)}에 ${p.sel.length}과목 추가하기</button>` : ''}
@@ -600,6 +600,22 @@ function vGuide(p) {
 }
 
 /* ---------- 캡처 읽기 결과 확인 ---------- */
+/* 캡처에서 빠진 과목을 직접 찾아 넣기 */
+function ocrAddBlock(p, sems, order) {
+  if (!p.adding) return `<button type="button" class="cr-add" data-act="ocrAddOpen">+ 빠진 과목 직접 추가</button>`;
+  const def = p.osem || order.find(x => x !== '?') || sems[sems.length - 1];
+  const q = (p.oq || '').trim();
+  const inList = c => (p.items || []).some(im => im.rows.some(r => r.code === c));
+  const list = q ? searchCatalog(q, c => !inList(c), 8) : [];
+  return `<div class="card" style="display:flex;flex-direction:column;gap:10px">
+    <div class="between"><b>빠진 과목 추가</b><button type="button" class="link" data-act="ocrAddClose">닫기</button></div>
+    <div class="field"><label for="oSem">들은 학기</label><select id="oSem">${sems.map(s => `<option value="${s}" ${s === def ? 'selected' : ''}>${semLabel(s)}${s === NOW_TERM ? ' (수강 중)' : ''}</option>`).join('')}</select></div>
+    <input class="search" id="oQ" type="search" placeholder="과목명 또는 학수번호 (예: 기독교와세계문화, YCA1101)" value="${esc(q)}" aria-label="빠진 과목 검색">
+    ${q ? (list.length ? `<div style="display:flex;flex-direction:column;gap:6px">${list.map(c => `<button type="button" class="opt" data-act="ocrAddPick" data-c="${c}" data-sem="${def}"><span class="grow"><span class="between"><b>${esc(CC(c).n)}</b><span class="muted tiny">${c}</span></span><span class="muted small">${CC(c).cr}학점 · ${esc(areaLabel(c))}</span></span><span class="pill info">+ 추가</span></button>`).join('')}</div>`
+      : /^[A-Za-z]{3}\d{4}$/.test(q) ? `<button type="button" class="opt" data-act="ocrAddPick" data-c="${q.toUpperCase()}" data-sem="${def}"><span class="grow"><b>${esc(q.toUpperCase())}</b><span class="muted small">데이터에 없는 학수번호예요. 추가한 뒤 이름과 학점을 적어 주세요.</span></span><span class="pill info">+ 추가</span></button>` : '<p class="note" style="margin:0">검색 결과가 없어요. 학수번호 7자리(예: YCA1101)로도 찾아보세요.</p>') : ''}
+  </div>`;
+}
+
 function vOcr(p) {
   const items = p.items || [];
   const busy = items.some(x => x.state === 'wait' || x.state === 'run');
@@ -610,9 +626,9 @@ function vOcr(p) {
   const groups = {}; rows.forEach(r => { (groups[r.sem || '?'] = groups[r.sem || '?'] || []).push(r); });
   const order = Object.keys(groups).sort();
   return `${top('캡처 읽기')}<div class="scroll">
-    <div class="ocr-thumbs">${items.map((im, i) => `<div class="ocr-thumb"><img src="${im.url}" alt="올린 캡처 ${i + 1}"><span>${im.state === 'done' ? `✓ ${im.rows.length}과목` : im.state === 'err' ? '! 읽지 못함' : im.state === 'run' ? `읽는 중 ${Math.round((im.prog || 0) * 100)}%` : '대기'}</span></div>`).join('')}</div>
+    <div class="ocr-thumbs">${items.filter(im => !im.manual).map((im, i) => `<div class="ocr-thumb"><img src="${im.url}" alt="올린 캡처 ${i + 1}"><span>${im.state === 'done' ? `✓ ${im.rows.length}과목` : im.state === 'err' ? '! 읽지 못함' : im.state === 'run' ? `읽는 중 ${Math.round((im.prog || 0) * 100)}%` : '대기'}</span></div>`).join('')}</div>
     ${busy ? `<div class="banner ok"><span aria-hidden="true">…</span><div><b>캡처를 읽고 있어요</b><p>${p.status || '처음에는 인식 엔진을 내려받느라 조금 걸려요.'}</p></div></div>` : ''}
-    ${!busy && !rows.length ? `<div class="banner bad"><span>!</span><div><b>학수번호를 찾지 못했어요</b><p>표의 "강좌명 (ABC1234.01-00)" 부분이 잘리지 않게 다시 캡처해 주세요. 직접 찾아서 추가할 수도 있어요.</p></div></div>` : ''}
+    ${!busy && !rows.length && items.some(im => !im.manual) ? `<div class="banner bad"><span>!</span><div><b>학수번호를 찾지 못했어요</b><p>표의 "강좌명 (ABC1234.01-00)" 부분이 잘리지 않게 다시 캡처해 주세요. 직접 찾아서 추가할 수도 있어요.</p></div></div>` : ''}
     ${rows.length ? `<div class="card soft"><b>읽은 과목을 확인해 주세요</b><p class="note" style="margin:4px 0 0">과거강좌조회에는 수강철회했거나 F를 받은 과목도 나와요. 이런 과목은 체크를 풀어 주세요. 학기가 틀리면 학기를 바꿔 주세요.</p></div>` : ''}
     ${order.map(sem => `<div class="between"><div class="field" style="flex:1"><label>${sem === '?' ? '학기를 읽지 못했어요. 골라 주세요' : '학기'}</label>
       <select data-ocrsem="${sem}"><option value="" ${sem === '?' ? 'selected' : ''} disabled>학기 선택</option>${sems.map(s => `<option value="${s}" ${s === sem ? 'selected' : ''}>${semLabel(s)}${s === NOW_TERM ? ' (수강 중)' : ''}</option>`).join('')}${sem !== '?' && !sems.includes(sem) ? `<option value="${sem}" selected>${sem} (입학 연도 밖)</option>` : ''}</select></div></div>
@@ -623,6 +639,7 @@ function vOcr(p) {
             : `<span class="between"><b>${r.code}</b><span class="pill gray">데이터에 없는 과목</span></span><span class="ocr-edit"><input type="text" data-ocrname="${r.ii}-${r.ri}" placeholder="과목명" value="${esc(r.name || '')}" aria-label="과목명"><input type="number" min="0" max="12" step="0.5" data-ocrcr="${r.ii}-${r.ri}" value="${r.cr || 3}" aria-label="학점"><span class="muted small">학점</span></span><span class="muted tiny">학수번호를 잘못 읽었다면 체크를 풀고 직접 추가해 주세요.</span>`}
           ${dup ? `<span class="muted tiny">이미 ${semOf(r.code)}에 등록돼 있어요. 등록하면 학기가 바뀌어요.</span>` : ''}</span></div>`;
       }).join('')}</div>`).join('')}
+    ${busy ? '' : ocrAddBlock(p, sems, order)}
   </div>
   <div class="foot">${rows.length ? `<div class="sum">${picked.length ? `<b>${picked.length}과목</b>을 등록해요${rows.some(r => r.on && !r.sem) ? ' · 학기를 고르지 않은 과목은 빠져요' : ''}` : '등록할 과목을 골라 주세요'}</div>` : ''}
     ${rows.length ? `<button type="button" class="btn" data-act="ocrSave" ${picked.length && !busy ? '' : 'disabled'}>${picked.length}과목 등록하기</button>` : ''}
@@ -641,7 +658,7 @@ function render(y) {
   renderTabs();
   const sc = $screen.querySelector('.scroll');
   if (sc && typeof y === 'number') sc.scrollTop = y;
-  if (active && /^(addQ|rQ)$/.test(active)) { const el = document.getElementById(active); if (el) { el.focus(); try { el.setSelectionRange(caret, caret); } catch (e) { /* noop */ } } }
+  if (active && /^(addQ|rQ|oQ)$/.test(active)) { const el = document.getElementById(active); if (el) { el.focus(); try { el.setSelectionRange(caret, caret); } catch (e) { /* noop */ } } }
   if (c.s === 'roadmap' && c.p && c.p.scrollTo) { const el = document.getElementById('sem-' + c.p.scrollTo); if (el && sc) { sc.scrollTop = el.offsetTop - sc.offsetTop - 8; } delete c.p.scrollTo; }
   if (S.flash.length) { setTimeout(() => { S.flash = []; }, 3500); }
   if (cur().s === 'guide') requestAnimationFrame(animateGuide);
@@ -682,6 +699,7 @@ $file.addEventListener('change', async () => {
         const el = document.querySelector(`.ocr-thumb img[src="${im.url}"] + span`); if (el) el.textContent = `읽는 중 ${Math.round((im.prog || 0) * 100)}%`;
       });
       im.rows = res.rows.map(r => {
+        r.code = fuzzyCode(r.code);
         const sem = r.year && r.sem ? `${r.year}-${r.sem}` : '';
         return { code: r.code, sem: sem, on: true, name: '', cr: 3, known: !!D.courses[r.code], inRange: sems.includes(sem) };
       });
@@ -693,6 +711,15 @@ $file.addEventListener('change', async () => {
   }
   if (cur().p === p) { const n = p.items.reduce((a, x) => a + x.rows.length, 0); toast(n ? `캡처에서 ${n}과목을 읽었어요. 확인해 주세요` : '학수번호를 찾지 못했어요'); }
 });
+
+/* 데이터에 없는 학수번호는 헷갈리기 쉬운 글자를 한 자씩 바꿔 보고, 딱 하나 맞으면 그걸로 고쳐요 */
+const LOOKALIKE = { O: 'DQC', D: 'O', Q: 'O', C: 'GO', G: 'C', I: 'LT', L: 'I', T: 'I', '0': '86', '1': '7', '7': '1', '8': '03', '3': '8', '6': '058', '5': '6' };
+function fuzzyCode(code) {
+  if (D.courses[code]) return code;
+  const hits = new Set();
+  for (let i = 0; i < code.length; i++) for (const ch of (LOOKALIKE[code[i]] || '')) { const c = code.slice(0, i) + ch + code.slice(i + 1); if (D.courses[c]) hits.add(c); }
+  return hits.size === 1 ? [...hits][0] : code;
+}
 
 /* ---------- 동작 ---------- */
 function addPlans(codes, sem) {
@@ -779,6 +806,13 @@ document.addEventListener('click', e => {
     case 'guideNext': p.i = (p.i || 0) + 1; render(0); break;
     case 'guidePrev': p.i = Math.max(0, (p.i || 0) - 1); render(0); break;
     case 'pickImages': S.guideSeen = true; save(); pickImages(); break;
+    case 'ocrAddOpen': p.adding = true; p.oq = ''; rerender(); setTimeout(() => { const el = document.getElementById('oQ'); if (el) el.focus(); }, 0); break;
+    case 'ocrAddClose': p.adding = false; rerender(); break;
+    case 'ocrAddPick': {
+      let m = p.items.find(x => x.manual); if (!m) { m = { manual: true, state: 'done', rows: [], url: '' }; p.items.push(m); }
+      const code = t.dataset.c; m.rows.push({ code, sem: t.dataset.sem, on: true, name: '', cr: 3 });
+      p.oq = ''; p.osem = t.dataset.sem; rerender(); toast(`${esc(CC(code).n)}을(를) ${t.dataset.sem}에 추가했어요`); break;
+    }
     case 'ocrToggle': { const r = ocrRow(t); r.on = !r.on; rerender(); break; }
     case 'ocrSave': {
       const rows = p.items.flatMap(im => im.rows).filter(r => r.on && r.sem);
@@ -808,6 +842,7 @@ document.addEventListener('change', e => {
   if (el.id === 'addSem') { p.sem = el.value; rerender(); return; }
   if (el.id === 'semSel') { p.sel = el.value; rerender(); return; }
   if (el.id === 'regSem') { p.sem = el.value; p.sel = []; rerender(); return; }
+  if (el.id === 'oSem') { p.osem = el.value; rerender(); return; }
   if (el.id === 'f-name') { p.name = el.value; return; }
   if (el.dataset.ocrsem !== undefined) { const from = el.dataset.ocrsem; p.items.forEach(im => im.rows.forEach(r => { if ((r.sem || '?') === from) r.sem = el.value; })); rerender(); return; }
   if (el.dataset.ocrname) { const [i, j] = el.dataset.ocrname.split('-'); p.items[+i].rows[+j].name = el.value.trim(); return; }
@@ -823,8 +858,9 @@ document.addEventListener('change', e => {
 document.addEventListener('input', e => {
   const el = e.target; const c = cur(), p = c.p || (c.p = {});
   if (['addQ', 'rQ'].includes(el.id)) { p.q = el.value; if (!e.isComposing) rerender(); }
+  if (el.id === 'oQ') { p.oq = el.value; if (!e.isComposing) rerender(); }
 });
-document.addEventListener('compositionend', e => { const el = e.target; if (['addQ', 'rQ'].includes(el.id)) { cur().p.q = el.value; rerender(); } });
+document.addEventListener('compositionend', e => { const el = e.target; if (['addQ', 'rQ'].includes(el.id)) { cur().p.q = el.value; rerender(); } if (el.id === 'oQ') { cur().p.oq = el.value; rerender(); } });
 
 /* ---------- 시작 ---------- */
 $screen.innerHTML = '<div class="empty" style="padding-top:120px"><p class="note">과목과 졸업요건 데이터를 불러오는 중이에요…</p></div>';

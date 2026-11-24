@@ -31,9 +31,9 @@ export async function readImage(file, onProgress) {
 }
 
 /* OCR이 헷갈리기 쉬운 글자 바로잡기 */
-const TO_LETTER = { '0': 'O', '1': 'I', '5': 'S', '8': 'B', '2': 'Z', '|': 'I', 'l': 'I' };
-const TO_DIGIT = { O: '0', o: '0', I: '1', l: '1', '|': '1', i: '1', S: '5', s: '5', B: '8', Z: '2', z: '2' };
-const CODE_RE = /([A-Za-z0-9|]{3})\s?([0-9OoIlSsBZz|]{4})\s?[.,·]\s?([0-9OoIl]{2})\s?[-–~]\s?([0-9OoIl]{2})/g;
+const TO_LETTER = { '0': 'O', '1': 'I', '5': 'S', '8': 'B', '2': 'Z', '4': 'A', '6': 'G', '7': 'T', '|': 'I', 'l': 'I', '!': 'I' };
+const TO_DIGIT = { O: '0', o: '0', D: '0', Q: '0', I: '1', l: '1', L: '1', '|': '1', i: '1', '!': '1', ']': '1', '[': '1', S: '5', s: '5', B: '8', Z: '2', z: '2', A: '4', G: '6', b: '6', T: '7', g: '9', q: '9' };
+const CODE_RE = /([A-Za-z0-9|!]{3})\s?([0-9OoDQIlLi|!\]\[SsBZzAGbTgq]{4})\s?[.,·:]\s?([0-9OoIlL]{2})\s?[-–~—]\s?([0-9OoIlL]{2})/g;
 
 export function fixCode(a, b) {
   const L = a.toUpperCase().split('').map(ch => TO_LETTER[ch] || ch).join('');

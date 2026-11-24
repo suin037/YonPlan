@@ -86,7 +86,9 @@ for h in rows('subject_history.csv'):
         cat = 'RC'
     elif code.startswith(('YC', 'UC')):
         cat = '대교'
-    catalog[code] = {'n': h['name_ko'].strip(), 'cr': 1 if code.startswith('UCR') else 3, 'd': h['dept_code'],
+    # 개설 이력에는 학점이 없어요: RC는 1학점, 채플(YCA10xx)은 0.5학점, 나머지는 3학점으로 봐요
+    cr = 1 if code.startswith('UCR') else 0.5 if re.match(r'YCA10\d\d$', code) else 3
+    catalog[code] = {'n': h['name_ko'].strip(), 'cr': cr, 'd': h['dept_code'],
                      'k': cat, 'g': '', 'h': h['terms_offered']}
 
 # ---------- 졸업요건 ----------
