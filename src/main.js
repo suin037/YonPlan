@@ -70,7 +70,7 @@ function saveScroll(){const sc=$screen.querySelector('.scroll');if(sc&&cur())cur
 function go(s,p,opt){saveScroll();opt=opt||{};if(opt.replace)S.stack.pop();S.stack.push({s,p:p||{}});render(opt.toY)}
 function back(){saveScroll();if(S.stack.length>1){S.stack.pop();render(cur().y||0)}}
 function tab(t){saveScroll();S.stack=[{s:t}];render(0)}
-const TAB_OF={home:'home',req:'req',area:'req',roadmap:'roadmap',course:'roadmap',addplan:'roadmap',tt:'tt',compare:'tt',alt:'tt',search:'tt',detail:'tt',me:'me',setup:'me',register:'me',source:'me'};
+const TAB_OF={home:'home',req:'home',area:'home',roadmap:'roadmap',course:'roadmap',addplan:'roadmap',tt:'tt',compare:'tt',alt:'tt',search:'tt',detail:'tt',me:'me',setup:'me',register:'me',source:'me'};
 
 let toastTimer;
 function toast(msg,action){
@@ -91,7 +91,7 @@ const ICONS={
   tt:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18" stroke="var(--bg)" stroke-width="2"/>',
   me:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6z"/>'
 };
-const TABS=[['home','홈'],['req','졸업요건'],['roadmap','로드맵'],['tt','시간표'],['me','내 정보']];
+const TABS=[['home','홈'],['roadmap','로드맵'],['tt','시간표'],['me','내 정보']];
 function renderTabs(){
   const active=TAB_OF[cur().s];
   $tabs.innerHTML=TABS.map(([k,n])=>`<button type="button" data-tab="${k}" ${active===k?'aria-current="page"':''}><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${ICONS[k]}</svg>${n}</button>`).join('');
@@ -127,10 +127,11 @@ function vHome(){
       ${barHtml(tot,after,126)}
       <div class="legend"><span><i class="sw"></i>이수 ${tot}</span><span><i class="sw plan"></i>이번 학기 시간표 반영 시 ${after}</span></div>
     </div>
-    <div class="between"><div class="h2">졸업요건 이수율</div><button type="button" class="link" data-tab="req">남은 졸업요건 보기 ›</button></div>
+    <div class="between"><div class="h2">졸업요건 이수율</div></div>
     <div class="card" style="display:flex;flex-direction:column;gap:14px">
       ${GROUPS.map(g=>{const n=groupCr(d,g),a=groupCr(d.concat(t),g);return `<div style="display:flex;flex-direction:column;gap:6px"><div class="between"><b>${g.k==='common'?'3·4000단위':g.n}</b><span class="muted small num">${n} → ${a} / ${g.need}학점</span></div>${barHtml(n,a,g.need)}</div>`}).join('')}
       <div class="legend"><span><i class="sw"></i>현재 이수</span><span><i class="sw plan"></i>2026-2 시간표 반영 후</span></div>
+      <button type="button" class="btn cta" data-go="req"><span>남은 졸업요건 보기</span><span class="cta-sub">${Object.keys(AREAS).filter(a=>areaCr(d,a)<AREAS[a].need).length}개 영역 · ${126-tot}학점 남음</span></button>
     </div>
     <div class="card" style="display:flex;flex-direction:column;gap:4px">
       <div class="between"><div class="h3">놓치기 쉬운 항목</div><button type="button" class="link" data-go="roadmap">로드맵에서 보기 ›</button></div>
@@ -153,7 +154,7 @@ function vReq(){
   const unmet=Object.keys(AREAS).filter(a=>areaCr(d,a)<AREAS[a].need);
   const tot=DONE_TOTAL();
   const mustLeft=[];['ec','pc'].forEach(a=>AREAS[a].fixed.forEach(k=>{if(!C[k].sem)mustLeft.push([a,k])}));
-  return `${top('졸업요건',{big:true})}<div class="scroll">
+  return `${top('졸업요건')}<div class="scroll">
     <div class="card" style="display:flex;flex-direction:column;gap:12px">
       <div class="between"><span class="muted small">내 기준</span><button type="button" class="link" data-go="setup">학적 변경 ›</button></div>
       <div class="chips">${profileText(S.profile,'|').split('|').filter(x=>!/학년/.test(x)).map(x=>`<span class="chip">${x.replace('(복수전공)','')}</span>`).join('')}</div>
@@ -529,7 +530,7 @@ document.addEventListener('click',e=>{
     if(g==='search')return go('search',{req:t.dataset.req||null});
     if(g==='setup')return go('setup',{});
     if(g==='register')return go('register',{onboard:false});
-    if(['roadmap','home','req','tt','me'].includes(g))return tab(g);
+    if(['roadmap','home','tt','me'].includes(g))return tab(g);
     return go(g,{});
   }
   const a=t.dataset.act;

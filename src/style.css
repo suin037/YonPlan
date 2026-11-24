@@ -55,7 +55,7 @@ button{cursor:pointer}
 .top .act{border:0;background:var(--g100);border-radius:10px;padding:7px 11px;font-size:13px;font-weight:600}
 
 /* tabbar */
-.tabs{display:grid;grid-template-columns:repeat(5,1fr);background:var(--bg);box-shadow:0 -1px 0 var(--g100);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);background:var(--bg);box-shadow:0 -1px 0 var(--g100);padding-bottom:env(safe-area-inset-bottom,0px)}
 .tabs button{border:0;background:transparent;padding:9px 0 10px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--g400)}
 .tabs button svg{width:22px;height:22px}
 .tabs button[aria-current="page"]{color:var(--g900)}
@@ -81,6 +81,9 @@ button{cursor:pointer}
 .btn.weak{background:var(--g100);color:var(--g800)}
 .btn.weak:hover{background:var(--g200)}
 .card .btn.weak{background:var(--bg)}
+.btn.cta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px;text-align:left}
+.btn.cta::after{content:"›";font-size:22px;font-weight:500;line-height:1;margin-left:4px}
+.btn.cta .cta-sub{margin-left:auto;font-size:13px;font-weight:600;opacity:.8}
 .btn.sm{min-height:42px;font-size:14px;width:auto;padding:0 16px;border-radius:12px}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{border:0;background:var(--g100);color:var(--g700);border-radius:999px;padding:7px 13px;font-size:13px;font-weight:600}
