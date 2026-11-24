@@ -299,7 +299,7 @@ function courseRow(code, st, opt) {
   const warn = prereqs(code).some(([q, t]) => t === 'R' && statusOf(q) !== 'done' && statusOf(q) !== 'now') && st !== 'done' ? '<span class="cr-tag bad">! 선수과목</span>' : '';
   return `<div class="cr-wrap ${on ? 'pinned' : ''}">${preTip(code)}<div class="cr cr-${st} ${opt.flash ? 'flash' : ''}">
     <button type="button" class="cr-main" data-go="course" data-c="${code}" aria-label="${esc(x.n)} 자세히 보기"><b>${esc(x.n)}${st === 'rec' ? ' <small class="cr-rec-t">추천</small>' : ''}</b><span>${x.cr}학점 (${code})</span></button>
-    <button type="button" class="cr-info" data-act="rmSel" data-c="${code}" aria-expanded="${on}" aria-label="${esc(x.n)} 선수과목 보기"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10 9v5M10 6.2v.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+    <button type="button" class="cr-info" data-act="rmSel" data-c="${code}" aria-expanded="${on}" aria-label="${esc(x.n)} 선수과목 보기, 누르면 자세히"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10 9v5M10 6.2v.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
   </div></div>`;
 }
 function ring(pct) {
@@ -441,7 +441,7 @@ function vMe() {
   return `${top('내 정보', { big: true })}<div class="scroll">
     ${S.onboarded ? `<div class="card row" style="gap:14px"><div class="empty" style="padding:0"><div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6z"/></svg></div></div><div><div class="h3">${esc(S.name) || '내 학적'}</div><div class="muted small">${profileText(pf)}</div></div></div>
     <div class="card" style="padding:4px 16px">
-      ${[['입학 연도', pf.year + '년'], ['현재 학년', pf.grade === '5' ? '5학년 이상' : pf.grade + '학년'], ['본전공', pf.major], ['추가 이수과정', pf.track === '없음' ? '없음 (단일전공)' : pf.track], ...(hasSecond(pf.track) ? [[SECOND_LABEL[pf.track], pf.second || '-']] : []), ['목표 졸업 학기', pf.grad.replace('-', '년 ') + '학기']].map(([a, b]) => `<div class="li"><span class="grow muted">${a}</span><b>${esc(b)}</b></div>`).join('')}
+      ${[['입학 연도', pf.year + '년'], ['현재 학년', pf.grade === '5' ? '5학년 이상' : pf.grade + '학년'], ['본전공', pf.major], ['추가 이수과정', pf.track === '없음' ? '없음 (단일전공)' : pf.track], ...(hasSecond(pf.track) ? [[SECOND_LABEL[pf.track], pf.second || '-']] : []), ['목표 졸업', (() => { const gp = gradParts(pf); return `${gp.g}학년 ${gp.sm}학기 (${pf.grad.replace('-', '년 ')}학기)`; })()]].map(([a, b]) => `<div class="li"><span class="grow muted">${a}</span><b>${esc(b)}</b></div>`).join('')}
     </div>
     ${R.ok ? '' : pendingCard(R)}
     <button type="button" class="btn weak" data-go="setup">학적 정보 수정</button>
@@ -483,17 +483,33 @@ function setupOptions(k, d) {
     return opts.map(([g, list]) => `<optgroup label="${g}">${list.filter(v => k !== 'second' || v !== d.major).map(v => `<option value="${v}" ${sel(v)}>${v}${SUPPORTED[v] ? '' : ' (준비 중)'}</option>`).join('')}</optgroup>`).join('');
   return opts.map(([v, t]) => `<option value="${v}" ${sel(v)}>${t}</option>`).join('');
 }
+/* 목표 졸업: 학년과 학기를 따로 고르면 입학 연도로 '2027년 2학기'를 계산해요 */
+const gradOf = (year, g, sm) => year && g && sm ? `${+year + +g - 1}-${sm}` : '';
+function gradParts(d) {
+  if (!d.grad || !d.year) return { g: d.gradG || '', sm: d.gradS || '' };
+  const [gy, gs] = d.grad.split('-');
+  return { g: d.gradG || String(+gy - +d.year + 1), sm: d.gradS || gs };
+}
+function gradField(d) {
+  const { g, sm } = gradParts(d);
+  const ok = gr => !d.year || gradOf(d.year, gr, '2') >= NOW_TERM;
+  const res = gradOf(d.year, g, sm);
+  return `<div class="field"><label>목표 졸업 시기</label>
+    <div class="row" style="gap:8px"><select id="f-gradG" data-field="gradG" class="${g ? '' : 'unset'}" style="flex:1" ${d.year ? '' : 'disabled'} aria-label="졸업 학년"><option value="" ${g ? '' : 'selected'} disabled>학년</option>${[1, 2, 3, 4, 5, 6].filter(ok).map(x => `<option value="${x}" ${String(x) === String(g) ? 'selected' : ''}>${x}학년</option>`).join('')}</select>
+    <select id="f-gradS" data-field="gradS" class="${sm ? '' : 'unset'}" style="flex:1" ${d.year ? '' : 'disabled'} aria-label="졸업 학기"><option value="" ${sm ? '' : 'selected'} disabled>학기</option><option value="1" ${sm === '1' ? 'selected' : ''}>1학기</option><option value="2" ${sm === '2' ? 'selected' : ''}>2학기</option></select></div>
+    <span class="muted small">${!d.year ? '입학 연도를 먼저 골라 주세요' : res ? (res < NOW_TERM ? '이미 지난 학기예요. 다시 골라 주세요' : `${res.replace('-', '년 ')}학기에 졸업해요`) : '보통 4학년 2학기예요'}</span></div>`;
+}
 function vSetup(p) {
   const d = p.draft || Object.assign({}, S.profile);
   const fields = SETUP_FIELDS.filter(f => f[0] !== 'second' || hasSecond(d.track));
-  const missing = fields.filter(f => !d[f[0]]).length;
+  const missing = fields.filter(f => f[0] === 'grad' ? !(d.grad && d.grad >= NOW_TERM) : !d[f[0]]).length;
   const onboarding = !S.onboarded;
   const unsupported = [d.major, hasSecond(d.track) ? d.second : ''].filter(v => v && !SUPPORTED[v]);
   return `${top(onboarding ? '학적 정보 입력' : '학적 정보 수정')}<div class="scroll">
     ${onboarding ? '<div class="steps"><i class="on"></i><i></i><span>1 / 2</span></div>' : ''}
     <div><div style="font-size:21px;font-weight:800">학적 정보를 입력해 주세요</div><div class="muted small">졸업요건은 입학 연도와 전공 기준으로 계산해요.</div></div>
     <div class="field"><label for="f-name">이름 (선택)</label><input class="search" id="f-name" type="text" maxlength="12" placeholder="홈에서 부를 이름" value="${esc(p.name !== undefined ? p.name : S.name)}"></div>
-    ${fields.map(([k, n]) => `<div class="field"><label for="f-${k}">${k === 'second' ? SECOND_LABEL[d.track] : n}</label><select id="f-${k}" data-field="${k}" class="${d[k] ? '' : 'unset'}"><option value="" ${d[k] ? '' : 'selected'} disabled>선택해 주세요</option>${setupOptions(k, d)}</select></div>`).join('')}
+    ${fields.map(([k, n]) => k === 'grad' ? gradField(d) : `<div class="field"><label for="f-${k}">${k === 'second' ? SECOND_LABEL[d.track] : n}</label><select id="f-${k}" data-field="${k}" class="${d[k] ? '' : 'unset'}"><option value="" ${d[k] ? '' : 'selected'} disabled>선택해 주세요</option>${setupOptions(k, d)}</select></div>`).join('')}
     ${unsupported.length ? `<div class="card" style="display:flex;flex-direction:column;gap:4px"><div class="row"><span class="pill gray">준비 중</span><b class="small">${unsupported.map(esc).join(', ')} 졸업요건은 준비 중이에요</b></div><p class="note" style="margin:0">학적은 그대로 저장돼요. 졸업요건은 지금 ${Object.keys(SUPPORTED).join(' · ')}만 계산하고, 이수 과목 등록과 로드맵은 모두 쓸 수 있어요.</p></div>` : ''}
   </div>
   <div class="foot"><div class="sum">${missing ? `${missing}개 항목을 더 골라 주세요` : '모두 입력했어요'}</div><button type="button" class="btn" data-act="setupNext" ${missing ? 'disabled' : ''}>${onboarding ? '다음' : '저장하기'}</button></div>`;
@@ -769,7 +785,12 @@ document.addEventListener('click', e => {
     case 'toggleSem': S.open[t.dataset.sem] = t.dataset.open !== 'true'; rerender(); break;
     case 'rmFilter': S.rmFilter = t.dataset.f; rerender(); break;
     case 'togglePre': S.showPre = !S.showPre; rerender(); break;
-    case 'rmSel': S.rmSel = S.rmSel === t.dataset.c ? null : t.dataset.c; rerender(); break;
+    case 'rmSel': {
+      const canHover = window.matchMedia && window.matchMedia('(hover: hover)').matches;
+      if (canHover || S.rmSel === t.dataset.c) { S.rmSel = null; go('course', { c: t.dataset.c }); }
+      else { S.rmSel = t.dataset.c; rerender(); }
+      break;
+    }
     case 'addF': p.f = t.dataset.f; rerender(); break;
     case 'addReqOff': p.req = null; rerender(); break;
     case 'addToggle': { const k = t.dataset.c; p.sel = p.sel || []; p.sel = p.sel.includes(k) ? p.sel.filter(x => x !== k) : p.sel.concat(k); rerender(); break; }
@@ -781,7 +802,7 @@ document.addEventListener('click', e => {
     case 'removePlan': { const k = t.dataset.c; const old = S.plan.find(x => x.c === k); S.plan = S.plan.filter(x => x.c !== k); back(); toast(`${esc(CC(k).n)}을(를) 계획에서 뺐어요`, { t: '되돌리기', fn: () => { S.plan.push(old); rerender(); } }); break; }
     case 'adoptRec': { const fut = futureSems(); const rc = recs().find(x => x.c === t.dataset.c); addPlans([t.dataset.c], p.sel || (rc ? rc.sem : fut[0])); break; }
     case 'setupNext': {
-      const d = p.draft || Object.assign({}, S.profile); if (!hasSecond(d.track)) d.second = '';
+      const d = Object.assign({}, p.draft || S.profile); if (!hasSecond(d.track)) d.second = ''; delete d.gradG; delete d.gradS;
       const nm = document.getElementById('f-name'); S.name = nm ? nm.value.trim() : S.name;
       S.profile = d;
       if (!S.onboarded) { S.onboarded = true; S.stack = [{ s: 'register', p: { onboard: true } }, { s: 'guide', p: { i: 0 } }]; render(0); } else { back(); toast('학적 정보를 저장했어요'); }
@@ -850,6 +871,7 @@ document.addEventListener('change', e => {
     const nm = document.getElementById('f-name'); if (nm) p.name = nm.value;
     if (f === 'track' && (!hasSecond(el.value) || (prevTrack === '연계전공') !== (el.value === '연계전공'))) p.draft.second = '';
     if (f === 'major' && p.draft.second === el.value) p.draft.second = '';
+    if (f === 'gradG' || f === 'gradS' || f === 'year') { const gp = gradParts(Object.assign({}, p.draft, { grad: f === 'year' ? '' : p.draft.grad })); p.draft.gradG = gp.g; p.draft.gradS = gp.sm; p.draft.grad = gradOf(p.draft.year, gp.g, gp.sm); }
     rerender(); return;
   }
 });
