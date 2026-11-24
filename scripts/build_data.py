@@ -134,7 +134,7 @@ for dept, (dname, pre) in SUPPORTED.items():
                      'cat': cat, 'must': must, 'rule': x['rule_type']}
                 note = review.get(x['req_id'])
                 for k, v in review.items():  # ECO-2025/2026-MB처럼 여러 학번을 묶은 항목
-                    if '/' in k and k.endswith('-MB') and k.split('-')[0] == x['req_id'].split('-')[0] and x['area'] == '전공기초' and y[2:] in k:
+                    if '/' in k and k.endswith('-MB') and k.split('-')[0] == x['req_id'].split('-')[0] and x['area'] == '전공기초' and y in k:
                         note = v
                 if note:
                     a['check'] = note

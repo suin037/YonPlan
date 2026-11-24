@@ -48,6 +48,11 @@ function majorGroup(k, code, rows, label, name) {
   const short = SHORT_DEPT[code];
   const areas = rows.filter(a => a.kind === 'MAJ').map(a => area(a, k, short));
   const major = rows.find(a => a.kind === 'MAJOR');
+  // 전공 합계가 영역 합보다 크면(영역 구분이 없거나 일부만 있는 경우) 나머지를 '전공 과목(영역 무관)'으로 세요
+  const sum = areas.reduce((t, a) => t + a.need, 0);
+  if (major && major.need > sum) {
+    areas.push(area({ id: major.id + '-REST', kind: 'MAJ', n: areas.length ? '그 외 전공 과목' : '전공 과목', need: major.need - sum, cat: '전기,전필,전선', must: [], rule: 'CREDITS', check: areas.length ? '' : '요람에서 영역 구분(전공기초·필수·선택)을 확인하지 못해 전공 과목 학점 합계로만 계산해요.' }, k, short));
+  }
   return { k, code, prefix: dep.prefix, short, n: `${name || dep.name} · ${label}`, areas, need: major ? major.need : areas.reduce((t, a) => t + a.need, 0) };
 }
 
