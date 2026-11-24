@@ -102,14 +102,14 @@ const top=(title,opt)=>{opt=opt||{};return `<header class="top ${opt.big?'big':'
 /* 예시 학생(24학번 경제학 + 심리학 복수전공) 데이터로 바로 둘러보기 */
 const DEMO_NOTE='24학번 경제학 · 심리학 복수전공 학생의 예시 데이터가 채워진 상태로 모든 기능을 둘러볼 수 있어요.';
 const demoBtn=(cls='btn weak')=>`<button type="button" class="${cls}" data-act="demo">예시 데이터로 체험하기</button>`;
-const needSetup=title=>`${top(title,{big:true})}<div class="scroll"><div class="empty"><div class="ico" aria-hidden="true">🎓</div><div class="h3">학적 정보를 먼저 설정해 주세요</div><p class="note">학번, 전공, 이수과정을 입력하면 내 기준으로 ${title==='졸업요건'?'졸업요건을':title==='학사 로드맵'?'학기별 로드맵을':'시간표와 요건을'} 정리해 드려요.</p><button type="button" class="btn sm" data-go="setup">학적 설정하러 가기</button>${demoBtn('btn weak sm')}<p class="note" style="margin:0">${DEMO_NOTE}</p></div></div>`;
+const needSetup=title=>`${top(title,{big:true})}<div class="scroll"><div class="empty"><div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L1 9l11 6 9-4.9V17h2V9z"/><path d="M5 13.2V17c0 1.7 3.1 3 7 3s7-1.3 7-3v-3.8l-7 3.8z"/></svg></div><div class="h3">학적 정보를 먼저 설정해 주세요</div><p class="note">학번, 전공, 이수과정을 입력하면 내 기준으로 ${title==='졸업요건'?'졸업요건을':title==='학사 로드맵'?'학기별 로드맵을':'시간표와 요건을'} 정리해 드려요.</p><button type="button" class="btn sm" data-go="setup">학적 설정하러 가기</button>${demoBtn('btn weak sm')}<p class="note" style="margin:0">${DEMO_NOTE}</p></div></div>`;
 function barHtml(now,after,need){const a=Math.min(now,need)/need*100,b=Math.max(0,Math.min(after,need)-Math.min(now,need))/need*100;return `<div class="bar" role="img" aria-label="${need}학점 중 ${now}학점 이수, 계획 반영 시 ${after}학점"><i style="width:${a}%"></i><i class="plan" style="width:${b}%"></i></div>`}
 
 /* ---------- 화면: 홈 ---------- */
 function vHome(){
   if(!S.onboarded){
     return `${top('홈',{big:true})}<div class="scroll">
-      <div class="card"><div class="row"><div class="empty" style="padding:0;flex-direction:row;gap:12px;text-align:left"><div class="ico" aria-hidden="true">👤</div><div><div class="h3">학적 정보가 아직 없어요</div><div class="muted small">이름과 학적은 설정 후 표시돼요</div></div></div></div></div>
+      <div class="card"><div class="row"><div class="empty" style="padding:0;flex-direction:row;gap:12px;text-align:left"><div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6z"/></svg></div><div><div class="h3">학적 정보가 아직 없어요</div><div class="muted small">이름과 학적은 설정 후 표시돼요</div></div></div></div></div>
       <div class="card soft" style="display:flex;flex-direction:column;gap:10px"><div class="h3">학적 정보를 먼저 설정해 주세요</div><p class="note" style="margin:0">학번 · 전공 · 이수과정을 입력하면 내 기준으로 졸업요건을 정리해 드려요.</p><button type="button" class="btn" data-go="setup">학적 설정하러 가기</button></div>
       <div class="card" style="display:flex;flex-direction:column;gap:10px"><div class="h3">먼저 둘러보고 싶다면</div><p class="note" style="margin:0">${DEMO_NOTE}</p>${demoBtn()}</div>
       <div class="between"><div class="h2">졸업요건 이수율</div></div>
@@ -190,7 +190,7 @@ function vArea(p){
       ${barHtml(n,n,A.need)}
     </div>
     <div><div class="h3">영역 규칙</div><p class="note" style="margin:4px 0 0">${A.rule}</p></div>
-    ${left.length?`<div class="card" style="display:flex;flex-direction:column;gap:8px;border-color:var(--bad)"><div class="between"><div class="h3">남은 과목</div><span class="muted small">${left.length}과목</span></div>
+    ${left.length?`<div class="card" style="display:flex;flex-direction:column;gap:8px;box-shadow:inset 0 0 0 1.5px var(--g900)"><div class="between"><div class="h3">남은 과목</div><span class="muted small">${left.length}과목</span></div>
       ${left.map(k=>{const st=statusOf(k);return `<div style="display:flex;flex-direction:column;gap:4px"><div class="between"><b>${C[k].n}</b>${st?badge(st):'<span class="pill gray">미계획</span>'}</div><span class="muted small">${k} · ${C[k].cr}학점 · 2026-2 개설 ${Object.values(SEC).filter(x=>x.code===k).length}개 분반</span>${secRows(k)}</div>`}).join('')}</div>`:''}
     ${now.length?`<div class="card" style="display:flex;flex-direction:column;gap:2px"><div class="h3">이번 학기 시간표에 담은 과목</div>${now.map(k=>`<div class="li"><span class="grow"><b>${C[k].n}</b><br><span class="muted small">${C[k].cr}학점</span></span>${badge('now')}</div>`).join('')}</div>`:''}
     ${plans.length?`<div class="card" style="display:flex;flex-direction:column;gap:2px"><div class="h3">로드맵에 넣어 둔 과목</div>${plans.map(x=>`<button type="button" class="li" data-go="course" data-c="${x.c}"><span class="grow"><b>${C[x.c].n}</b><br><span class="muted small">${x.sem} · ${C[x.c].cr}학점</span></span>${badge(x.st)}<span class="chev">›</span></button>`).join('')}</div>`:''}
@@ -321,7 +321,7 @@ function vTT(){
 }
 function vCompare(){
   const col=k=>{const t=ttCodes(k),cf=conflicts(k).length;
-    return `<div class="card" style="display:flex;flex-direction:column;gap:8px;${S.main===k?'border-color:var(--ink)':''}"><div class="between"><b style="font-size:17px">${k==='A'?'1안':'2안'}</b>${S.main===k?'<span class="pill info">★ 내 시간표</span>':''}</div>
+    return `<div class="card" style="display:flex;flex-direction:column;gap:8px;${S.main===k?'box-shadow:inset 0 0 0 1.5px var(--yb)':''}"><div class="between"><b style="font-size:17px">${k==='A'?'1안':'2안'}</b>${S.main===k?'<span class="pill info">★ 내 시간표</span>':''}</div>
     ${cf?`<span class="pill bad" style="align-self:flex-start">! 충돌 ${cf}건</span>`:'<span class="pill ok" style="align-self:flex-start">✓ 충돌 없음</span>'}
     <div class="small">${t.length}과목 · ${ttCredits(k)}학점</div>
     <div class="small muted">경제 ${t.filter(c=>C[c].g!=='x'&&/^ECO/.test(c)).reduce((a,c)=>a+C[c].cr,0)} · 심리 ${t.filter(c=>/^PSY/.test(c)).reduce((a,c)=>a+C[c].cr,0)} · 교양 ${t.filter(c=>/^UCC/.test(c)).reduce((a,c)=>a+C[c].cr,0)}</div>
@@ -407,15 +407,15 @@ function vDetail(p){
 function vMe(){
   const pf=S.profile;
   return `${top('내 정보',{big:true})}<div class="scroll">
-    ${S.onboarded?`<div class="card row" style="gap:14px"><div class="empty" style="padding:0"><div class="ico" aria-hidden="true">👤</div></div><div><div class="h3">김연세</div><div class="muted small">${profileText(pf)}</div></div></div>
+    ${S.onboarded?`<div class="card row" style="gap:14px"><div class="empty" style="padding:0"><div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6z"/></svg></div></div><div><div class="h3">김연세</div><div class="muted small">${profileText(pf)}</div></div></div>
     <div class="card" style="padding:4px 16px">
       ${[['입학 연도',pf.year+'년'],['현재 학년',pf.grade==='5'?'5학년 이상':pf.grade+'학년'],['본전공',pf.major],['추가 이수과정',pf.track==='없음'?'없음 (단일전공)':pf.track],...(hasSecond(pf.track)?[[SECOND_LABEL[pf.track],pf.second||'-']]:[]),['목표 졸업 학기',pf.grad.replace('-','년 ')+'학기']].map(([a,b])=>`<div class="li"><span class="grow muted">${a}</span><b>${b}</b></div>`).join('')}
     </div>
     <button type="button" class="btn weak" data-go="setup">학적 정보 수정</button>
-    <button type="button" class="card li" style="border:1px solid var(--line);padding:14px 16px" data-go="register"><span class="grow"><b>이수 내역 관리</b><br><span class="muted small">등록한 과목 ${S.registered.length}개 확인 및 수정</span></span><span class="chev">›</span></button>
+    <button type="button" class="card li" style="padding:16px 20px" data-go="register"><span class="grow"><b>이수 내역 관리</b><br><span class="muted small">등록한 과목 ${S.registered.length}개 확인 및 수정</span></span><span class="chev">›</span></button>
     ${S.demo?`<div class="card soft" style="display:flex;flex-direction:column;gap:10px"><div class="h3">예시 데이터로 체험 중이에요</div><p class="note" style="margin:0">체험을 끝내면 예시 데이터가 지워지고 처음 화면으로 돌아가요.</p><button type="button" class="btn weak" data-act="demoEnd">체험 끝내고 내 학적 입력하기</button></div>`:''}`
     :`<div class="card soft" style="display:flex;flex-direction:column;gap:10px"><div class="h3">학적 정보가 아직 없어요</div><button type="button" class="btn" data-go="setup">학적 설정하러 가기</button>${demoBtn()}<p class="note" style="margin:0">${DEMO_NOTE}</p></div>`}
-    <button type="button" class="card li" style="border:1px solid var(--line);padding:14px 16px" data-go="source"><span class="grow"><b>정보 출처 및 유의사항</b></span><span class="chev">›</span></button>
+    <button type="button" class="card li" style="padding:16px 20px" data-go="source"><span class="grow"><b>정보 출처 및 유의사항</b></span><span class="chev">›</span></button>
     ${UT_MODE?`<div class="card soft" style="display:flex;flex-direction:column;gap:8px"><div class="h3">UT 진행 도구</div><p class="note" style="margin:0">과제 시작 상태로 바로 맞춰요. 휴대폰에서 진행할 때 쓰세요.</p>
       <div class="chips">${[1,2,3,4,5].map(n=>`<button type="button" class="chip" data-ut="${n}">T${n} 시작</button>`).join('')}</div></div>`:''}
   </div>`;
