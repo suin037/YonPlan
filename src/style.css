@@ -474,3 +474,11 @@ kbd{border:1px solid var(--g300);border-bottom-width:2px;border-radius:6px;paddi
 .cr-wrap .tip{display:none}
 .cr-wrap.hover .tip,.cr-wrap.pinned .tip{display:flex}
 .cr-wrap.hover .cr,.cr-wrap.pinned .cr{border:1.5px solid var(--yb)}
+
+/* 팀 디자인 v3 */
+.hgrade{background:var(--yb-mid);color:#fff;font-size:12px;font-weight:700;border-radius:999px;padding:3px 12px}
+.hm-item{padding-left:0}
+.hm-item::before{display:none}
+.hm-ic{flex:none;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--yb);color:var(--yb);font-size:12px;font-weight:800;display:grid;place-items:center;align-self:flex-start;margin-top:1px}
+.hlegend{margin-top:-2px}
+.bar i.plan,.sw.plan{background:var(--yb-mid)}

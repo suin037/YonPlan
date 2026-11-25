@@ -178,25 +178,26 @@ function vHome() {
   const reqRow = (label, a, b, n, go) => `<button type="button" class="hr-row" ${go}><span class="between"><b>${label}</b><span class="num">${fmt(a)} → ${fmt(b)} / ${n}학점</span></span>${barHtml(a, b, n)}</button>`;
   const reqBlock = !R.ok ? pendingCard(R) : `<section class="hsec">
       <div class="between"><div class="h2">졸업요건 이수율</div><button type="button" class="link" data-go="req">졸업요건 자세히 ›</button></div>
-      ${R.groups.map(g => g.pending ? `<div class="hr-row"><span class="between"><b>${esc(g.n)}</b><span class="pill gray">준비 중</span></span></div>` : reqRow(esc(g.n), A0.groupCr[g.k], A1.groupCr[g.k], g.need, 'data-go="req"')).join('')}
+      ${R.groups.map(g => g.pending ? `<div class="hr-row"><span class="between"><b>${esc(g.n)}</b><span class="pill gray">준비 중</span></span></div>` : reqRow(esc(g.n.includes(' · ') ? g.n.replace(' · ', ' (') + ')' : g.n), A0.groupCr[g.k], A1.groupCr[g.k], g.need, 'data-go="req"')).join('')}
       ${reqRow('3·4000단위', A0.u3, A1.u3, R.u3000, 'data-go="area" data-a="U3000"')}
+      <div class="legend hlegend"><span><i class="sw"></i>이수</span><span><i class="sw plan"></i>이번 학기 수강 중</span></div>
     </section>`;
   // 놓치기 쉬운 항목
   const miss = [];
   if (R.ok) {
-    miss.push(`<button type="button" class="hm-item" data-go="area" data-a="U3000"><span class="grow"><b>3·4000단위 과목 ${R.u3000}학점 중 ${fmt(A0.u3)}학점</b><span>전공·교양 구분 없이 인정 가능 · ${fmt(Math.max(0, R.u3000 - A0.u3))}학점 남음</span></span><span class="chev">›</span></button>`);
+    miss.push(`<button type="button" class="hm-item" data-go="area" data-a="U3000"><span class="hm-ic" aria-hidden="true">!</span><span class="grow"><b>3·4000단위 과목 ${R.u3000}학점 중 ${fmt(A0.u3)}학점 이수</b><span>전공·교양 구분 없이 인정 가능</span></span><span class="chev">›</span></button>`);
     allAreas(R).forEach(a => a.must.filter(k => !d.includes(k)).forEach(k => {
-      if (miss.length >= 4) return;
+      if (miss.length >= 3) return;
       const inNow = t.includes(k), pl = S.plan.find(x => x.c === k);
-      miss.push(`<button type="button" class="hm-item" data-go="area" data-a="${a.id}"><span class="grow"><b>${esc(a.label)} '${esc(CC(k).n)}' 미이수</b><span>${CC(k).cr}학점 남음 · ${inNow ? '이번 학기 수강 중' : pl ? pl.sem + ' 계획' : offered(k) ? '이번 학기 수강 가능' : '계획에 담아 두세요'}</span></span><span class="chev">›</span></button>`);
+      const gName = (groupOf(R, a.g) || { n: '' }).n.split(' · ')[0];
+      miss.push(`<button type="button" class="hm-item" data-go="area" data-a="${a.id}"><span class="hm-ic" aria-hidden="true">!</span><span class="grow"><b>${esc(gName)} ${esc(a.n)} '${esc(CC(k).n)}' 미이수</b><span>${inNow ? '이번 학기 수강 중' : pl ? pl.sem + ' 계획' : offered(k) ? '이번 학기 수강 가능' : '다음 학기 이후 계획에 담아 두세요'}</span></span><span class="chev">›</span></button>`);
     }));
   }
   const pct = need ? Math.round(tot / need * 100) : null;
   const wbar = need ? `<div class="hbar" role="img" aria-label="${need}학점 중 ${fmt(tot)}학점 이수"><i style="width:${Math.min(tot, need) / need * 100}%"></i><i class="p" style="width:${Math.max(0, Math.min(after, need) - Math.min(tot, need)) / need * 100}%"></i></div>` : '';
   return `<div class="scroll home">
-    ${demoBar()}
     <header class="hhead"><span class="havatar" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="3.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5.5 19c1.2-3 3.8-4.4 6.5-4.4s5.3 1.4 6.5 4.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
-      <div><h1>${esc(S.name) || '나의 졸업 계획'}</h1><p>${profileText(S.profile)}</p></div></header>
+      <div><div class="row" style="gap:8px"><h1>${esc(S.name) || '나의 졸업 계획'}</h1><span class="hgrade">${S.profile.grade === '5' ? '5학년 이상' : S.profile.grade + '학년'}</span></div><p>${homeProfile(S.profile)}</p></div></header>
     <div class="hcard">
       <div class="between"><span class="hc-l">전체 이수율</span></div>
       <div class="between" style="align-items:flex-end"><span class="hc-pct num">${pct === null ? '—' : pct + '%'}</span><span class="hc-r num"><b>${fmt(tot)} / ${need || '—'}학점</b><br>목표 졸업 ${S.profile.grad}</span></div>
@@ -206,11 +207,6 @@ function vHome() {
     </div>
     ${reqBlock}
     ${miss.length ? `<div class="hmiss"><div class="between"><div class="h3">놓치기 쉬운 항목</div><button type="button" class="link" data-go="roadmap">로드맵에서 보기 ›</button></div>${miss.join('')}</div>` : ''}
-    <div class="hmiss">
-      <div class="between"><div class="h3">${NOW_TERM} 수강 중</div><span class="muted small">${t.length}과목 · ${fmt(sumCr(t))}학점</span></div>
-      ${t.length ? `<p class="note" style="margin:0">${t.map(k => esc(CC(k).n)).join(', ')}</p>` : '<p class="note" style="margin:0">이번 학기 런어스 강좌를 캡처해 올리면 수강 중 과목으로 들어가요.</p>'}
-      <button type="button" class="link" data-go="register" data-sem="${NOW_TERM}" style="align-self:flex-start">${t.length ? '이수 내역 관리 ›' : '이번 학기 과목 등록하기 ›'}</button>
-    </div>
   </div>`;
 }
 
@@ -332,7 +328,7 @@ function vRoadmap() {
     const open = S.open[sem.id] !== undefined ? !!S.open[sem.id] : sem.k !== 'done';
     return `<section class="rsem ${open ? 'open' : ''} rsem-${sem.k}" id="sem-${sem.id}">
       <button type="button" class="rsem-h" data-act="toggleSem" data-sem="${sem.id}" data-open="${open}" aria-expanded="${open}">
-        <span class="rsem-t">${shortSem(sem)}</span><span class="rsem-y">${sem.id}${sem.k === 'now' ? ' · 이번 학기' : ''}</span>
+        <span class="rsem-t">${shortSem(sem)}</span><span class="rsem-y" aria-label="${sem.id}"></span>
         <span class="rsem-cr">${fmt(cr)}학점</span><svg class="chev2" viewBox="0 0 16 16" aria-hidden="true"><path d="${open ? 'M4 10l4-4 4 4' : 'M4 6l4 4 4-4'}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       ${open ? `<div class="rsem-b">${items.map(([k, st]) => courseRow(k, st, { flash: flash.includes(k) })).join('')}
         ${sem.k === 'future' ? `<button type="button" class="cr-add" data-go="addplan" data-sem="${sem.id}">+ 과목 추가</button>` : `<button type="button" class="cr-add" data-go="register" data-sem="${sem.id}">+ ${sem.k === 'now' ? '수강 중 과목' : '들은 과목'} 등록</button>`}</div>` : ''}
@@ -340,7 +336,6 @@ function vRoadmap() {
   };
   return `${top('학사 로드맵', { big: true })}
   <div class="scroll" data-rm="1">
-    ${demoBar()}
     ${summary}
     ${SEMS.map(semHtml).join('')}
   </div>`;
@@ -498,6 +493,12 @@ function gradField(d) {
     <div class="row" style="gap:8px"><select id="f-gradG" data-field="gradG" class="${g ? '' : 'unset'}" style="flex:1" ${d.year ? '' : 'disabled'} aria-label="졸업 학년"><option value="" ${g ? '' : 'selected'} disabled>학년</option>${[1, 2, 3, 4, 5, 6].filter(ok).map(x => `<option value="${x}" ${String(x) === String(g) ? 'selected' : ''}>${x}학년</option>`).join('')}</select>
     <select id="f-gradS" data-field="gradS" class="${sm ? '' : 'unset'}" style="flex:1" ${d.year ? '' : 'disabled'} aria-label="졸업 학기"><option value="" ${sm ? '' : 'selected'} disabled>학기</option><option value="1" ${sm === '1' ? 'selected' : ''}>1학기</option><option value="2" ${sm === '2' ? 'selected' : ''}>2학기</option></select></div>
     <span class="muted small">${!d.year ? '입학 연도를 먼저 골라 주세요' : res ? (res < NOW_TERM ? '이미 지난 학기예요. 다시 골라 주세요' : `${res.replace('-', '년 ')}학기에 졸업해요`) : '보통 4학년 2학기예요'}</span></div>`;
+}
+/* 홈 머리말용: "24학번 / 경제학 1전공 · 심리학 2전공(복수전공)" */
+function homeProfile(pf) {
+  if (!pf || !pf.year) return '';
+  const m = hasSecond(pf.track) && pf.second ? `${pf.major} 1전공 · ${pf.track === '복수전공' ? `${pf.second} 2전공(복수전공)` : `${pf.second} ${pf.track}`}` : pf.major;
+  return `${pf.year.slice(2)}학번 / ${esc(m)}`;
 }
 function vSetup(p) {
   const d = p.draft || Object.assign({}, S.profile);
