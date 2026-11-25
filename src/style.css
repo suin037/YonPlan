@@ -482,3 +482,12 @@ kbd{border:1px solid var(--g300);border-bottom-width:2px;border-radius:6px;paddi
 .hm-ic{flex:none;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--yb);color:var(--yb);font-size:12px;font-weight:800;display:grid;place-items:center;align-self:flex-start;margin-top:1px}
 .hlegend{margin-top:-2px}
 .bar i.plan,.sw.plan{background:var(--yb-mid)}
+
+/* ---------- iPhone 16 (393 × 852pt) ---------- */
+.phone{width:417px;height:min(876px,calc(100dvh - 32px));border-radius:62px;border-width:12px}
+.statusbar{height:54px;padding:6px 30px 0 40px;font-size:17px}
+.statusbar .island{top:11px;width:126px;height:37px;border-radius:20px}
+.homebar{height:24px}
+.homebar::after{width:139px}
+.dim{border-radius:50px}
+.wlogo{width:52px;height:auto;align-self:flex-start}

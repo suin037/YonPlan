@@ -294,7 +294,7 @@ function courseRow(code, st, opt) {
   const tag = st === 'rec' ? '<span class="cr-tag">☆ 추천</span>' : st === 'plan' ? '<span class="cr-tag plan">◆ 계획</span>' : '';
   const warn = prereqs(code).some(([q, t]) => t === 'R' && statusOf(q) !== 'done' && statusOf(q) !== 'now') && st !== 'done' ? '<span class="cr-tag bad">! 선수과목</span>' : '';
   return `<div class="cr-wrap ${on ? 'pinned' : ''}">${preTip(code)}<div class="cr cr-${st} ${opt.flash ? 'flash' : ''}">
-    <button type="button" class="cr-main" data-go="course" data-c="${code}" aria-label="${esc(x.n)} 자세히 보기"><b>${esc(x.n)}${st === 'rec' ? ' <small class="cr-rec-t">추천</small>' : ''}</b><span>${x.cr}학점 (${code})</span></button>
+    <button type="button" class="cr-main" data-act="rmSel" data-c="${code}" aria-expanded="${on}" aria-label="${esc(x.n)}, 한 번 누르면 선수과목, 두 번 누르면 자세히"><b>${esc(x.n)}${st === 'rec' ? ' <small class="cr-rec-t">추천</small>' : ''}</b><span>${x.cr}학점 (${code})</span></button>
     <button type="button" class="cr-info" data-act="rmSel" data-c="${code}" aria-expanded="${on}" aria-label="${esc(x.n)} 선수과목 보기, 누르면 자세히"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10 9v5M10 6.2v.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
   </div></div>`;
 }
@@ -680,6 +680,7 @@ function rerender() { saveScroll(); render(cur().y); }
 /* ---------- 처음 방문 안내 ---------- */
 function welcome() {
   $layer.innerHTML = `<div class="dim center"><div class="sheet modal" role="dialog" aria-modal="true" aria-labelledby="wTitle">
+    <img src="${import.meta.env.BASE_URL}logo.svg" alt="" class="wlogo">
     <div class="h2" id="wTitle" style="margin:0">연플랜에 오신 걸 환영해요</div>
     <p class="note" style="margin:0">내 졸업요건과 학기별 로드맵을 한 곳에서 관리해요. 어떻게 시작할까요?</p>
     <button type="button" class="opt" data-act="startReal"><span class="grow"><b>처음부터 시작하기</b><span class="muted small">내 학적을 입력하고, 런어스 캡처로 들은 과목을 등록해요.</span></span><span class="chev">›</span></button>
@@ -786,12 +787,10 @@ document.addEventListener('click', e => {
     case 'toggleSem': S.open[t.dataset.sem] = t.dataset.open !== 'true'; rerender(); break;
     case 'rmFilter': S.rmFilter = t.dataset.f; rerender(); break;
     case 'togglePre': S.showPre = !S.showPre; rerender(); break;
-    case 'rmSel': {
-      const canHover = window.matchMedia && window.matchMedia('(hover: hover)').matches;
-      if (canHover || S.rmSel === t.dataset.c) { S.rmSel = null; go('course', { c: t.dataset.c }); }
+    case 'rmSel': // 한 번 누르면 선수과목, 같은 과목을 한 번 더 누르면 상세
+      if (S.rmSel === t.dataset.c) { S.rmSel = null; go('course', { c: t.dataset.c }); }
       else { S.rmSel = t.dataset.c; rerender(); }
       break;
-    }
     case 'addF': p.f = t.dataset.f; rerender(); break;
     case 'addReqOff': p.req = null; rerender(); break;
     case 'addToggle': { const k = t.dataset.c; p.sel = p.sel || []; p.sel = p.sel.includes(k) ? p.sel.filter(x => x !== k) : p.sel.concat(k); rerender(); break; }
@@ -884,7 +883,7 @@ document.addEventListener('input', e => {
 document.addEventListener('compositionend', e => { const el = e.target; if (['addQ', 'rQ'].includes(el.id)) { cur().p.q = el.value; rerender(); } if (el.id === 'oQ') { cur().p.oq = el.value; rerender(); } });
 
 /* ---------- 시작 ---------- */
-$screen.innerHTML = '<div class="empty" style="padding-top:120px"><p class="note">과목과 졸업요건 데이터를 불러오는 중이에요…</p></div>';
+$screen.innerHTML = `<div class="empty" style="padding-top:160px"><img src="${import.meta.env.BASE_URL}logo.svg" alt="연플랜" style="width:56px;height:auto"><p class="note">과목과 졸업요건 데이터를 불러오는 중이에요…</p></div>`;
 loadData().then(() => {
   const mode = store.get(KEY.mode);
   if (UT_MODE) { S = withUi(null, 'ut'); render(0); return; }
