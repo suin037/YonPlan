@@ -145,7 +145,9 @@ const ICONS = {
 const TABS = [['roadmap', '로드맵'], ['home', '홈'], ['me', '내 정보']];
 function renderTabs() {
   const active = TAB_OF[cur().s];
-  $tabs.innerHTML = TABS.map(([k, n]) => `<button type="button" data-tab="${k}" ${active === k ? 'aria-current="page"' : ''}><span class="tab-pill"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${ICONS[k]}</svg>${n}</span></button>`).join('');
+  // Figma '연플랜/하단 탭바'(373:3294): 탭 109.667×64, 선택 배경 93.667×54 알약
+  $tabs.innerHTML = TABS.map(([k, n]) => { const on = active === k; const ic = { roadmap: 'tab-roadmap', home: 'tab-home', me: 'tab-me' }[k] + (on ? '-on' : '');
+    return `<button type="button" class="f-tab ${k === 'roadmap' ? 'bold' : ''}" data-tab="${k}" ${on ? 'aria-current="page"' : ''}>${on ? '<span class="f-tab-bg"></span>' : ''}<img src="${import.meta.env.BASE_URL}figma/${ic}.svg" alt="" width="24" height="24"><span class="f-tab-l">${n}</span></button>`; }).join('');
 }
 
 /* ---------- 공통 조각 ---------- */
@@ -174,39 +176,40 @@ function vHome() {
   const d = pastCodes(), t = nowCodes();
   const A0 = assign(R, d), A1 = assign(R, d.concat(t));
   const need = R.ok ? R.total : 0, tot = A0.total, after = A1.total;
-  // 졸업요건 이수율 (팀 디자인: 그룹마다 "이수 → 수강 중 반영 / 기준")
-  const reqRow = (label, a, b, n, go) => `<button type="button" class="hr-row" ${go}><span class="between"><b>${label}</b><span class="num">${fmt(a)} → ${fmt(b)} / ${n}학점</span></span>${barHtml(a, b, n)}</button>`;
-  const reqBlock = !R.ok ? pendingCard(R) : `<section class="hsec">
-      <div class="between"><div class="h2">졸업요건 이수율</div><button type="button" class="link" data-go="req">졸업요건 자세히 ›</button></div>
-      ${R.groups.map(g => g.pending ? `<div class="hr-row"><span class="between"><b>${esc(g.n)}</b><span class="pill gray">준비 중</span></span></div>` : reqRow(esc(g.n.includes(' · ') ? g.n.replace(' · ', ' (') + ')' : g.n), A0.groupCr[g.k], A1.groupCr[g.k], g.need, 'data-go="req"')).join('')}
+  // Figma 'LF/홈'(81:414) 그대로: 프로필 헤더 → 전체 이수율 박스 → 졸업요건 이수율 → 범례 → 놓치기 쉬운 항목
+  const fbar = (a, b, n) => n ? `<div class="f-bar"><i class="p" style="width:${Math.min(b, n) / n * 100}%"></i><i style="width:${Math.min(a, n) / n * 100}%"></i></div>` : '';
+  const reqRow = (label, a, b, n, go) => `<button type="button" class="f-req-row" ${go}><span class="f-req-l"><b>${label}</b><span>${fmt(a)} → ${fmt(b)} / ${n}학점</span></span>${fbar(a, b, n)}</button>`;
+  const legend = cls => `<div class="f-legend ${cls}"><span><i></i>이수</span><span><i class="p"></i>이번 학기 계획</span></div>`;
+  const reqBlock = !R.ok ? pendingCard(R) : `<section class="f-req">
+      <div class="f-title"><h2>졸업요건 이수율</h2><button type="button" class="f-more" data-go="req">졸업요건 자세히 <span>›</span></button></div>
+      ${R.groups.map(g => g.pending ? `<div class="f-req-row"><span class="f-req-l"><b>${esc(g.n)}</b><span>준비 중</span></span></div>` : reqRow(esc(g.n.includes(' · ') ? g.n.replace(' · ', ' (') + ')' : g.n), A0.groupCr[g.k], A1.groupCr[g.k], g.need, 'data-go="req"')).join('')}
       ${reqRow('3·4000단위', A0.u3, A1.u3, R.u3000, 'data-go="area" data-a="U3000"')}
-      <div class="legend hlegend"><span><i class="sw"></i>이수</span><span><i class="sw plan"></i>이번 학기 수강 중</span></div>
-    </section>`;
-  // 놓치기 쉬운 항목
+    </section>${legend('f-legend-dark')}`;
   const miss = [];
+  const missItem = (go, t1, t2) => `<button type="button" class="f-miss-item" ${go}><img src="${import.meta.env.BASE_URL}figma/warn.svg" alt="" width="20" height="20"><span class="f-miss-t"><b>${t1}</b><span>${t2}</span></span><span class="f-chev">›</span></button>`;
   if (R.ok) {
-    miss.push(`<button type="button" class="hm-item" data-go="area" data-a="U3000"><span class="hm-ic" aria-hidden="true">!</span><span class="grow"><b>3·4000단위 과목 ${R.u3000}학점 중 ${fmt(A0.u3)}학점 이수</b><span>전공·교양 구분 없이 인정 가능</span></span><span class="chev">›</span></button>`);
+    miss.push(missItem('data-go="area" data-a="U3000"', `3·4000단위 과목 ${R.u3000}학점 중 ${fmt(A0.u3)}학점 이수`, '전공·교양 구분 없이 인정 가능'));
     allAreas(R).forEach(a => a.must.filter(k => !d.includes(k)).forEach(k => {
       if (miss.length >= 3) return;
       const inNow = t.includes(k), pl = S.plan.find(x => x.c === k);
       const gName = (groupOf(R, a.g) || { n: '' }).n.split(' · ')[0];
-      miss.push(`<button type="button" class="hm-item" data-go="area" data-a="${a.id}"><span class="hm-ic" aria-hidden="true">!</span><span class="grow"><b>${esc(gName)} ${esc(a.n)} '${esc(CC(k).n)}' 미이수</b><span>${inNow ? '이번 학기 수강 중' : pl ? pl.sem + ' 계획' : offered(k) ? '이번 학기 수강 가능' : '다음 학기 이후 계획에 담아 두세요'}</span></span><span class="chev">›</span></button>`);
+      miss.push(missItem(`data-go="area" data-a="${a.id}"`, `${esc(gName)} ${esc(a.n)} '${esc(CC(k).n)}' 미이수`, inNow ? '이번 학기 수강 중' : pl ? pl.sem + ' 계획' : offered(k) ? '이번 학기 수강 가능' : '다음 학기 이후 계획에 담아 두세요'));
     }));
   }
   const pct = need ? Math.round(tot / need * 100) : null;
-  const wbar = need ? `<div class="hbar" role="img" aria-label="${need}학점 중 ${fmt(tot)}학점 이수"><i style="width:${Math.min(tot, need) / need * 100}%"></i><i class="p" style="width:${Math.max(0, Math.min(after, need) - Math.min(tot, need)) / need * 100}%"></i></div>` : '';
-  return `<div class="scroll home">
-    <header class="hhead"><span class="havatar" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="3.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5.5 19c1.2-3 3.8-4.4 6.5-4.4s5.3 1.4 6.5 4.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
-      <div><div class="row" style="gap:8px"><h1>${esc(S.name) || '나의 졸업 계획'}</h1><span class="hgrade">${S.profile.grade === '5' ? '5학년 이상' : S.profile.grade + '학년'}</span></div><p>${homeProfile(S.profile)}</p></div></header>
-    <div class="hcard">
-      <div class="between"><span class="hc-l">전체 이수율</span></div>
-      <div class="between" style="align-items:flex-end"><span class="hc-pct num">${pct === null ? '—' : pct + '%'}</span><span class="hc-r num"><b>${fmt(tot)} / ${need || '—'}학점</b><br>목표 졸업 ${S.profile.grad}</span></div>
-      ${wbar}
-      <div class="hc-legend"><span><i></i>이수</span><span><i class="p"></i>이번 학기 수강 중</span></div>
-      ${S.taken.length ? '' : '<button type="button" class="hc-btn" data-go="register">런어스 캡처로 들은 과목 등록하기</button>'}
+  return `<div class="scroll f-home">
+    <header class="f-profile"><img class="f-avatar" src="${import.meta.env.BASE_URL}figma/profile.svg" alt="" width="49" height="49">
+      <div class="f-profile-t"><div class="f-name-row"><h1>${esc(S.name) || '나의 졸업 계획'}</h1><span class="f-grade">${S.profile.grade === '5' ? '5학년 이상' : S.profile.grade + '학년'}</span></div><p>${homeProfile(S.profile)}</p></div></header>
+    <div class="f-total">
+      <span class="f-total-l">전체 이수율</span>
+      <span class="f-total-pct">${pct === null ? '—' : pct + '%'}</span>
+      <span class="f-total-r"><b>${fmt(tot)} / ${need || '—'}학점</b><span>목표 졸업 ${S.profile.grad}</span></span>
+      ${need ? `<div class="f-total-bar"><i class="p" style="width:${Math.min(after, need) / need * 100}%"></i><i style="width:${Math.min(tot, need) / need * 100}%"></i></div>` : ''}
+      ${legend('f-legend-light')}
     </div>
+    ${S.taken.length ? '' : '<button type="button" class="btn" data-go="register">런어스 캡처로 들은 과목 등록하기</button>'}
     ${reqBlock}
-    ${miss.length ? `<div class="hmiss"><div class="between"><div class="h3">놓치기 쉬운 항목</div><button type="button" class="link" data-go="roadmap">로드맵에서 보기 ›</button></div>${miss.join('')}</div>` : ''}
+    ${miss.length ? `<div class="f-miss"><div class="f-title f-miss-title"><h2>놓치기 쉬운 항목</h2><button type="button" class="f-more" data-go="roadmap">로드맵에서 보기 <span>›</span></button></div>${miss.join('')}</div>` : ''}
   </div>`;
 }
 
@@ -278,47 +281,47 @@ function vArea(p) {
 const shortSem = sem => { const m = /^(\d+)학년 (\d)학기$/.exec(sem.g); return m ? `${m[1]}-${m[2]}` : sem.id; };
 const semShortById = id => { const x = semesters(S.profile).find(s => s.id === id); return x ? shortSem(x) : id; };
 /* 선수과목 말풍선: 과목 행을 누르면 위에 떠요 */
+/* Figma '로드맵/선수과목 안내/탭'(353:3394): 반투명 메인 말풍선 + 상태 알약 */
 function preTip(code) {
   const pres = prereqs(code);
   const row = ([q, t]) => {
     const st = statusOf(q), sem = semOf(q), pl = S.plan.find(x => x.c === q);
-    const tag = st === 'done' ? `<span class="tip-tag">${semShortById(sem)} 이수 완료</span>`
-      : st === 'now' ? `<span class="tip-tag now">${semShortById(sem)} 수강 중</span>`
-        : pl ? `<span class="tip-tag plan">${semShortById(pl.sem)} 계획</span>` : '<span class="tip-tag bad">미이수</span>';
-    return `<div class="tip-row"><span class="${st === 'done' || st === 'now' ? '' : 'tip-miss'}">${esc(CC(q).n)}${t === 'R' ? ' <small>(필수)</small>' : ''}</span>${tag}</div>`;
+    const tag = st === 'done' ? `<span class="f-tag">${semShortById(sem)} 이수 완료</span>`
+      : st === 'now' ? `<span class="f-tag">${semShortById(sem)} 수강 중</span>`
+        : pl ? `<span class="f-tag">${semShortById(pl.sem)} 계획</span>` : '<span class="f-tag warn">미이수</span>';
+    return `<div class="f-tip-row"><span>${esc(CC(q).n)}</span>${tag}</div>`;
   };
-  return `<div class="tip" role="tooltip"><div class="tip-h">선수과목</div>${pres.length ? pres.map(row).join('') : '<div class="tip-row muted">등록된 선수과목이 없어요</div>'}</div>`;
+  return `<div class="f-tip" role="tooltip"><div class="f-tip-h">선수과목</div>${pres.length ? pres.map(row).join('') : '<div class="f-tip-row"><span class="f-tip-none">등록된 선수과목이 없어요</span></div>'}</div>`;
 }
+/* Figma 과목 행(353:3424): 345×54, 흰 바탕 + 테두리, 오른쪽 42×42 ⓘ */
 function courseRow(code, st, opt) {
   opt = opt || {}; const x = CC(code); const on = S.rmSel === code;
-  const tag = st === 'rec' ? '<span class="cr-tag">☆ 추천</span>' : st === 'plan' ? '<span class="cr-tag plan">◆ 계획</span>' : '';
-  const warn = prereqs(code).some(([q, t]) => t === 'R' && statusOf(q) !== 'done' && statusOf(q) !== 'now') && st !== 'done' ? '<span class="cr-tag bad">! 선수과목</span>' : '';
-  return `<div class="cr-wrap ${on ? 'pinned' : ''}">${preTip(code)}<div class="cr cr-${st} ${opt.flash ? 'flash' : ''}">
-    <button type="button" class="cr-main" data-act="rmSel" data-c="${code}" aria-expanded="${on}" aria-label="${esc(x.n)}, 한 번 누르면 선수과목, 두 번 누르면 자세히"><b>${esc(x.n)}${st === 'rec' ? ' <small class="cr-rec-t">추천</small>' : ''}</b><span>${x.cr}학점 (${code})</span></button>
-    <button type="button" class="cr-info" data-act="rmSel" data-c="${code}" aria-expanded="${on}" aria-label="${esc(x.n)} 선수과목 보기, 누르면 자세히"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10 9v5M10 6.2v.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+  return `<div class="cr-wrap f-course-wrap ${on ? 'pinned' : ''}">${preTip(code)}<div class="f-course ${st === 'rec' ? 'rec' : ''} ${opt.flash ? 'flash' : ''}">
+    <button type="button" class="f-course-main" data-act="rmSel" data-c="${code}" aria-expanded="${on}" aria-label="${esc(x.n)}, 한 번 누르면 선수과목, 두 번 누르면 자세히"><b>${esc(x.n)}${st === 'rec' ? ' <small>추천</small>' : ''}</b><span>${x.cr}학점 (${code})</span></button>
+    <button type="button" class="cr-info f-info" data-act="rmSel" data-c="${code}" aria-expanded="${on}" aria-label="${esc(x.n)} 선수과목 보기, 누르면 자세히">ⓘ</button>
   </div></div>`;
 }
+/* Figma '전체 이수율' 원(98:1080): 72px, 두께 20%, 3시 방향부터 시계 방향 */
 function ring(pct) {
-  const r = 26, c = 2 * Math.PI * r, v = Math.max(0, Math.min(1, pct));
-  return `<svg class="ring" viewBox="0 0 64 64" role="img" aria-label="전체 이수율 ${Math.round(v * 100)}%"><circle cx="32" cy="32" r="${r}" fill="none" stroke="var(--g200)" stroke-width="7"/><circle cx="32" cy="32" r="${r}" fill="none" stroke="var(--yb)" stroke-width="7" stroke-linecap="round" stroke-dasharray="${c * v} ${c}" transform="rotate(-90 32 32)"/><text x="32" y="36.5" text-anchor="middle">${Math.round(v * 100)}%</text></svg>`;
+  const v = Math.max(0, Math.min(1, pct)), r = 32.4, c = 2 * Math.PI * r;
+  return `<div class="f-ring" role="img" aria-label="전체 이수율 ${Math.round(v * 100)}%"><svg width="72" height="72" viewBox="0 0 72 72"><circle cx="36" cy="36" r="${r}" fill="none" stroke="rgba(95,115,171,.62)" stroke-width="7.2"/><circle cx="36" cy="36" r="${r}" fill="none" stroke="#fff" stroke-width="7.2" stroke-dasharray="${c * v} ${c}"/></svg><span>${Math.round(v * 100)}%</span></div>`;
 }
 function vRoadmap() {
   if (!S.onboarded) return needSetup('학사 로드맵', '학기별 로드맵');
   const SEMS = semesters(S.profile);
   const vp = visiblePlan().map(x => ({ ...x, st: 'plan' })).concat(recs());
   const past = pastCodes(), now = nowCodes();
-  const A0 = assign(R, past), A1 = assign(R, past.concat(now, visiblePlan().map(x => x.c)));
+  const A0 = assign(R, past);
   const flash = S.flash;
-  // 위쪽 요약: 전체 이수율 + 전공·교양
+  // Figma '이수 현황'(98:1079): 원형 + 전공·교양 막대
   let summary;
   if (R.ok) {
     const majors = R.groups.filter(g => g.k !== 'gen' && !g.pending), gen = groupOf(R, 'gen');
     const mNeed = majors.reduce((t, g) => t + g.need, 0);
-    const m0 = majors.reduce((t, g) => t + A0.groupCr[g.k], 0), m1 = majors.reduce((t, g) => t + A1.groupCr[g.k], 0);
-    const line = (n, a, b, need) => `<div class="rs-line"><div class="between"><b>${n}</b><span class="num">${fmt(a)} / ${need}학점</span></div>${barHtml(a, b, need)}</div>`;
-    summary = `<div class="rm-sum blue">${ring(A0.total / R.total)}<div class="rs-lines">${line('전공', m0, m1, mNeed)}${line('교양', A0.groupCr.gen, A1.groupCr.gen, gen.need)}</div></div>
-      `;
-  } else summary = `<div class="rm-sum"><div class="rs-lines"><div class="between"><b>이수 학점</b><span class="num">${fmt(A0.total)}학점</span></div><p class="note" style="margin:0">졸업요건은 준비 중이에요.</p></div></div>`;
+    const m0 = majors.reduce((t, g) => t + A0.groupCr[g.k], 0);
+    const line = (n, a, need) => `<div class="f-sum-line"><div class="f-sum-l"><b>${n}</b><span>${fmt(a)} / ${need}학점</span></div><div class="f-sum-bar"><i style="width:${need ? Math.min(a, need) / need * 100 : 0}%"></i></div></div>`;
+    summary = `<div class="f-sum">${ring(A0.total / R.total)}<div class="f-sum-lines">${line('전공', m0, mNeed)}${line('교양', A0.groupCr.gen, gen.need)}</div></div>`;
+  } else summary = `<div class="f-sum"><div class="f-sum-lines"><div class="f-sum-l"><b>이수 학점</b><span>${fmt(A0.total)}학점</span></div><div class="f-sum-l"><span>졸업요건은 준비 중이에요</span></div></div></div>`;
   const semHtml = sem => {
     let items = [];
     if (sem.k === 'done') items = S.taken.filter(x => x.sem === sem.id).map(x => [x.c, 'done']);
@@ -326,18 +329,18 @@ function vRoadmap() {
     else items = vp.filter(x => x.sem === sem.id).map(x => [x.c, x.st]);
     const cr = items.filter(([, st]) => st !== 'rec').reduce((a, [k]) => a + CC(k).cr, 0);
     const open = S.open[sem.id] !== undefined ? !!S.open[sem.id] : sem.k !== 'done';
-    return `<section class="rsem ${open ? 'open' : ''} rsem-${sem.k}" id="sem-${sem.id}">
-      <button type="button" class="rsem-h" data-act="toggleSem" data-sem="${sem.id}" data-open="${open}" aria-expanded="${open}">
-        <span class="rsem-t">${shortSem(sem)}</span><span class="rsem-y" aria-label="${sem.id}"></span>
-        <span class="rsem-cr">${fmt(cr)}학점</span><svg class="chev2" viewBox="0 0 16 16" aria-hidden="true"><path d="${open ? 'M4 10l4-4 4 4' : 'M4 6l4 4 4-4'}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-      ${open ? `<div class="rsem-b">${items.map(([k, st]) => courseRow(k, st, { flash: flash.includes(k) })).join('')}
-        ${sem.k === 'future' ? `<button type="button" class="cr-add" data-go="addplan" data-sem="${sem.id}">+ 과목 추가</button>` : `<button type="button" class="cr-add" data-go="register" data-sem="${sem.id}">+ ${sem.k === 'now' ? '수강 중 과목' : '들은 과목'} 등록</button>`}</div>` : ''}
+    // Figma '학기 접기/펼치기'(361:3172): 345×60 헤더, 펼치면 8px 아래로 과목 행(간격 8)
+    return `<section class="f-sem ${open ? 'open' : ''}" id="sem-${sem.id}">
+      <button type="button" class="f-sem-h" data-act="toggleSem" data-sem="${sem.id}" data-open="${open}" aria-expanded="${open}" aria-label="${shortSem(sem)} (${sem.id}) ${fmt(cr)}학점">
+        <span class="f-sem-t">${shortSem(sem)}</span><span class="f-sem-cr">${fmt(cr)}학점</span><img src="${import.meta.env.BASE_URL}figma/${open ? 'chev-up' : 'chev-down'}.svg" alt="" width="16" height="16"></button>
+      ${open ? `<div class="f-sem-b">${items.map(([k, st]) => courseRow(k, st, { flash: flash.includes(k) })).join('')}
+        ${sem.k === 'future' ? `<button type="button" class="f-add" data-go="addplan" data-sem="${sem.id}">+ 과목 추가</button>` : `<button type="button" class="f-add" data-go="register" data-sem="${sem.id}">+ ${sem.k === 'now' ? '수강 중 과목' : '들은 과목'} 등록</button>`}</div>` : ''}
     </section>`;
   };
-  return `${top('학사 로드맵', { big: true })}
-  <div class="scroll" data-rm="1">
+  return `<div class="scroll f-rm">
+    <h1 class="f-rm-title">학사 로드맵</h1>
     ${summary}
-    ${SEMS.map(semHtml).join('')}
+    <div class="f-sems">${SEMS.map(semHtml).join('')}</div>
   </div>`;
 }
 function vCourse(p) {
