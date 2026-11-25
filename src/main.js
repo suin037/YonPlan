@@ -268,9 +268,9 @@ function vArea(p) {
     <div><div class="h3">영역 규칙</div><p class="note" style="margin:4px 0 0">${esc(rule)}</p></div>
     ${a.check ? `<div class="card" style="display:flex;flex-direction:column;gap:4px"><div class="row"><span class="pill gray">확인 중</span><b class="small">학교 자료에서 확인하고 있는 내용이에요</b></div><p class="note" style="margin:0">${esc(a.check)}</p></div>` : ''}
     ${left.length ? `<div class="card" style="display:flex;flex-direction:column;gap:8px;box-shadow:inset 0 0 0 1.5px var(--g900)"><div class="between"><div class="h3">남은 지정 과목</div><span class="muted small">${left.length}과목</span></div>
-      ${left.map(k => { const st = statusOf(k); return `<div style="display:flex;flex-direction:column;gap:4px"><div class="between"><b>${esc(CC(k).n)}</b>${st ? badge(st) : '<span class="pill gray">미계획</span>'}</div><span class="muted small">${k} · ${CC(k).cr}학점 · ${D.secByCode[k] ? `${NOW_TERM} 개설 ${D.secByCode[k].length}개 분반` : `${NOW_TERM} 미개설`}</span><button type="button" class="link" data-go="course" data-c="${k}" style="align-self:flex-start">과목 보기 · 계획에 담기 ›</button></div>`; }).join('')}</div>` : ''}
+      ${left.map(k => { const st = statusOf(k); return `<div style="display:flex;flex-direction:column;gap:4px"><div class="between"><b>${esc(CC(k).n)}</b>${st ? badge(st) : '<span class="pill gray">미계획</span>'}</div><span class="muted small">${k} · ${CC(k).cr}학점 · ${D.secByCode[k] ? `${NOW_TERM} 개설 ${D.secByCode[k].length}개 분반` : `${NOW_TERM} 미개설`}</span></div>`; }).join('')}</div>` : ''}
     ${now.length ? `<div class="card" style="display:flex;flex-direction:column;gap:2px"><div class="h3">이번 학기 수강 중인 과목</div>${now.map(k => `<div class="li"><span class="grow"><b>${esc(CC(k).n)}</b><br><span class="muted small">${CC(k).cr}학점</span></span>${badge('now')}</div>`).join('')}</div>` : ''}
-    ${plans.length ? `<div class="card" style="display:flex;flex-direction:column;gap:2px"><div class="h3">로드맵에 넣어 둔 과목</div>${plans.map(x => `<button type="button" class="li" data-go="course" data-c="${x.c}"><span class="grow"><b>${esc(CC(x.c).n)}</b><br><span class="muted small">${x.sem} · ${CC(x.c).cr}학점</span></span>${badge('plan')}<span class="chev">›</span></button>`).join('')}</div>` : ''}
+    ${plans.length ? `<div class="card" style="display:flex;flex-direction:column;gap:2px"><div class="h3">로드맵에 넣어 둔 과목</div>${plans.map(x => `<div class="li"><span class="grow"><b>${esc(CC(x.c).n)}</b><br><span class="muted small">${x.sem} · ${CC(x.c).cr}학점</span></span>${badge('plan')}<button type="button" class="link" data-act="removePlan" data-c="${x.c}">빼기</button></div>`).join('')}</div>` : ''}
     <div class="card" style="display:flex;flex-direction:column;gap:2px"><div class="between"><div class="h3">이수한 과목</div><span class="muted small">${done.length}과목</span></div>${done.length ? done.map(k => `<div class="li"><span class="grow"><b>${esc(CC(k).n)}</b><br><span class="muted small">${semOf(k)} · ${CC(k).cr}학점</span></span>${badge('done')}</div>`).join('') : '<p class="note">아직 이수한 과목이 없어요.</p>'}</div>
     ${ok || !futureSems().length ? '' : `<button type="button" class="btn weak" data-go="addplan" data-req="${a.id}">이 요건을 채울 과목 찾아 계획에 담기</button>`}
   </div>`;
@@ -297,8 +297,8 @@ function preTip(code) {
 function courseRow(code, st, opt) {
   opt = opt || {}; const x = CC(code); const on = S.rmSel === code;
   return `<div class="cr-wrap f-course-wrap ${on ? 'pinned' : ''}">${preTip(code)}<div class="f-course ${st === 'rec' ? 'rec' : ''} ${opt.flash ? 'flash' : ''}">
-    <button type="button" class="f-course-main" data-act="rmSel" data-c="${code}" aria-expanded="${on}" aria-label="${esc(x.n)}, 한 번 누르면 선수과목, 두 번 누르면 자세히"><b>${esc(x.n)}${st === 'rec' ? ' <small>추천</small>' : ''}</b><span>${x.cr}학점 (${code})</span></button>
-    <button type="button" class="cr-info f-info" data-act="rmSel" data-c="${code}" aria-expanded="${on}" aria-label="${esc(x.n)} 선수과목 보기, 누르면 자세히">ⓘ</button>
+    <button type="button" class="f-course-main" data-act="rmSel" data-c="${code}" aria-expanded="${on}" aria-label="${esc(x.n)}, 누르면 선수과목 보기"><b>${esc(x.n)}${st === 'rec' ? ' <small>추천</small>' : ''}</b><span>${x.cr}학점 (${code})</span></button>
+    <button type="button" class="cr-info f-info" data-act="rmSel" data-c="${code}" aria-expanded="${on}" aria-label="${esc(x.n)} 선수과목 보기">ⓘ</button>
   </div></div>`;
 }
 /* Figma '전체 이수율' 원(98:1080): 72px, 두께 20%, 3시 방향부터 시계 방향 */
@@ -342,37 +342,6 @@ function vRoadmap() {
     ${summary}
     <div class="f-sems">${SEMS.map(semHtml).join('')}</div>
   </div>`;
-}
-function vCourse(p) {
-  const code = p.c, x = CC(code), st = statusOf(code), pl = S.plan.find(y => y.c === code), rc = recs().find(y => y.c === code);
-  const sem = semOf(code) || (st === 'now' ? NOW_TERM : pl ? pl.sem : rc ? rc.sem : '');
-  const fut = futureSems();
-  const sel = p.sel || (fut.includes(sem) ? sem : fut[0] || '');
-  const pre = prereqInfo(code, sel);
-  const a = areaOf(R, code);
-  const reqLine = `${a ? a.label : '일반선택'} +${x.cr}학점${x.u >= 3000 ? ' · 3·4000단위 +' + x.cr + '학점' : ''}`;
-  const canPlan = st !== 'done' && st !== 'now' && fut.length > 0;
-  const actions = canPlan ? `<div class="field"><label for="semSel">${st === 'plan' ? '계획 학기' : '담을 학기'}</label><select id="semSel">${fut.map(s => `<option value="${s}" ${s === sel ? 'selected' : ''}>${semLabel(s)}</option>`).join('')}</select></div>
-      <div class="banner ${pre.ok ? 'ok' : 'bad'}"><span aria-hidden="true">${pre.ok ? '✓' : '!'}</span><div><b>${pre.ok ? (pre.soft ? '선수과목 순서 참고' : '선수과목 순서 확인') : '선수과목 순서 확인 필요'}</b><p>${esc(pre.t)}</p></div></div>` : '';
-  const footBtns = st === 'plan' ? `<button type="button" class="btn" data-act="savePlan" data-c="${code}" ${sel === sem ? 'disabled' : ''}>${sel === sem ? '학기를 바꾸면 저장할 수 있어요' : sel + '(으)로 옮기기'}</button><button type="button" class="btn weak" data-act="removePlan" data-c="${code}">계획에서 빼기</button>`
-    : canPlan ? `<button type="button" class="btn" data-act="adoptRec" data-c="${code}">${sel} 계획에 담기</button>`
-      : '';
-  const pres = prereqs(code), nexts = Object.keys(D.pre).filter(k => D.pre[k].some(q => q[0] === code)).slice(0, 8);
-  return `${top('과목 계획')}<div class="scroll">
-    <div class="row">${st ? badge(st) : '<span class="pill gray">미계획</span>'}<span class="muted small">${code}</span></div>
-    <div><div style="font-size:24px;font-weight:800">${esc(x.n)}</div><div class="muted">${esc(a ? a.label : '일반선택')} · ${x.cr}학점</div></div>
-    <div class="card" style="padding:4px 16px">
-      <div class="li"><span class="grow muted">${st === 'done' ? '이수 학기' : st === 'now' ? '수강 학기' : '계획 학기'}</span><b>${sem ? semLabel(sem) : '-'}</b></div>
-      <div class="li"><span class="grow muted">${NOW_TERM} 개설</span><b>${D.secByCode[code] ? D.secByCode[code].length + '개 분반' : '없음'}</b></div>
-    </div>
-    ${pres.length || nexts.length ? `<div class="card" style="display:flex;flex-direction:column;gap:8px"><div class="h3">선수과목 관계</div>
-      ${pres.length ? `<div class="small"><span class="muted">먼저 들으면 좋은 과목</span><div class="tags" style="margin-top:6px">${pres.map(([q, t]) => `<button type="button" class="pill ${isTaken(q) ? 'ok' : 'gray'}" data-go="course" data-c="${q}">${isTaken(q) ? '✓ ' : ''}${esc(CC(q).n)}${t === 'R' ? ' (필수)' : ''}</button>`).join('')}</div></div>` : ''}
-      ${nexts.length ? `<div class="small"><span class="muted">이 과목 다음에 듣는 과목</span><div class="tags" style="margin-top:6px">${nexts.map(q => `<button type="button" class="pill gray" data-go="course" data-c="${q}">${esc(CC(q).n)}</button>`).join('')}</div></div>` : ''}
-      <p class="note" style="margin:0">강의계획서와 요람에 적힌 선수과목이에요. (필수)가 없으면 권장 과목이에요.</p></div>` : ''}
-    <div class="card soft"><div class="h3">이 과목을 이수하면</div><p style="margin:6px 0 0">${esc(reqLine)}</p></div>
-    ${actions}
-    ${canPlan ? '<p class="note">미래 학기의 개설 여부와 분반은 수강편람이 나온 뒤 확인할 수 있어요. 지금은 지난 학기 개설 이력을 바탕으로 한 잠정 계획이에요.</p>' : ''}
-  </div>${footBtns ? `<div class="foot">${footBtns}</div>` : ''}`;
 }
 /* 과목 목록 검색: 이름·학수번호 */
 function searchCatalog(q, filter, limit) {
@@ -660,7 +629,7 @@ function vOcr(p) {
     <button type="button" class="btn weak" data-act="pickImages">${items.length ? '캡처 더 올리기' : '캡처 사진 고르기'}</button></div>`;
 }
 
-const VIEWS = { home: vHome, req: vReq, area: vArea, roadmap: vRoadmap, course: vCourse, addplan: vAddPlan, me: vMe, setup: vSetup, register: vRegister, guide: vGuide, ocr: vOcr, source: vSource };
+const VIEWS = { home: vHome, req: vReq, area: vArea, roadmap: vRoadmap, addplan: vAddPlan, me: vMe, setup: vSetup, register: vRegister, guide: vGuide, ocr: vOcr, source: vSource };
 
 function render(y) {
   R = buildReq(S.onboarded ? S.profile : null);
@@ -770,7 +739,6 @@ document.addEventListener('click', e => {
   if (t.dataset.go) {
     const g = t.dataset.go;
     if (g === 'area') return go('area', { a: t.dataset.a });
-    if (g === 'course') return go('course', { c: t.dataset.c });
     if (g === 'addplan') return go('addplan', { sem: t.dataset.sem, req: t.dataset.req || null, sel: [] });
     if (g === 'setup') return go('setup', {});
     if (g === 'register') return go('register', { onboard: false, sem: t.dataset.sem });
@@ -790,20 +758,14 @@ document.addEventListener('click', e => {
     case 'toggleSem': S.open[t.dataset.sem] = t.dataset.open !== 'true'; rerender(); break;
     case 'rmFilter': S.rmFilter = t.dataset.f; rerender(); break;
     case 'togglePre': S.showPre = !S.showPre; rerender(); break;
-    case 'rmSel': // 한 번 누르면 선수과목, 같은 과목을 한 번 더 누르면 상세
-      if (S.rmSel === t.dataset.c) { S.rmSel = null; go('course', { c: t.dataset.c }); }
-      else { S.rmSel = t.dataset.c; rerender(); }
+    case 'rmSel': // 누르면 선수과목 말풍선, 한 번 더 누르면 닫기
+      S.rmSel = S.rmSel === t.dataset.c ? null : t.dataset.c; rerender();
       break;
     case 'addF': p.f = t.dataset.f; rerender(); break;
     case 'addReqOff': p.req = null; rerender(); break;
     case 'addToggle': { const k = t.dataset.c; p.sel = p.sel || []; p.sel = p.sel.includes(k) ? p.sel.filter(x => x !== k) : p.sel.concat(k); rerender(); break; }
     case 'addPlan': if (p.sel && p.sel.length) addPlans(p.sel, p.sem && futureSems().includes(p.sem) ? p.sem : futureSems()[0]); break;
-    case 'savePlan': {
-      const pl = S.plan.find(x => x.c === t.dataset.c); const from = pl.sem; pl.sem = p.sel; S.open[p.sel] = true; S.flash = [pl.c]; S.stack = [{ s: 'roadmap', p: { scrollTo: p.sel } }]; render(0);
-      toast(`${esc(CC(pl.c).n)}을(를) ${from}에서 ${pl.sem}(으)로 옮겼어요`, { t: '되돌리기', fn: () => { pl.sem = from; rerender(); } }); break;
-    }
-    case 'removePlan': { const k = t.dataset.c; const old = S.plan.find(x => x.c === k); S.plan = S.plan.filter(x => x.c !== k); back(); toast(`${esc(CC(k).n)}을(를) 계획에서 뺐어요`, { t: '되돌리기', fn: () => { S.plan.push(old); rerender(); } }); break; }
-    case 'adoptRec': { const fut = futureSems(); const rc = recs().find(x => x.c === t.dataset.c); addPlans([t.dataset.c], p.sel || (rc ? rc.sem : fut[0])); break; }
+    case 'removePlan': { const k = t.dataset.c; const old = S.plan.find(x => x.c === k); S.plan = S.plan.filter(x => x.c !== k); rerender(); toast(`${esc(CC(k).n)}을(를) 계획에서 뺐어요`, { t: '되돌리기', fn: () => { S.plan.push(old); rerender(); } }); break; }
     case 'setupNext': {
       const d = Object.assign({}, p.draft || S.profile); if (!hasSecond(d.track)) d.second = ''; delete d.gradG; delete d.gradS;
       const nm = document.getElementById('f-name'); S.name = nm ? nm.value.trim() : S.name;
@@ -862,7 +824,6 @@ document.addEventListener('change', e => {
   const el = e.target; if (!el.closest || !el.closest('#phone')) return; const c = cur(), p = c.p || (c.p = {});
   if (el.id === 'jump' && el.value) { S.open[el.value] = true; c.p = { scrollTo: el.value }; render(0); return; }
   if (el.id === 'addSem') { p.sem = el.value; rerender(); return; }
-  if (el.id === 'semSel') { p.sel = el.value; rerender(); return; }
   if (el.id === 'regSem') { p.sem = el.value; p.sel = []; rerender(); return; }
   if (el.id === 'oSem') { p.osem = el.value; rerender(); return; }
   if (el.id === 'f-name') { p.name = el.value; return; }
