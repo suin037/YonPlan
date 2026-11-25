@@ -169,7 +169,7 @@ function pendingCard(r) {
 function vHome() {
   if (!S.onboarded) {
     return `${top('홈', { big: true })}<div class="scroll">
-      <div class="empty" style="padding-top:56px"><div class="ico" aria-hidden="true">${SETUP_ICON}</div><div class="h3">학적 정보를 먼저 입력해 주세요</div>
+      <div class="empty" style="padding-top:56px"><div class="brand lg" aria-label="Yon-Plan"><img src="${import.meta.env.BASE_URL}logo.svg" alt="" class="brand-mark"><img src="${import.meta.env.BASE_URL}wordmark.svg" alt="Yon-Plan" class="brand-word"></div><div class="h3" style="margin-top:12px">학적 정보를 먼저 입력해 주세요</div>
       <p class="note" style="margin:0">입학 연도, 전공, 이수과정을 입력하고 들은 과목을 등록하면<br>졸업요건 이수율과 남은 과목을 정리해 드려요.</p>
       <button type="button" class="btn sm" data-go="setup">학적 정보 입력하기</button></div></div>`;
   }
@@ -683,7 +683,7 @@ function rerender() { saveScroll(); render(cur().y); }
 /* ---------- 처음 방문 안내 ---------- */
 function welcome() {
   $layer.innerHTML = `<div class="dim center"><div class="sheet modal" role="dialog" aria-modal="true" aria-labelledby="wTitle">
-    <img src="${import.meta.env.BASE_URL}logo.svg" alt="" class="wlogo">
+    <div class="brand wbrand" aria-label="Yon-Plan"><img src="${import.meta.env.BASE_URL}logo.svg" alt="" class="brand-mark"><img src="${import.meta.env.BASE_URL}wordmark.svg" alt="Yon-Plan" class="brand-word"></div>
     <div class="h2" id="wTitle" style="margin:0">연플랜에 오신 걸 환영해요</div>
     <p class="note" style="margin:0">내 졸업요건과 학기별 로드맵을 한 곳에서 관리해요. 어떻게 시작할까요?</p>
     <button type="button" class="opt" data-act="startReal"><span class="grow"><b>처음부터 시작하기</b><span class="muted small">내 학적을 입력하고, 런어스 캡처로 들은 과목을 등록해요.</span></span><span class="chev">›</span></button>
@@ -886,7 +886,7 @@ document.addEventListener('input', e => {
 document.addEventListener('compositionend', e => { const el = e.target; if (['addQ', 'rQ'].includes(el.id)) { cur().p.q = el.value; rerender(); } if (el.id === 'oQ') { cur().p.oq = el.value; rerender(); } });
 
 /* ---------- 시작 ---------- */
-$screen.innerHTML = `<div class="empty" style="padding-top:160px"><img src="${import.meta.env.BASE_URL}logo.svg" alt="연플랜" style="width:56px;height:auto"><p class="note">과목과 졸업요건 데이터를 불러오는 중이에요…</p></div>`;
+$screen.innerHTML = `<div class="empty" style="padding-top:160px"><div class="brand lg" aria-label="Yon-Plan"><img src="${import.meta.env.BASE_URL}logo.svg" alt="" class="brand-mark"><img src="${import.meta.env.BASE_URL}wordmark.svg" alt="Yon-Plan" class="brand-word"></div><p class="note">과목과 졸업요건 데이터를 불러오는 중이에요…</p></div>`;
 loadData().then(() => {
   const mode = store.get(KEY.mode);
   if (UT_MODE) { S = withUi(null, 'ut'); render(0); return; }

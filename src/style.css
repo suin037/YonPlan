@@ -637,3 +637,11 @@ body{letter-spacing:0}
 .f-sem.open .f-sem-cr{right:46px;top:0;min-width:72px;height:26px;border-radius:13px;line-height:26px;font-weight:500}
 .f-sem.open .f-sem-h img{right:9px;top:4px}
 .cr-wrap.pinned .f-info{background:rgba(95,129,171,.16)}
+
+/* 텍스트 로고 — Figma 'Yon-Plan'(2011:3232): Rubik Scribble 120, #3355B7, 566×91 */
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{width:auto;height:44px}
+.brand-word{width:auto;height:26px}
+.brand.lg .brand-mark{height:56px}
+.brand.lg .brand-word{height:34px}
+.wbrand{align-self:flex-start}
