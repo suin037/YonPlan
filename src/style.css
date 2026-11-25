@@ -645,3 +645,7 @@ body{letter-spacing:0}
 .brand.lg .brand-mark{height:56px}
 .brand.lg .brand-word{height:34px}
 .wbrand{align-self:flex-start}
+/* 계획 과목 추가: 2단 필터(요건 영역) */
+.chips.sub{margin-top:-4px}
+.chips.sub .chip{background:#fff;color:rgba(0,0,0,.7);box-shadow:inset 0 0 0 1px rgba(32,52,109,.19);font-size:12px;padding:6px 11px}
+.chips.sub .chip[aria-pressed="true"]{background:var(--box2);color:var(--main);box-shadow:inset 0 0 0 1.5px var(--main)}

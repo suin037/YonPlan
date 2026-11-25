@@ -368,9 +368,10 @@ function vAddPlan(p) {
   const fut = futureSems();
   if (!fut.length) return `${top('계획 과목 추가')}<div class="scroll"><p class="note">목표 졸업 학기가 이번 학기라 계획할 다음 학기가 없어요. 내 정보에서 목표 졸업 학기를 바꿀 수 있어요.</p></div>`;
   const sem = p.sem && fut.includes(p.sem) ? p.sem : fut[0];
-  const q = (p.q || '').trim(), f = p.f || 'all', sel = p.sel || [];
+  const q = (p.q || '').trim(), sel = p.sel || [];
   const blocked = c => isTaken(c);
   const req = p.req || null; const reqA = req ? (req === 'U3000' ? U3() : areaById(R, req)) : null;
+  const f = p.f || (reqA && groupOf(R, reqA.g) ? reqA.g : 'all');
   const inReq = c => !req || (req === 'U3000' ? C(c).u >= 3000 : (areaOf(R, c) || {}).id === req);
   const majorGroups = R.groups.filter(g => g.k !== 'gen' && !g.pending);
   let list;
@@ -381,18 +382,25 @@ function vAddPlan(p) {
     const rest = searchCatalog('', c => !blocked(c) && !first.includes(c) && groupFilter(f === 'all' && majorGroups.length ? majorGroups[0].k : f)(c) && (f === 'gen' || C(c).u >= 2000), 40);
     list = first.filter(groupFilter(f)).concat(rest);
   }
+  // 2단 필터: 고른 전공(또는 교양)의 요건 영역 — 전공기초·전공필수·전공선택 등
+  const fg = f !== 'all' ? groupOf(R, f) : null;
+  const A1 = assign(R, pastCodes().concat(nowCodes())); // 수강 중 과목까지 이수로 보고 ✓ 표시
+  const areaChip = (id, n, done) => `<button type="button" class="chip" data-act="addReq" data-req="${id}" aria-pressed="${req === id}">${esc(n)}${done ? ' ✓' : ''}</button>`;
+  const subChips = fg ? fg.areas.map(a => areaChip(a.id, a.n, (A1.cr[a.id] || 0) >= a.need && !a.must.some(k => !isTaken(k)))).join('')
+    : R.u3000 ? areaChip('U3000', '3·4000단위', false) : '';
   const cr = sel.reduce((a, c) => a + CC(c).cr, 0);
   return `${top('계획 과목 추가')}<div class="scroll">
     <div class="field"><label for="addSem">추가할 학기</label><select id="addSem">${fut.map(s => `<option value="${s}" ${s === sem ? 'selected' : ''}>${semLabel(s)}</option>`).join('')}</select></div>
     <input class="search" id="addQ" type="search" placeholder="과목명 또는 학수번호 검색" value="${esc(q)}" aria-label="과목 검색">
-    <div class="chips">${reqA ? `<button type="button" class="chip" aria-pressed="true" data-act="addReqOff">${esc(reqA.label)} ✕</button>` : ''}${[['all', '전체'], ...majorGroups.map(g => [g.k, g.short]), ['gen', '교양']].map(([k, n]) => `<button type="button" class="chip" data-act="addF" data-f="${k}" aria-pressed="${f === k}">${n}</button>`).join('')}</div>
+    <div class="chips">${[['all', '전체'], ...majorGroups.map(g => [g.k, g.short]), ['gen', '교양']].map(([k, n]) => `<button type="button" class="chip" data-act="addF" data-f="${k}" aria-pressed="${f === k}">${n}</button>`).join('')}</div>
+    ${subChips ? `<div class="chips sub" role="group" aria-label="요건 영역으로 거르기">${subChips}</div>` : ''}
     <div class="h3">${q ? `"${esc(q)}" 검색 결과` : reqA ? `${esc(reqA.label)}에 인정되는 과목` : '내 졸업요건에 필요한 과목'}</div>
     <div style="display:flex;flex-direction:column;gap:8px">
     ${list.length ? list.map(c => {
       const pl = S.plan.find(x => x.c === c); const on = sel.includes(c); const pre = prereqInfo(c, sem); const a = areaOf(R, c); const isRec = recs().some(r => r.c === c);
       return `<button type="button" class="opt" role="checkbox" aria-checked="${on}" data-act="addToggle" data-c="${c}" ${pl ? 'disabled' : ''}><span class="check" aria-hidden="true">${on ? '✓' : ''}</span><span class="grow"><span class="between"><b>${esc(CC(c).n)}</b><span class="muted tiny">${c}</span></span><span class="muted small">${CC(c).cr}학점${C(c).u >= 3000 ? ' · 3000단위' : ''}${offered(c) ? ` · ${NOW_TERM} 개설` : ''}</span>
       <span class="tags">${pl ? `<span class="pill gray">이미 ${pl.sem} 계획에 있어요</span>` : isRec ? badge('rec') : ''}${a ? `<span class="pill ok">✓ ${esc(a.label)} 인정</span>` : '<span class="pill gray">일반선택</span>'}${pre.ok ? '' : '<span class="pill bad">! 선수과목 필요</span>'}</span></span></button>`;
-    }).join('') : '<p class="note">검색 결과가 없어요. 다른 이름으로 찾아보세요.</p>'}
+    }).join('') : `<p class="note">${q ? '검색 결과가 없어요. 다른 이름으로 찾아보세요.' : reqA ? `${esc(reqA.label)}에서 더 담을 과목이 없어요. 남은 과목은 이미 이수했거나 이번 학기에 수강 중이에요.` : '담을 수 있는 과목이 없어요.'}</p>`}
     </div>
   </div>
   <div class="foot"><div class="sum">${sel.length ? `<b>${sel.map(c => esc(CC(c).n)).join(', ')}</b> · ${sel.length}과목 ${fmt(cr)}학점을 <b>${sem}</b>에 추가해요` : '추가할 과목을 골라 주세요'}</div>
@@ -761,7 +769,8 @@ document.addEventListener('click', e => {
     case 'rmSel': // 누르면 선수과목 말풍선, 한 번 더 누르면 닫기
       S.rmSel = S.rmSel === t.dataset.c ? null : t.dataset.c; rerender();
       break;
-    case 'addF': p.f = t.dataset.f; rerender(); break;
+    case 'addF': p.f = t.dataset.f; p.req = null; rerender(); break;
+    case 'addReq': p.req = p.req === t.dataset.req ? null : t.dataset.req; rerender(); break;
     case 'addReqOff': p.req = null; rerender(); break;
     case 'addToggle': { const k = t.dataset.c; p.sel = p.sel || []; p.sel = p.sel.includes(k) ? p.sel.filter(x => x !== k) : p.sel.concat(k); rerender(); break; }
     case 'addPlan': if (p.sel && p.sel.length) addPlans(p.sel, p.sem && futureSems().includes(p.sem) ? p.sem : futureSems()[0]); break;
