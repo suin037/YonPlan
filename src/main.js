@@ -413,20 +413,26 @@ function vMe() {
   const modeCard = S.mode === 'demo'
     ? `<div class="card soft" style="display:flex;flex-direction:column;gap:10px"><div class="h3">예시 데이터로 체험 중이에요</div><p class="note" style="margin:0">체험 데이터는 내 정보와 따로 저장돼요. 체험을 끝내면 내 정보 화면으로 돌아가요.</p><button type="button" class="btn" data-act="demoEnd">체험 끝내기</button><button type="button" class="btn weak" data-act="demoReset">예시 데이터 처음 상태로 되돌리기</button></div>`
     : S.mode === 'real' ? `<div class="card" style="display:flex;flex-direction:column;gap:10px"><div class="h3">먼저 둘러보고 싶다면</div><p class="note" style="margin:0">24학번 경제학 · 심리학 복수전공 학생의 예시 데이터로 모든 기능을 써 볼 수 있어요. 내 정보는 그대로 남아 있어요.</p><button type="button" class="btn weak" data-act="demo">예시 데이터로 체험하기</button></div>` : '';
-  return `${top('내 정보', { big: true })}<div class="scroll">
-    ${S.onboarded ? `<div class="card row" style="gap:14px"><div class="empty" style="padding:0"><div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6z"/></svg></div></div><div><div class="h3">${esc(S.name) || '내 학적'}</div><div class="muted small">${profileText(pf)}</div></div></div>
-    <div class="card" style="padding:4px 16px">
-      ${[['입학 연도', pf.year + '년'], ['현재 학년', pf.grade === '5' ? '5학년 이상' : pf.grade + '학년'], ['본전공', pf.major], ['추가 이수과정', pf.track === '없음' ? '없음 (단일전공)' : pf.track], ...(hasSecond(pf.track) ? [[SECOND_LABEL[pf.track], pf.second || '-']] : []), ['목표 졸업', (() => { const gp = gradParts(pf); return `${gp.g}학년 ${gp.sm}학기 (${pf.grad.replace('-', '년 ')}학기)`; })()]].map(([a, b]) => `<div class="li"><span class="grow muted">${a}</span><b>${esc(b)}</b></div>`).join('')}
-    </div>
-    ${R.ok ? '' : pendingCard(R)}
-    <button type="button" class="btn weak" data-go="setup">학적 정보 수정</button>
-    <button type="button" class="card li" style="padding:16px 20px" data-go="register"><span class="grow"><b>이수 내역 관리</b><br><span class="muted small">이수 ${pastCodes().length}과목 · 수강 중 ${nowCodes().length}과목</span></span><span class="chev">›</span></button>`
-    : `<div class="empty" style="padding:32px 12px"><div class="ico" aria-hidden="true">${SETUP_ICON}</div><div class="h3">학적 정보를 먼저 입력해 주세요</div><button type="button" class="btn sm" data-go="setup">학적 정보 입력하기</button></div>`}
-    ${modeCard}
-    <button type="button" class="card li" style="padding:16px 20px" data-go="source"><span class="grow"><b>정보 출처 및 유의사항</b></span><span class="chev">›</span></button>
-    ${S.mode === 'real' && S.onboarded ? '<button type="button" class="link" data-act="wipe" style="align-self:flex-start">이 기기에 저장된 내 정보 모두 지우기</button>' : ''}
-    ${UT_MODE ? `<div class="card soft" style="display:flex;flex-direction:column;gap:8px"><div class="h3">UT 진행 도구</div><p class="note" style="margin:0">과제 시작 상태로 바로 맞춰요. 휴대폰에서 진행할 때 쓰세요.</p>
-      <div class="chips">${[1, 2, 3, 4, 5].map(n => `<button type="button" class="chip" data-ut="${n}">T${n} 시작</button>`).join('')}</div></div>` : ''}
+  const B = import.meta.env.BASE_URL;
+  const head = `<div class="f-me-top"><button type="button" class="f-me-back" data-tab="home" aria-label="홈으로"><img src="${B}figma/back.svg" alt="" width="10" height="17"></button><h1>내 정보</h1></div>`;
+  if (!S.onboarded) return `<div class="scroll f-me">${head}
+    <div class="empty" style="padding:32px 12px"><div class="ico" aria-hidden="true">${SETUP_ICON}</div><div class="h3">학적 정보를 먼저 입력해 주세요</div><button type="button" class="btn sm" data-go="setup">학적 정보 입력하기</button></div>
+    <div class="f-me-extra">${modeCard}</div>
+    <button type="button" class="f-me-link one" data-go="source"><span class="f-me-link-t"><b>정보 출처 및 유의사항</b></span><span class="f-me-chev" aria-hidden="true">›</span></button>
+  </div>`;
+  const gp = gradParts(pf);
+  const rows = [['입학 연도', pf.year + '년'], ['현재 학년', pf.grade === '5' ? '5학년 이상' : pf.grade + '학년'], ['본전공', pf.major], ['추가 이수과정', pf.track === '없음' ? '없음 (단일전공)' : pf.track], ...(hasSecond(pf.track) ? [[SECOND_LABEL[pf.track], pf.second || '-']] : []), ['목표 졸업 학기', `${pf.grad.split('-')[0]}년 ${pf.grad.split('-')[1]}학기`]];
+  return `<div class="scroll f-me">${head}
+    <div class="f-me-profile"><img class="f-me-avatar" src="${B}figma/profile.svg" alt="" width="49" height="49"><div class="f-me-pt"><div class="f-me-name"><b>${esc(S.name) || '내 학적'}</b><span class="f-me-grade">${pf.grade === '5' ? '5학년+' : pf.grade + '학년'}</span></div><p>${majorLine(pf, ' / ')}</p></div></div>
+    <div class="f-me-sec"><h2>나의 학적 정보</h2><button type="button" class="f-me-edit" data-go="setup">정보 수정</button></div>
+    <div class="f-me-card" aria-label="${gp.g}학년 ${gp.sm}학기 졸업 목표">${rows.map(([k, v]) => `<div class="f-me-row"><span>${k}</span><b>${esc(v)}</b></div>`).join('')}</div>
+    ${R.ok ? '' : `<div class="f-me-extra">${pendingCard(R)}</div>`}
+    <button type="button" class="f-me-link" data-go="register"><span class="f-me-link-t"><b>이수 내역 관리</b><span>등록한 과목 확인 및 수정</span></span><span class="f-me-chev" aria-hidden="true">›</span></button>
+    <button type="button" class="f-me-link one" data-go="source"><span class="f-me-link-t"><b>정보 출처 및 유의사항</b></span><span class="f-me-chev" aria-hidden="true">›</span></button>
+    ${modeCard ? `<div class="f-me-extra">${modeCard}</div>` : ''}
+    ${S.mode === 'real' ? '<button type="button" class="link f-me-wipe" data-act="wipe">이 기기에 저장된 내 정보 모두 지우기</button>' : ''}
+    ${UT_MODE ? `<div class="f-me-extra"><div class="card soft" style="display:flex;flex-direction:column;gap:8px"><div class="h3">UT 진행 도구</div><p class="note" style="margin:0">과제 시작 상태로 바로 맞춰요. 휴대폰에서 진행할 때 쓰세요.</p>
+      <div class="chips">${[1, 2, 3, 4, 5].map(n => `<button type="button" class="chip" data-ut="${n}">T${n} 시작</button>`).join('')}</div></div></div>` : ''}
   </div>`;
 }
 function vSource() {
@@ -477,8 +483,12 @@ function gradField(d) {
 /* 홈 머리말용: "24학번 / 경제학 1전공 · 심리학 2전공(복수전공)" */
 function homeProfile(pf) {
   if (!pf || !pf.year) return '';
-  const m = hasSecond(pf.track) && pf.second ? `${pf.major} 1전공 · ${pf.track === '복수전공' ? `${pf.second} 2전공(복수전공)` : `${pf.second} ${pf.track}`}` : pf.major;
-  return `${pf.year.slice(2)}학번 / ${esc(m)}`;
+  return `${pf.year.slice(2)}학번 / ${majorLine(pf, ' · ')}`;
+}
+// 내 정보(Figma 113:1090): "경제학 1전공 / 심리학 2전공(복수전공)"
+function majorLine(pf, sep) {
+  const m = hasSecond(pf.track) && pf.second ? `${pf.major} 1전공${sep}${pf.track === '복수전공' ? `${pf.second} 2전공(복수전공)` : `${pf.second} ${pf.track}`}` : pf.major;
+  return esc(m);
 }
 function vSetup(p) {
   const d = p.draft || Object.assign({}, S.profile);
