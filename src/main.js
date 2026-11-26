@@ -147,7 +147,7 @@ function renderTabs() {
   const active = TAB_OF[cur().s];
   // Figma '연플랜/하단 탭바'(373:3294): 탭 109.667×64, 선택 배경 93.667×54 알약
   $tabs.innerHTML = TABS.map(([k, n]) => { const on = active === k; const ic = { roadmap: 'tab-roadmap', home: 'tab-home', me: 'tab-me' }[k] + (on ? '-on' : '');
-    return `<button type="button" class="f-tab ${k === 'roadmap' ? 'bold' : ''}" data-tab="${k}" ${on ? 'aria-current="page"' : ''}>${on ? '<span class="f-tab-bg"></span>' : ''}<img src="${import.meta.env.BASE_URL}figma/${ic}.svg" alt="" width="24" height="24"><span class="f-tab-l">${n}</span></button>`; }).join('');
+    return `<button type="button" class="f-tab ${on ? 'bold' : ''}" data-tab="${k}" ${on ? 'aria-current="page"' : ''}>${on ? '<span class="f-tab-bg"></span>' : ''}<img src="${import.meta.env.BASE_URL}figma/${ic}.svg" alt="" width="24" height="24"><span class="f-tab-l">${n}</span></button>`; }).join('');
 }
 
 /* ---------- 공통 조각 ---------- */
