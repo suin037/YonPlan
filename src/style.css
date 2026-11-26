@@ -575,7 +575,7 @@ body{letter-spacing:0}
 /* ---------- 학사 로드맵 ---------- */
 .scroll.f-rm{display:block;padding:13px 0 24px}
 .f-rm-title{margin:0 0 0 32px;font-size:25px;line-height:36px;font-weight:900;color:#000}
-.f-sum{display:flex;gap:16px;align-items:flex-start;margin:27px 32px 0;padding:15px;border:1px solid var(--box-base);border-radius:12px;background:var(--main);color:#fff}
+.f-sum{display:flex;gap:16px;align-items:flex-start;margin:27px 32px 0;padding:16px;border:0;border-radius:12px;background:var(--main);color:#fff}
 .f-ring{position:relative;flex:none;width:72px;height:72px}
 .f-ring svg{display:block}
 .f-ring span{position:absolute;left:0;top:24px;width:72px;text-align:center;font-size:16px;line-height:24px;font-weight:700}
