@@ -678,3 +678,18 @@ body{letter-spacing:0}
 .f-me-extra{margin:20px 32px 0;display:flex;flex-direction:column;gap:12px}
 .f-me .empty{margin:24px 32px 0}
 .f-me-wipe{display:block;margin:16px 32px 0}
+
+/* ===== 실제 휴대폰: 기기 프레임 없이 전체 화면 (반드시 파일 맨 끝에 둬야 위 규칙을 덮어씀) ===== */
+@media (max-width:560px){
+  html,body{background:#fff}
+  .stage{display:block;padding:0;min-height:0;height:100%;background:#fff}
+  .phone{width:100%;height:100vh;height:100dvh;max-width:none;border:0;border-radius:0;box-shadow:none}
+  .statusbar,.homebar{display:none}
+  /* 가짜 상태바(62px)가 빠진 만큼 실제 노치·상태바 안전영역만 띄움 */
+  .screen{padding-top:max(16px,env(safe-area-inset-top,0px))}
+  .tabs{grid-template-columns:repeat(3,1fr);padding:0 max(16px,calc((100% - 329px) / 2)) env(safe-area-inset-bottom,0px);height:calc(64px + env(safe-area-inset-bottom,0px))}
+  .f-tab-bg{left:8px;right:8px;width:auto}
+  .f-tab img{left:50%;transform:translateX(-50%)}
+  .f-me-link{width:calc(100% - 64px);max-width:none}
+  .dim{border-radius:0}
+}
