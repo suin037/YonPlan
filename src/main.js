@@ -488,6 +488,7 @@ function vMe() {
   if (!S.onboarded) return `<div class="scroll f-me">${head}
     <div class="empty" style="padding:32px 12px"><div class="ico" aria-hidden="true">${SETUP_ICON}</div><div class="h3">학적 정보를 먼저 입력해 주세요</div><button type="button" class="btn sm" data-go="setup">학적 정보 입력하기</button></div>
     <div class="f-me-extra">${modeCard}</div>
+    <button type="button" class="f-me-link one" data-act="introShow"><span class="f-me-link-t"><b>연플랜 소개 다시 보기</b></span><span class="f-me-chev" aria-hidden="true">›</span></button>
     <button type="button" class="f-me-link one" data-go="source"><span class="f-me-link-t"><b>정보 출처 및 유의사항</b></span><span class="f-me-chev" aria-hidden="true">›</span></button>
   </div>`;
   const gp = gradParts(pf);
@@ -771,6 +772,34 @@ function render(y) {
 }
 function rerender() { saveScroll(); render(cur().y); }
 
+/* ---------- 온보딩: 처음 방문하면 앱이 무엇을 해 주는지 3장으로 소개한 뒤 시작 방법을 고릅니다 ---------- */
+const INTRO = [
+  { t: '들은 과목을 올리면\n남은 졸업요건이 보입니다', d: '런어스 과거강좌조회 캡처로 이수한 과목을 한 번에 등록합니다. 연세포탈처럼 이미 이수한 과목을 기준으로, 영역마다 얼마나 남았는지 계산합니다.',
+    art: `<div class="ia-card ia-blue"><span>졸업 학점</span><b>83.5 <small>/ 126학점</small></b><i class="ia-bar"><em style="width:66%"></em></i></div>
+      <div class="ia-card">${[['전공기초', 9, 9], ['전공필수', 3, 6], ['교양기초', 6.5, 8]].map(([n, a, b]) => `<div class="ia-row"><span>${n}</span><span class="${a >= b ? 'ok' : 'left'}">${a >= b ? '✓ 충족' : fmt(b - a) + '학점 남음'}</span></div>`).join('')}</div>` },
+  { t: '복수전공·부전공도\n한 화면에서 확인합니다', d: '추가 이수과정을 고르면 1전공과 2전공 요건을 나눠 계산합니다. 이미 들은 과목이 어느 전공, 어느 영역에 인정되는지도 바로 보입니다.',
+    art: `<div class="ia-card">${[['경제학(1전공)', 24, 36], ['심리학(2전공)', 18, 36]].map(([n, a, b]) => `<div class="ia-grp"><div class="ia-row"><b>${n}</b><span>${a} / ${b}학점</span></div><i class="ia-bar"><em style="width:${a / b * 100}%"></em></i></div>`).join('')}</div>
+      <div class="ia-chips"><span class="on">복수전공</span><span>부전공</span><span>연계전공</span><span>마이크로전공</span></div>` },
+  { t: '놓치기 쉬운 필수 과목을\n남은 학기에 계획합니다', d: '아직 듣지 않은 필수 과목을 먼저 알려 줍니다. 로드맵에서 남은 학기마다 들을 과목을 담아 졸업까지의 계획을 세웁니다.',
+    art: `<div class="ia-card ia-miss"><span class="ia-ic">!</span><div><b>'심리학의실험연구방법' 미이수</b><small>심리학 전공필수 · 이번 학기 수강 가능합니다.</small></div></div>
+      <div class="ia-card">${[['4-1', '2027년 1학기', '심리학의실험연구방법'], ['4-2', '2027년 2학기', '정보및게임이론']].map(([a, b, c]) => `<div class="ia-sem"><b>${a}</b><span>${b}</span></div><div class="ia-course">${c}</div>`).join('')}</div>` }
+];
+const INTRO_KEY = 'yonplan.v1.intro';
+function intro(i = 0) {
+  const g = INTRO[i], last = i === INTRO.length - 1;
+  $layer.innerHTML = `<div class="intro" role="dialog" aria-modal="true" aria-label="연플랜 소개 ${i + 1} / ${INTRO.length}" data-i="${i}">
+    <div class="intro-top">${last ? '<span></span>' : '<button type="button" class="link" data-act="introSkip">건너뛰기</button>'}</div>
+    <div class="intro-art" aria-hidden="true">${g.art}</div>
+    <div class="intro-txt"><h2>${esc(g.t).replace('\n', '<br>')}</h2><p>${esc(g.d)}</p></div>
+    <div class="intro-dots" aria-hidden="true">${INTRO.map((_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('')}</div>
+    <div class="intro-foot">${i ? `<button type="button" class="btn weak" data-act="introGo" data-i="${i - 1}" style="flex:1">이전</button>` : ''}<button type="button" class="btn" data-act="${last ? 'introDone' : 'introGo'}" data-i="${i + 1}" style="flex:2">${last ? '시작하기' : '다음'}</button></div>
+  </div>`;
+  const el = $layer.querySelector('.intro'); let x0 = null;
+  el.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+  el.addEventListener('touchend', e => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if (dx < -50 && !last) intro(i + 1); else if (dx > 50 && i) intro(i - 1); });
+}
+function introDone() { store.set(INTRO_KEY, 1); if (S && S.mode !== 'new') $layer.innerHTML = ''; else welcome(); }
+
 /* ---------- 처음 방문 안내 ---------- */
 function welcome() {
   $layer.innerHTML = `<div class="dim center"><div class="sheet modal" role="dialog" aria-modal="true" aria-labelledby="wTitle">
@@ -872,6 +901,9 @@ document.addEventListener('click', e => {
     case 'back': back(); break;
     case 'closeSheet': if (e.target === t || t.tagName === 'BUTTON') closeSheet(); break;
     case 'startReal': startMode('real', { go: store.get(KEY.real) && store.get(KEY.real).onboarded ? 'home' : 'setup' }); break;
+    case 'introGo': intro(+t.dataset.i); break;
+    case 'introSkip': case 'introDone': introDone(); break;
+    case 'introShow': intro(0); break;
     case 'demo': startMode('demo'); toast('예시 데이터로 체험을 시작합니다.'); break;
     case 'demoReset': startMode('demo', { reset: true, go: 'me' }); toast('예시 데이터를 처음 상태로 되돌렸습니다.'); break;
     case 'demoEnd': startMode('real', { go: 'me' }); toast('체험을 종료했습니다.'); break;
@@ -987,7 +1019,7 @@ loadData().then(() => {
   const mode = store.get(KEY.mode);
   if (UT_MODE) { S = withUi(null, 'ut'); render(0); return; }
   if (mode === 'demo' || mode === 'real') { S = withUi(store.get(KEY[mode]), mode); render(0); return; }
-  S = withUi(null, 'new'); render(0); welcome();
+  S = withUi(null, 'new'); render(0); if (store.get(INTRO_KEY)) welcome(); else intro(0);
 }).catch(err => {
   $screen.innerHTML = `<div class="empty" style="padding-top:120px"><div class="h3">데이터를 불러오지 못했습니다</div><p class="note">네트워크를 확인하고 새로고침해 주세요. (${esc(err.message)})</p></div>`;
 });
