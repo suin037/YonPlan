@@ -12,7 +12,7 @@ if (UT_MODE) document.body.classList.add('ut-mode');
    로그인 없이 이 브라우저(localStorage)에만 저장해요.
    내 정보(real)와 체험 데이터(demo)는 따로 저장돼서 서로 덮어쓰지 않아요.
    taken: 등록한 과목 [{c: 학수번호, sem: '2025-1'}]. 이번 학기(2026-2) 과목은 '수강 중'이에요. */
-const KEY = { mode: 'yonplan.v1.mode', real: 'yonplan.v1.real', demo: 'yonplan.v1.demo' };
+const KEY = { mode: 'yonplan.v1.mode', real: 'yonplan.v1.real', demo: 'yonplan.v2.demo' }; // 예시 데이터를 바꾸면 demo 버전을 올려 새로 불러오게 함
 const store = {
   get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* 저장 불가 환경 */ } },
@@ -188,12 +188,12 @@ function vHome() {
   const miss = [];
   const missItem = (go, t1, t2) => `<button type="button" class="f-miss-item" ${go}><img src="${import.meta.env.BASE_URL}figma/warn.svg" alt="" width="20" height="20"><span class="f-miss-t"><b>${t1}</b><span>${t2}</span></span><span class="f-chev">›</span></button>`;
   if (R.ok) {
-    miss.push(missItem('data-go="area" data-a="U3000"', `3·4000단위 과목 ${R.u3000}학점 중 ${fmt(A0.u3)}학점 이수`, '전공·교양 구분 없이 인정 가능'));
-    allAreas(R).forEach(a => a.must.filter(k => !d.includes(k)).forEach(k => {
+    if (A0.u3 < R.u3000) miss.push(missItem('data-go="area" data-a="U3000"', `3·4000단위 과목 ${R.u3000}학점 중 ${fmt(A0.u3)}학점 이수`, '전공·교양 구분 없이 인정 가능'));
+    // 놓치기 쉬운 지정 과목: 이수·수강 중·로드맵 계획 어디에도 없는 것만 경고
+    allAreas(R).forEach(a => a.must.filter(k => !d.includes(k) && !t.includes(k) && !S.plan.some(x => x.c === k)).forEach(k => {
       if (miss.length >= 3) return;
-      const inNow = t.includes(k), pl = S.plan.find(x => x.c === k);
       const gName = (groupOf(R, a.g) || { n: '' }).n.split(' (')[0];
-      miss.push(missItem(`data-go="area" data-a="${a.id}"`, `${esc(gName)} ${esc(a.n)} '${esc(CC(k).n)}' 미이수`, inNow ? '이번 학기 수강 중' : pl ? pl.sem + ' 계획' : offered(k) ? '이번 학기 수강 가능' : '다음 학기 이후 계획에 담아 두세요'));
+      miss.push(missItem(`data-go="area" data-a="${a.id}"`, `${esc(gName)} ${esc(a.n)} '${esc(CC(k).n)}' 미이수`, offered(k) ? '이번 학기 수강 가능' : '로드맵에 계획을 담아 두세요'));
     }));
   }
   const pct = need ? Math.round(tot / need * 100) : null;
