@@ -393,7 +393,7 @@ function vRoadmap() {
     // Figma '학기 접기/펼치기'(361:3172): 345×60 헤더, 펼치면 8px 아래로 과목 행(간격 8)
     return `<section class="f-sem ${open ? 'open' : ''}" id="sem-${sem.id}">
       <button type="button" class="f-sem-h" data-act="toggleSem" data-sem="${sem.id}" data-open="${open}" aria-expanded="${open}" aria-label="${shortSem(sem)} (${sem.id}) ${fmt(cr)}학점">
-        <span class="f-sem-t">${shortSem(sem)}</span><span class="f-sem-cr">${fmt(cr)}학점</span><img src="${import.meta.env.BASE_URL}figma/${open ? 'chev-up' : 'chev-down'}.svg" alt="" width="16" height="16"></button>
+        <span class="f-sem-t">${shortSem(sem)}<span class="f-sem-y">${sem.id.replace('-', '년 ')}학기</span>${sem.k === 'now' ? '<span class="f-sem-now">현재 학기</span>' : ''}</span><span class="f-sem-cr">${fmt(cr)}학점</span><img src="${import.meta.env.BASE_URL}figma/${open ? 'chev-up' : 'chev-down'}.svg" alt="" width="16" height="16"></button>
       ${open ? `<div class="f-sem-b">${items.map(([k, st]) => courseRow(k, st, { flash: flash.includes(k) })).join('')}
         ${sem.k === 'future' ? `<button type="button" class="f-add" data-go="addplan" data-sem="${sem.id}">+ 과목 추가</button>` : `<button type="button" class="f-add" data-go="register" data-sem="${sem.id}">+ ${sem.k === 'now' ? '수강 중 과목' : '들은 과목'} 등록</button>`}</div>` : ''}
     </section>`;
