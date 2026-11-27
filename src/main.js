@@ -235,8 +235,8 @@ function vReq() {
       <div class="h3">아직 듣지 않은 필수 과목</div>
       ${mustLeft.map(([a, k]) => { const st = statusOf(k); return `<button type="button" class="li" data-go="area" data-a="${a.id}"><span class="grow"><b>${esc(CC(k).n)}</b><br><span class="muted small">${esc(a.label)} · ${CC(k).cr}학점</span></span>${st ? badge(st) : '<span class="pill gray">미계획</span>'}<span class="chev">›</span></button>`; }).join('')}
     </div>` : ''}
-    ${R.groups.map(g => g.pending ? `<div class="between"><div class="h2">${esc(g.n)}</div><span class="pill gray">준비 중</span></div><div class="card"><p class="note" style="margin:0">${esc(g.n.split(' (')[0])} ${S.profile.track === '연계전공' ? '연계전공' : ''} 요건은 준비 중이에요. 지금은 ${Object.keys(SUPPORTED).join(' · ')}을 지원해요.</p></div>`
-      : `<div class="between"><div class="h2">${esc(g.n)}</div><span class="muted small num">${fmt(A0.groupCr[g.k])} / ${g.need}학점</span></div>
+    ${R.groups.map(g => g.pending ? `<div class="between gh"><div class="h2">${esc(g.n)}</div><span class="pill gray">준비 중</span></div><div class="card"><p class="note" style="margin:0">${esc(g.n.split(' (')[0])} ${S.profile.track === '연계전공' ? '연계전공' : ''} 요건은 준비 중이에요. 지금은 ${Object.keys(SUPPORTED).join(' · ')}을 지원해요.</p></div>`
+      : `<div class="between gh"><div class="h2">${esc(g.n)}</div><span class="muted small num">${fmt(A0.groupCr[g.k])} / ${g.need}학점</span></div>
       <div class="card" style="padding:4px 16px">${g.areas.map(a => { const n = A0.cr[a.id] || 0, left = a.must.filter(k => !d.includes(k)).length, ok = n >= a.need && !left; return `<button type="button" class="li" data-go="area" data-a="${a.id}">
         <span class="grow" style="display:flex;flex-direction:column;gap:6px"><span class="between"><b>${esc(a.n)} ${checkPill(a)}</b><span class="num small">${fmt(n)} / ${a.need}</span></span>${barHtml(n, n, a.need)}</span>
         ${ok ? '<span class="pill ok">✓ 충족</span>' : `<span class="pill bad">${n < a.need ? fmt(a.need - n) + '학점 남음' : left + '과목 남음'}</span>`}<span class="chev">›</span></button>`; }).join('')}</div>`).join('')}
