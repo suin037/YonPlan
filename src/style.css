@@ -755,3 +755,4 @@ body{letter-spacing:0}
 .rq-explain p{margin:0}.rq-explain b{color:#111827}
 .rq-tags{display:flex;flex-wrap:wrap;gap:6px}
 .rq-tags span{padding:3px 8px;border-radius:8px;background:rgba(239,98,98,.12);color:#C84848;font-size:12px;font-weight:600}
+.cinfo-note{margin-bottom:-6px;padding:8px 12px;border-radius:10px;background:var(--box2);color:#4B5568;font-size:12px;line-height:18px}

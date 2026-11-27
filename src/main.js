@@ -279,7 +279,7 @@ function sectionMode(x) {
   return x.online ? '대면 + 온라인 콘텐츠' : '대면';
 }
 function uniq(a) { return [...new Set(a.filter(Boolean))]; }
-function courseInfoSheet(c) {
+function courseInfoSheet(c, forSem) {
   const k = CC(c), secs = D.secByCode[c] || [], raw = D.courses[c] || [];
   const cat = raw[3], area = raw[4];
   const per = (vals, unit) => vals.length > 1 ? `${vals.join(' · ')} <span class="muted small">(분반마다 달라요)</span>` : (vals[0] || unit);
@@ -300,6 +300,7 @@ function courseInfoSheet(c) {
   $layer.innerHTML = `<div class="dim" data-act="closeSheet"><div class="sheet cinfo" role="dialog" aria-modal="true" aria-labelledby="ciTitle">
     <div class="cinfo-grab" aria-hidden="true"></div>
     <div><div class="h2" id="ciTitle" style="margin:0">${esc(k.n)}</div><div class="muted small">${c} · ${k.cr}학점${C(c).u ? ' · ' + C(c).u + '단위' : ''}</div></div>
+    ${forSem && forSem !== NOW_TERM ? `<div class="cinfo-note">ⓘ ${NOW_TERM} 수강편람 기준 · 다음 학기엔 달라질 수 있어요</div>` : ''}
     <dl class="cinfo-list">${rows.map(([a, b]) => `<div><dt>${a}</dt><dd>${b}</dd></div>`).join('')}</dl>
     <button type="button" class="btn weak" data-act="closeSheet">닫기</button>
   </div></div>`;
@@ -882,7 +883,7 @@ document.addEventListener('click', e => {
     }
     case 'pushRoadmap': go('roadmap'); break;
     case 'unmetInfo': p.unmet = !p.unmet; rerender(); break;
-    case 'courseInfo': courseInfoSheet(t.dataset.c); break;
+    case 'courseInfo': courseInfoSheet(t.dataset.c, p.sem && futureSems().includes(p.sem) ? p.sem : futureSems()[0]); break;
     case 'addToggle': { const k = t.dataset.c; p.sel = p.sel || []; p.sel = p.sel.includes(k) ? p.sel.filter(x => x !== k) : p.sel.concat(k); rerender(); break; }
     case 'addPlan': if (p.sel && p.sel.length) addPlans(p.sel, p.sem && futureSems().includes(p.sem) ? p.sem : futureSems()[0]); break;
     case 'removePlan': { const k = t.dataset.c; const old = S.plan.find(x => x.c === k); S.plan = S.plan.filter(x => x.c !== k); rerender(); toast(`${esc(CC(k).n)}을(를) 계획에서 뺐어요`, { t: '되돌리기', fn: () => { S.plan.push(old); rerender(); } }); break; }
