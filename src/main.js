@@ -562,14 +562,20 @@ function gradParts(d) {
   const [gy, gs] = d.grad.split('-');
   return { g: d.gradG || String(+gy - +d.year + 1), sm: d.gradS || gs };
 }
+/* 졸업 연도·월 ↔ 마지막 수강 학기: 2월 졸업 = 전년도 2학기까지, 8월 졸업 = 그해 1학기까지 */
+const gradYM = id => { if (!id) return { y: '', m: '' }; const [y, sm] = id.split('-'); return sm === '1' ? { y, m: '8' } : { y: String(+y + 1), m: '2' }; };
+const gradFromYM = (y, m) => y && m ? (m === '8' ? `${y}-1` : `${+y - 1}-2`) : '';
 function gradField(d) {
-  // 학생들이 쓰는 표현(2028년 2월 졸업)으로 고르고, 안에서는 마지막 수강 학기(2027-2)로 저장해요
+  const cur = gradYM(d.grad), y = d.gradY || cur.y, m = d.gradM || cur.m;
   const [ny] = NOW_TERM.split('-').map(Number);
-  const opts = []; for (let y = ny; y <= ny + 6; y++) for (const sm of ['1', '2']) { const id = `${y}-${sm}`; if (id >= NOW_TERM) opts.push(id); }
-  const gl = id => d.year ? ` (${+id.split('-')[0] - +d.year + 1}학년 ${id.split('-')[1]}학기까지)` : '';
-  return `<div class="field"><label for="f-grad">졸업 예정</label>
-    <select id="f-grad" data-field="grad" class="${d.grad ? '' : 'unset'}"><option value="" ${d.grad ? '' : 'selected'} disabled>졸업 예정 시기</option>${opts.map(id => `<option value="${id}" ${id === d.grad ? 'selected' : ''}>${gradDate(id)}${gl(id)}</option>`).join('')}</select>
-    <span class="muted small">${d.grad ? `${d.grad.replace('-', '년 ')}학기까지 수강하고 ${gradDate(d.grad)}에 졸업합니다.` : '2월 졸업은 2학기, 8월 졸업은 1학기까지 수강합니다.'}</span></div>`;
+  const years = []; for (let x = ny; x <= ny + 7; x++) if (gradFromYM(String(x), '2') >= NOW_TERM || gradFromYM(String(x), '8') >= NOW_TERM) years.push(String(x));
+  const okM = mm => !y || gradFromYM(y, mm) >= NOW_TERM;
+  const res = gradFromYM(y, m), bad = res && res < NOW_TERM;
+  const gl = res && d.year ? `(${+res.split('-')[0] - +d.year + 1}학년 ${res.split('-')[1]}학기)` : '';
+  return `<div class="field"><label>졸업 예정</label>
+    <div class="row" style="gap:8px"><select id="f-gradY" data-field="gradY" class="${y ? '' : 'unset'}" style="flex:1" aria-label="졸업 연도"><option value="" ${y ? '' : 'selected'} disabled>연도</option>${years.map(x => `<option value="${x}" ${x === y ? 'selected' : ''}>${x}년</option>`).join('')}</select>
+    <select id="f-gradM" data-field="gradM" class="${m ? '' : 'unset'}" style="flex:1" aria-label="졸업 월"><option value="" ${m ? '' : 'selected'} disabled>월</option>${['2', '8'].map(mm => `<option value="${mm}" ${mm === m ? 'selected' : ''} ${okM(mm) ? '' : 'disabled'}>${mm}월</option>`).join('')}</select></div>
+    <span class="muted small">${bad ? '이미 지난 시기입니다. 다시 선택해 주세요.' : res ? `${res.replace('-', '년 ')}학기${gl}까지 수강하고 ${gradDate(res)}에 졸업합니다.` : '2월 졸업은 2학기, 8월 졸업은 1학기까지 수강합니다.'}</span></div>`;
 }
 /* 홈 머리말용: "24학번 / 경제학 1전공 · 심리학 2전공(복수전공)" */
 function homeProfile(pf) {
@@ -887,7 +893,7 @@ document.addEventListener('click', e => {
     case 'addPlan': if (p.sel && p.sel.length) addPlans(p.sel, p.sem && futureSems().includes(p.sem) ? p.sem : futureSems()[0]); break;
     case 'removePlan': { const k = t.dataset.c; const old = S.plan.find(x => x.c === k); S.plan = S.plan.filter(x => x.c !== k); rerender(); toast(`${esc(CC(k).n)}을(를) 계획에서 제외했습니다.`, { t: '되돌리기', fn: () => { S.plan.push(old); rerender(); } }); break; }
     case 'setupNext': {
-      const d = Object.assign({}, p.draft || S.profile); d.tracks = tracksOf(d).filter(x => !needsDept(x.t) || x.d); delete d.track; delete d.second; delete d.gradG; delete d.gradS;
+      const d = Object.assign({}, p.draft || S.profile); d.tracks = tracksOf(d).filter(x => !needsDept(x.t) || x.d); delete d.track; delete d.second; delete d.gradG; delete d.gradS; delete d.gradY; delete d.gradM;
       const nm = document.getElementById('f-name'); S.name = nm ? nm.value.trim() : S.name;
       S.profile = d;
       if (!S.onboarded) { S.onboarded = true; S.stack = [{ s: 'register', p: { onboard: true } }, { s: 'guide', p: { i: 0 } }]; render(0); } else { back(); toast('학적 정보를 저장했습니다.'); }
@@ -959,7 +965,7 @@ document.addEventListener('change', e => {
     const f = el.dataset.field; p.draft = p.draft || Object.assign({}, S.profile); p.draft[f] = el.value;
     const nm = document.getElementById('f-name'); if (nm) p.name = nm.value;
     if (f === 'major') { p.draft.tracks = tracksOf(p.draft).map(x => x.d === el.value ? { ...x, d: '' } : x); delete p.draft.track; delete p.draft.second; }
-    if (f === 'gradG' || f === 'gradS') { const gp = gradParts(Object.assign({}, p.draft, { grad: f === 'year' ? '' : p.draft.grad })); p.draft.gradG = gp.g; p.draft.gradS = gp.sm; p.draft.grad = gradOf(p.draft.year, gp.g, gp.sm); }
+    if (f === 'gradY' || f === 'gradM') { const cy = gradYM(p.draft.grad); const y = p.draft.gradY || cy.y, m = p.draft.gradM || cy.m; const g = gradFromYM(y, m); p.draft.grad = g && g >= NOW_TERM ? g : ''; }
     rerender(); return;
   }
 });
