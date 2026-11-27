@@ -709,3 +709,5 @@ body{letter-spacing:0}
 .num.bigval{line-height:1}
 .between>.h3+span,.between>.h3+.muted{line-height:24px}
 .h3{line-height:24px}
+.chips.sub .chip.na{background:transparent;color:rgba(0,0,0,.35);box-shadow:inset 0 0 0 1px rgba(32,52,109,.12);cursor:default}
+.li.na-row{opacity:.75}

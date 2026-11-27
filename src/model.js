@@ -47,11 +47,6 @@ function majorGroup(k, code, rows, label, name) {
   const dep = D.req[code];
   const short = SHORT_DEPT[code];
   const areas = rows.filter(a => a.kind === 'MAJ').map(a => area(a, k, short));
-  // 요람이 '전공필수 6 + 전공필수·전공선택 30'처럼 적힌 경우(심리 등): 전필은 앞 영역에서 따로 세니
-  // 뒤 영역은 사실상 전공선택이라, 다른 전공과 같게 '전공선택'으로 보여 줘요(규칙 설명엔 요람 표현 유지).
-  if (areas.some(a => a.cat.join() === '전필')) areas.forEach(a => {
-    if (a.cat.join() === '전필,전선') { a.n = '전공선택'; a.label = (short ? short + ' ' : '') + '전공선택'; a.mixed = true; }
-  });
   const major = rows.find(a => a.kind === 'MAJOR');
   // 전공 합계가 영역 합보다 크면(영역 구분이 없거나 일부만 있는 경우) 나머지를 '전공 과목(영역 무관)'으로 세요
   const sum = areas.reduce((t, a) => t + a.need, 0);
@@ -117,7 +112,6 @@ export function ruleText(a, R) {
   if (a.kind === 'RC') return `RC 교육 과목을 ${a.need}학점 이수해요.`;
   if (a.all) return `지정 과목 ${a.must.length}개(${names})를 모두 이수해요.`;
   const cat = a.cat.map(x => KIND_LABEL[x] || x).join('·');
-  if (a.mixed) return `${g ? g.n.split(' (')[0] : ''} 전공필수·전공선택 과목 중 ${a.need}학점 이상 이수해요. 전공필수 영역을 채우고 남는 전공필수 학점도 여기에 들어가요.`;
   return `${g ? g.n.split(' (')[0] : ''} ${cat} 과목 중 ${a.need}학점 이상 이수해요.${a.must.length ? ` 지정 과목(${names})은 꼭 들어야 해요.` : ''}`;
 }
 

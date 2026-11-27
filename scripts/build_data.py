@@ -126,6 +126,10 @@ for dept, (dname, pre) in SUPPORTED.items():
                     if c not in catalog:
                         catalog[c] = {'n': n.strip(), 'cr': 3, 'd': dept, 'k': '', 'g': ''}
                 cat = x['match_category'] or (CAT_OF_AREA.get(x['area'], '') if kind == 'MAJ' else '')
+                # 요람 원문 확인(2024 심리학 졸업요건 표, 요람 91쪽): 복수전공 줄은 전공필수 6 / 전공선택 30이 '따로' 적힌 칸이에요.
+                # 데이터셋의 '전공필수·전공선택'(합산) 칸은 이 표를 잘못 옮긴 것이라 전공선택으로 바로잡아요.
+                if x['area'] == '전공필수·전공선택':
+                    x = dict(x, area='전공선택'); cat = '전선'
                 if kind == 'BASIC':
                     cat = '공기'
                 if kind == 'GE':

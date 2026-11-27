@@ -237,7 +237,7 @@ function vReq() {
     </div>` : ''}
     ${R.groups.map(g => g.pending ? `<div class="between gh"><div class="h2">${esc(g.n)}</div><span class="pill gray">준비 중</span></div><div class="card"><p class="note" style="margin:0">${esc(g.n.split(' (')[0])} ${S.profile.track === '연계전공' ? '연계전공' : ''} 요건은 준비 중이에요. 지금은 ${Object.keys(SUPPORTED).join(' · ')}을 지원해요.</p></div>`
       : `<div class="between gh"><div class="h2">${esc(g.n)}</div><span class="muted small num">${fmt(A0.groupCr[g.k])} / ${g.need}학점</span></div>
-      <div class="card" style="padding:4px 16px">${g.areas.map(a => { const n = A0.cr[a.id] || 0, left = a.must.filter(k => !d.includes(k)).length, ok = n >= a.need && !left; return `<button type="button" class="li" data-go="area" data-a="${a.id}">
+      <div class="card" style="padding:4px 16px">${areaSlots(g).map(({ n: sn, a }) => { if (!a) return `<div class="li na-row"><span class="grow"><b>${sn}</b><br><span class="muted small">이 전공 요람에는 없는 영역이에요</span></span><span class="pill gray">해당 없음</span></div>`; const n = A0.cr[a.id] || 0, left = a.must.filter(k => !d.includes(k)).length, ok = n >= a.need && !left; return `<button type="button" class="li" data-go="area" data-a="${a.id}">
         <span class="grow" style="display:flex;flex-direction:column;gap:6px"><span class="between"><b>${esc(a.n)} ${checkPill(a)}</b><span class="num small">${fmt(n)} / ${a.need}</span></span>${barHtml(n, n, a.need)}</span>
         ${ok ? '<span class="pill ok">✓ 충족</span>' : `<span class="pill bad">${n < a.need ? fmt(a.need - n) + '학점 남음' : left + '과목 남음'}</span>`}<span class="chev">›</span></button>`; }).join('')}</div>`).join('')}
     <div class="between"><div class="h2">공통 조건</div></div>
@@ -246,6 +246,15 @@ function vReq() {
   </div>`;
 }
 const U3 = () => ({ id: 'U3000', g: 'common', label: '3·4000단위', n: '3·4000단위', need: R.u3000, must: [], cat: [] });
+// 전공 영역은 항상 전공기초·전공필수·전공선택 세 칸을 기본으로 보여 주고, 학과 요람에 없는 칸은 '해당 없음'으로 둬요.
+const MAJ_SLOTS = [['전공기초', '전기'], ['전공필수', '전필'], ['전공선택', '전선']];
+function areaSlots(g) {
+  if (!g || !g.code) return g ? g.areas.map(a => ({ n: a.n, a })) : [];
+  const used = new Set();
+  const slots = MAJ_SLOTS.map(([n, c]) => { const a = g.areas.find(x => x.cat.join() === c); if (a) used.add(a.id); return { n, a: a || null }; });
+  if (!used.size) return g.areas.map(a => ({ n: a.n, a })); // 영역 구분 자체가 없는 학과는 그대로
+  return slots.concat(g.areas.filter(a => !used.has(a.id)).map(a => ({ n: a.n, a })));
+}
 function vArea(p) {
   const a = p.a === 'U3000' ? U3() : areaById(R, p.a);
   if (!a) return `${top('졸업요건')}<div class="scroll"><p class="note">이 영역을 찾을 수 없어요. 학적이 바뀌었을 수 있어요.</p></div>`;
@@ -386,7 +395,8 @@ function vAddPlan(p) {
   const fg = f !== 'all' ? groupOf(R, f) : null;
   const A1 = assign(R, pastCodes().concat(nowCodes())); // 수강 중 과목까지 이수로 보고 ✓ 표시
   const areaChip = (id, n, done) => `<button type="button" class="chip" data-act="addReq" data-req="${id}" aria-pressed="${req === id}">${esc(n)}${done ? ' ✓' : ''}</button>`;
-  const subChips = fg ? fg.areas.map(a => areaChip(a.id, a.n, (A1.cr[a.id] || 0) >= a.need && !a.must.some(k => !isTaken(k)))).join('')
+  const subChips = fg ? areaSlots(fg).map(({ n, a }) => a ? areaChip(a.id, n, (A1.cr[a.id] || 0) >= a.need && !a.must.some(k => !isTaken(k)))
+      : `<button type="button" class="chip na" disabled title="이 전공은 요람에 ${n} 요건이 없어요">${n} 해당 없음</button>`).join('')
     : R.u3000 ? areaChip('U3000', '3·4000단위', false) : '';
   const cr = sel.reduce((a, c) => a + CC(c).cr, 0);
   return `${top('계획 과목 추가')}<div class="scroll">
