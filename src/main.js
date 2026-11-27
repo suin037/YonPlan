@@ -151,7 +151,7 @@ function renderTabs() {
 }
 
 /* ---------- 공통 조각 ---------- */
-const top = (title, opt) => { opt = opt || {}; return `<header class="top ${opt.big ? 'big' : ''}">${opt.big ? '' : '<button type="button" class="back" data-act="back" aria-label="뒤로 가기">‹</button>'}<h1>${title}</h1>${opt.right || ''}</header>`; };
+const top = (title, opt) => { opt = opt || {}; return `<header class="top ${opt.big ? 'big' : ''}">${opt.big ? '' : `<button type="button" class="back" data-act="back" aria-label="뒤로 가기"><img src="${import.meta.env.BASE_URL}figma/back.svg" alt="" width="10" height="17"></button>`}<h1>${title}</h1>${opt.right || ''}</header>`; };
 const demoBar = () => S.mode === 'demo' ? `<div class="demo-bar"><span>예시 학생 데이터로 체험 중이에요</span><button type="button" data-act="demoEnd">체험 끝내기</button></div>` : '';
 const SETUP_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L1 9l11 6 9-4.9V17h2V9z"/><path d="M5 13.2V17c0 1.7 3.1 3 7 3s7-1.3 7-3v-3.8l-7 3.8z"/></svg>';
 const needSetup = (title, what) => `${top(title, { big: true })}<div class="scroll"><div class="empty"><div class="ico" aria-hidden="true">${SETUP_ICON}</div><div class="h3">학적 정보를 먼저 입력해 주세요</div><p class="note">입학 연도, 전공, 이수과정을 입력하면 내 기준으로 ${what}을(를) 보여 드려요.</p><button type="button" class="btn sm" data-go="setup">학적 정보 입력하기</button></div></div>`;
