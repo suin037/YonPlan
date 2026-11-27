@@ -610,7 +610,7 @@ body{letter-spacing:0}
 .f-tip-row+.f-tip-row{margin-top:-3px}
 .f-tip-row>span:first-child{font-size:15px;line-height:21px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .f-tip-none{font-size:12px!important;font-weight:500!important}
-.f-tag{flex:none;min-width:56px;height:16px;padding:0 6px;border-radius:120px;background:var(--sub);color:#fff;font-size:6px;line-height:16px;font-weight:500;text-align:center}
+.f-tag{flex:none;min-width:64px;height:20px;padding:0 8px;border-radius:120px;background:var(--sub);color:#fff;font-size:10px;line-height:20px;font-weight:500;text-align:center}
 .f-tag.warn{background:var(--warn)}
 /* 남은 화면도 같은 팔레트 */
 .pill.bad,.banner.bad>span{background:var(--warn);color:#fff}
