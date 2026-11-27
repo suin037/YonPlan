@@ -609,7 +609,7 @@ body{letter-spacing:0}
 .f-tip-row{display:flex;align-items:center;gap:8px;min-height:21px}
 .f-tip-row+.f-tip-row{margin-top:-3px}
 .f-tip-row>span:first-child{font-size:15px;line-height:21px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.f-tip-none{font-size:12px!important;font-weight:500!important}
+.f-tip-none{font-size:15px;line-height:21px;font-weight:700}
 .f-tag{flex:none;min-width:64px;height:20px;padding:0 8px;border-radius:120px;background:var(--sub);color:#fff;font-size:10px;line-height:20px;font-weight:500;text-align:center}
 .f-tag.warn{background:var(--warn)}
 /* 남은 화면도 같은 팔레트 */
