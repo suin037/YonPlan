@@ -204,7 +204,7 @@ function vHome() {
 }
 
 /* ---------- 화면: 졸업요건 ---------- */
-function vReq() {
+function vReq(p = {}) {
   if (!S.onboarded) return needSetup('졸업요건', '졸업요건');
   const d = pastCodes(), A0 = assign(R, d);
   const t = nowCodes(), dt = d.concat(t), A1 = assign(R, dt); // 이번 학기 수강 중(계획)까지 반영
@@ -214,11 +214,12 @@ function vReq() {
     : `<span class="pill bad">${n1 < need ? fmt(need - n1) + '학점 남음' : left1 + '과목 남음'}</span>`;
   const numTxt = (n, n1, need) => `${fmt(n)}${n1 > n ? ' → ' + fmt(n1) : ''} / ${need}`;
   const lack = Math.max(0, R.total - A0.total);
-  const unmet = R.ok ? allAreas(R).filter(a => (A0.cr[a.id] || 0) < a.need || a.must.some(k => !d.includes(k))).length : 0;
+  const unmetL = R.ok ? allAreas(R).filter(a => (A0.cr[a.id] || 0) < a.need || a.must.some(k => !d.includes(k))) : [], unmet = unmetL.length;
   const head = `<div class="card rq-head">
       <div class="rq-who"><span>${profileText(S.profile, '|').split('|').filter(x => !/학년/.test(x)).map(x => `<b>${esc(x.replace('(복수전공)', ''))}</b>`).join('<i>·</i>')}</span><button type="button" class="link" data-go="setup">학적 변경 ›</button></div>
       ${R.ok ? `<div class="rq-total"><div class="between"><span class="rq-l">졸업 학점</span><span class="rq-v num">${fmt(A0.total)}${A1.total > A0.total ? `<em>→${fmt(A1.total)}</em>` : ''}<small> / ${R.total}학점</small></span></div>${barHtml(A0.total, A1.total, R.total)}</div>
-      <div class="rq-stats"><div><span class="rq-l">부족 학점</span><span class="rq-v num">${fmt(lack)}<small>학점</small></span></div><div><span class="rq-l">미충족 영역</span><span class="rq-v num">${unmet}<small>개</small></span></div></div>` : ''}
+      <div class="rq-stats"><div><span class="rq-l">부족 학점</span><span class="rq-v num">${fmt(lack)}<small>학점</small></span></div><button type="button" class="rq-stat-btn" data-act="unmetInfo" aria-expanded="${!!p.unmet}"><span class="rq-l">못 채운 요건 <span class="rq-i" aria-hidden="true">ⓘ</span></span><span class="rq-v num">${unmet}<small>개 영역</small></span></button></div>
+      ${p.unmet ? `<div class="rq-explain"><p>졸업하려면 전공기초·전공필수·교양기초처럼 <b>영역마다</b> 정해진 학점과 필수 과목을 모두 채워야 해요. 지금까지 이수한 과목 기준으로 아직 다 채우지 못한 영역이에요.</p>${unmet ? `<div class="rq-tags">${unmetL.map(a => `<span>${esc(a.label)}</span>`).join('')}</div>` : ''}</div>` : ''}` : ''}
     </div>`;
   if (!R.ok) return `${top('졸업요건')}<div class="scroll">${head}${pendingCard(R)}<button type="button" class="link" data-go="source" style="align-self:flex-start">정보 출처 및 유의사항 ›</button></div>`;
   const mustLeft = [];
@@ -880,6 +881,7 @@ document.addEventListener('click', e => {
       delete p.draft.track; delete p.draft.second; rerender(); break;
     }
     case 'pushRoadmap': go('roadmap'); break;
+    case 'unmetInfo': p.unmet = !p.unmet; rerender(); break;
     case 'courseInfo': courseInfoSheet(t.dataset.c); break;
     case 'addToggle': { const k = t.dataset.c; p.sel = p.sel || []; p.sel = p.sel.includes(k) ? p.sel.filter(x => x !== k) : p.sel.concat(k); rerender(); break; }
     case 'addPlan': if (p.sel && p.sel.length) addPlans(p.sel, p.sem && futureSems().includes(p.sem) ? p.sem : futureSems()[0]); break;
