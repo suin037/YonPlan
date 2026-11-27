@@ -756,12 +756,3 @@ body{letter-spacing:0}
 .rq-tags{display:flex;flex-wrap:wrap;gap:6px}
 .rq-tags span{padding:3px 8px;border-radius:8px;background:rgba(239,98,98,.12);color:#C84848;font-size:12px;font-weight:600}
 .cinfo-note{margin-bottom:-6px;padding:8px 12px;border-radius:10px;background:var(--box2);color:#4B5568;font-size:12px;line-height:18px}
-
-/* ---------- 사용법 둘러보기(코치마크) ---------- */
-.tour{position:absolute;inset:0;z-index:60}
-.tour-hole{position:absolute;border-radius:16px;box-shadow:0 0 0 9999px rgba(10,20,50,.6);outline:2px solid #fff;transition:all .25s ease;pointer-events:none}
-.tour-tip{position:absolute;left:16px;right:16px;background:#fff;border-radius:18px;padding:16px 16px 12px;display:flex;flex-direction:column;gap:8px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-.tour-tip b{font-size:16px;font-weight:800}
-.tour-tip p{margin:0;font-size:13.5px;line-height:21px;color:var(--g700)}
-.tour-btns{display:flex;align-items:center;gap:8px;margin-top:4px}
-.tour-btns .btn.sm{height:38px;padding:0 16px;font-size:14px;border-radius:12px;width:auto;flex:none}
