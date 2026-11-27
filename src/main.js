@@ -154,15 +154,15 @@ function renderTabs() {
 const top = (title, opt) => { opt = opt || {}; return `<header class="top ${opt.big ? 'big' : ''}">${opt.big ? '' : `<button type="button" class="back" data-act="back" aria-label="뒤로 가기"><img src="${import.meta.env.BASE_URL}figma/back.svg" alt="" width="10" height="17"></button>`}<h1>${title}</h1>${opt.right || ''}</header>`; };
 const demoBar = () => S.mode === 'demo' ? `<div class="demo-bar"><span>예시 학생 데이터로 체험 중이에요</span><button type="button" data-act="demoEnd">체험 끝내기</button></div>` : '';
 const SETUP_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L1 9l11 6 9-4.9V17h2V9z"/><path d="M5 13.2V17c0 1.7 3.1 3 7 3s7-1.3 7-3v-3.8l-7 3.8z"/></svg>';
-const needSetup = (title, what) => `${top(title, { big: true })}<div class="scroll"><div class="empty"><div class="ico" aria-hidden="true">${SETUP_ICON}</div><div class="h3">학적 정보를 먼저 입력해 주세요</div><p class="note">입학 연도, 전공, 이수과정을 입력하면 내 기준으로 ${what}을(를) 보여 드려요.</p><button type="button" class="btn sm" data-go="setup">학적 정보 입력하기</button></div></div>`;
+const needSetup = (title, what) => `${top(title, { big: true })}<div class="scroll"><div class="empty"><div class="ico" aria-hidden="true">${SETUP_ICON}</div><div class="h3">학적 정보를 먼저 입력해 주세요</div><p class="note">입학 연도, 전공, 이수과정을 입력하면 내 기준으로 ${what}을(를) 보여 드립니다.</p><button type="button" class="btn sm" data-go="setup">학적 정보 입력하기</button></div></div>`;
 function barHtml(now, after, need) { if (!need) return ''; const a = Math.min(now, need) / need * 100, b = Math.max(0, Math.min(after, need) - Math.min(now, need)) / need * 100; return `<div class="bar" role="img" aria-label="${need}학점 중 ${fmt(now)}학점 이수, 수강 중·계획 반영 시 ${fmt(after)}학점"><i style="width:${a}%"></i><i class="plan" style="width:${b}%"></i></div>`; }
 const CAT_NAME = { 전기: '전공기초', 전필: '전공필수', 전선: '전공선택', 대교: '대학교양', 공기: '교양기초', 계기: '계열기초', 일반: '일반선택', RC: 'RC교육' };
 const checkPill = a => a && a.check ? '<span class="pill gray" title="학교 자료에서 확인 중인 항목">확인 중</span>' : '';
 function pendingCard(r) {
   const list = Object.keys(SUPPORTED).join(' · ');
-  const why = r.reason === 'cohort' ? `${S.profile.year}학번 졸업요건은 준비 중이에요. 지금은 2020~2026학번을 지원해요.`
-    : `${esc(S.profile.major)} 졸업요건은 준비 중이에요. 지금은 ${list} 전공을 지원해요.`;
-  return `<div class="card" style="display:flex;flex-direction:column;gap:8px"><div class="row"><span class="pill gray">준비 중</span><div class="h3">졸업요건 데이터를 준비하고 있어요</div></div><p class="note" style="margin:0">${why} 이수 과목 등록과 로드맵은 그대로 쓸 수 있어요.</p></div>`;
+  const why = r.reason === 'cohort' ? `${S.profile.year}학번 졸업요건은 준비 중입니다. 현재 2020~2026학번을 지원합니다.`
+    : `${esc(S.profile.major)} 졸업요건은 준비 중입니다. 현재 ${list} 전공을 지원합니다.`;
+  return `<div class="card" style="display:flex;flex-direction:column;gap:8px"><div class="row"><span class="pill gray">준비 중</span><div class="h3">졸업요건 데이터를 준비하고 있습니다</div></div><p class="note" style="margin:0">${why} 이수 과목 등록과 로드맵은 그대로 사용할 수 있습니다.</p></div>`;
 }
 
 /* ---------- 화면: 홈 ---------- */
@@ -170,7 +170,7 @@ function vHome() {
   if (!S.onboarded) {
     return `${top('홈', { big: true })}<div class="scroll">
       <div class="empty" style="padding-top:56px"><div class="brand lg" aria-label="Yon-Plan"><img src="${import.meta.env.BASE_URL}logo.svg" alt="" class="brand-mark"><img src="${import.meta.env.BASE_URL}wordmark.svg" alt="Yon-Plan" class="brand-word"></div><div class="h3" style="margin-top:12px">학적 정보를 먼저 입력해 주세요</div>
-      <p class="note" style="margin:0">입학 연도, 전공, 이수과정을 입력하고 들은 과목을 등록하면<br>졸업요건 이수율과 남은 과목을 정리해 드려요.</p>
+      <p class="note" style="margin:0">입학 연도, 전공, 이수과정을 입력하고 들은 과목을 등록하면<br>졸업요건 이수율과 남은 과목을 정리해 드립니다.</p>
       <button type="button" class="btn sm" data-go="setup">학적 정보 입력하기</button></div></div>`;
   }
   const d = pastCodes(), t = nowCodes();
@@ -219,7 +219,7 @@ function vReq(p = {}) {
       <div class="rq-who"><span>${profileText(S.profile, '|').split('|').filter(x => !/학년/.test(x)).map(x => `<b>${esc(x.replace('(복수전공)', ''))}</b>`).join('<i>·</i>')}</span><button type="button" class="link" data-go="setup">학적 변경 ›</button></div>
       ${R.ok ? `<div class="rq-total"><div class="between"><span class="rq-l">졸업 학점</span><span class="rq-v num">${fmt(A0.total)}${A1.total > A0.total ? `<em>→${fmt(A1.total)}</em>` : ''}<small> / ${R.total}학점</small></span></div>${barHtml(A0.total, A1.total, R.total)}</div>
       <div class="rq-stats"><div><span class="rq-l">부족 학점</span><span class="rq-v num">${fmt(lack)}<small>학점</small></span></div><button type="button" class="rq-stat-btn" data-act="unmetInfo" aria-expanded="${!!p.unmet}"><span class="rq-l">미충족 요건 <span class="rq-i" aria-hidden="true">ⓘ</span></span><span class="rq-v num">${unmet}<small>개 영역</small></span></button></div>
-      ${p.unmet ? `<div class="rq-explain"><p>졸업하려면 전공기초·전공필수·교양기초처럼 <b>영역마다</b> 정해진 학점과 필수 과목을 모두 채워야 해요. 지금까지 이수한 과목 기준으로 아직 다 채우지 못한 영역이에요.</p>${unmet ? `<div class="rq-tags">${unmetL.map(a => `<span>${esc(a.label)}</span>`).join('')}</div>` : ''}</div>` : ''}` : ''}
+      ${p.unmet ? `<div class="rq-explain"><p>졸업하려면 전공기초·전공필수·교양기초 등 <b>영역별로</b> 정해진 학점과 필수 과목을 모두 채워야 합니다. 지금까지 이수한 과목 기준으로 아직 채우지 못한 영역입니다.</p>${unmet ? `<div class="rq-tags">${unmetL.map(a => `<span>${esc(a.label)}</span>`).join('')}</div>` : ''}</div>` : ''}` : ''}
     </div>`;
   if (!R.ok) return `${top('졸업요건')}<div class="scroll">${head}${pendingCard(R)}<button type="button" class="link" data-go="source" style="align-self:flex-start">정보 출처 및 유의사항 ›</button></div>`;
   const mustLeft = [];
@@ -230,9 +230,9 @@ function vReq(p = {}) {
       <div class="h3">아직 듣지 않은 필수 과목</div>
       ${mustLeft.map(([a, k]) => { const st = statusOf(k); return `<button type="button" class="li" data-go="area" data-a="${a.id}"><span class="grow"><b>${esc(CC(k).n)}</b><br><span class="muted small">${esc(a.label)} · ${CC(k).cr}학점</span></span>${st ? badge(st) : '<span class="pill gray">미계획</span>'}<span class="chev">›</span></button>`; }).join('')}
     </div>` : ''}
-    ${R.groups.map(g => g.pending ? `<div class="between gh"><div class="h2">${esc(g.n)}</div><span class="pill gray">준비 중</span></div><div class="card"><p class="note" style="margin:0">${esc(g.n)} 요건은 준비 중이에요. 지금은 ${Object.keys(SUPPORTED).join(' · ')}을 지원해요.</p></div>`
+    ${R.groups.map(g => g.pending ? `<div class="between gh"><div class="h2">${esc(g.n)}</div><span class="pill gray">준비 중</span></div><div class="card"><p class="note" style="margin:0">${esc(g.n)} 요건은 준비 중입니다. 현재 ${Object.keys(SUPPORTED).join(' · ')}을 지원합니다.</p></div>`
       : `<div class="between gh"><div class="h2">${esc(g.n)}</div><span class="muted small num">${numTxt(A0.groupCr[g.k] || 0, A1.groupCr[g.k] || 0, g.need)}학점</span></div>
-      <div class="card" style="padding:4px 16px">${areaSlots(g).map(({ n: sn, a }) => { if (!a) return `<div class="li na-row"><span class="grow"><b>${sn}</b><br><span class="muted small">이 전공 요람에는 없는 영역이에요</span></span><span class="pill gray">해당 없음</span></div>`; const n = A0.cr[a.id] || 0, n1 = A1.cr[a.id] || 0, left = a.must.filter(k => !d.includes(k)).length, left1 = a.must.filter(k => !dt.includes(k)).length; return `<button type="button" class="li" data-go="area" data-a="${a.id}">
+      <div class="card" style="padding:4px 16px">${areaSlots(g).map(({ n: sn, a }) => { if (!a) return `<div class="li na-row"><span class="grow"><b>${sn}</b><br><span class="muted small">이 전공의 요람에는 없는 영역입니다.</span></span><span class="pill gray">해당 없음</span></div>`; const n = A0.cr[a.id] || 0, n1 = A1.cr[a.id] || 0, left = a.must.filter(k => !d.includes(k)).length, left1 = a.must.filter(k => !dt.includes(k)).length; return `<button type="button" class="li" data-go="area" data-a="${a.id}">
         <span class="grow" style="display:flex;flex-direction:column;gap:6px"><span class="between"><b>${esc(a.n)} ${checkPill(a)}</b><span class="num small">${numTxt(n, n1, a.need)}</span></span>${barHtml(n, n1, a.need)}</span>
         ${stPill(n, n1, a.need, left, left1)}<span class="chev">›</span></button>`; }).join('')}</div>`).join('')}
     <div class="between"><div class="h2">공통 조건</div></div>
@@ -255,18 +255,18 @@ const missItem = (go, t1, t2) => `<button type="button" class="f-miss-item" ${go
 function missList() {
   if (!R.ok) return [];
   const d = pastCodes(), t = nowCodes(), A0 = assign(R, d), out = [];
-  if (A0.u3 < R.u3000) out.push(missItem('data-go="area" data-a="U3000"', `3·4000단위 과목 ${R.u3000}학점 중 ${fmt(A0.u3)}학점 이수`, '전공·교양 구분 없이 인정 가능'));
+  if (A0.u3 < R.u3000) out.push(missItem('data-go="area" data-a="U3000"', `3·4000단위 과목 ${R.u3000}학점 중 ${fmt(A0.u3)}학점 이수`, '전공·교양 구분 없이 인정 가능합니다.'));
   allAreas(R).forEach(a => a.must.filter(k => !d.includes(k) && !t.includes(k) && !S.plan.some(x => x.c === k)).forEach(k => {
     const gName = (groupOf(R, a.g) || { n: '' }).n.split('(')[0];
-    out.push(missItem(`data-go="area" data-a="${a.id}"`, `${esc(gName)} ${esc(a.n)} '${esc(CC(k).n)}' 미이수`, offered(k) ? '이번 학기 수강 가능' : '로드맵에 계획을 담아 두세요'));
+    out.push(missItem(`data-go="area" data-a="${a.id}"`, `${esc(gName)} ${esc(a.n)} '${esc(CC(k).n)}' 미이수`, offered(k) ? '이번 학기 수강 가능합니다.' : '로드맵에 계획을 추가해야 합니다.'));
   }));
   return out;
 }
 function vMiss() {
   const list = missList();
   return `${top('놓치기 쉬운 항목')}<div class="scroll">
-    <p class="note" style="margin:0">필수로 이수해야 하는 과목·학점 중에서 아직 이수하지 않았고, 이번 학기 수강이나 로드맵 계획에도 없는 항목입니다. 누르면 해당 요건으로 이동합니다.</p>
-    ${list.length ? `<div class="f-miss f-miss-all">${list.join('')}</div>` : '<div class="card"><p class="note" style="margin:0">놓친 항목이 없어요. 필요한 과목이 모두 이수·수강 중이거나 계획에 들어 있어요.</p></div>'}
+    <p class="note" style="margin:0">필수로 이수해야 하는 과목·학점 중 아직 이수하지 않았고, 이번 학기 수강이나 로드맵 계획에도 없는 항목입니다. 항목을 누르면 해당 요건으로 이동합니다.</p>
+    ${list.length ? `<div class="f-miss f-miss-all">${list.join('')}</div>` : '<div class="card"><p class="note" style="margin:0">놓친 항목이 없습니다. 필요한 과목이 모두 이수·수강 중이거나 계획에 포함되어 있습니다.</p></div>'}
     <button type="button" class="btn weak" data-act="pushRoadmap">로드맵에서 계획 담기</button>
   </div>`;
 }
@@ -283,7 +283,7 @@ function courseInfoSheet(c, forSem) {
   const k = CC(c), secs = D.secByCode[c] || [], raw = D.courses[c] || [];
   const cat = raw[3], area = raw[4];
   const per = (vals, unit) => vals.length > 1 ? `${vals.join(' · ')} <span class="muted small">(분반마다 달라요)</span>` : (vals[0] || unit);
-  const none = `${NOW_TERM} 미개설이라 확인할 수 없어요`;
+  const none = `${NOW_TERM} 미개설로 확인할 수 없습니다.`;
   const langs = uniq(secs.map(x => LANG_NAME[x.lang] || x.lang));
   const modes = uniq(secs.map(sectionMode));
   const grades = uniq(secs.map(x => ({ 절대: '절대평가', 상대: '상대평가', 'P/NP': 'P/NP' })[x.grading] || x.grading));
@@ -300,14 +300,14 @@ function courseInfoSheet(c, forSem) {
   $layer.innerHTML = `<div class="dim" data-act="closeSheet"><div class="sheet cinfo" role="dialog" aria-modal="true" aria-labelledby="ciTitle">
     <div class="cinfo-grab" aria-hidden="true"></div>
     <div><div class="h2" id="ciTitle" style="margin:0">${esc(k.n)}</div><div class="muted small">${c} · ${k.cr}학점${C(c).u ? ' · ' + C(c).u + '단위' : ''}</div></div>
-    ${forSem && forSem !== NOW_TERM ? `<div class="cinfo-note">ⓘ ${NOW_TERM} 수강편람 기준 · 다음 학기엔 달라질 수 있어요</div>` : ''}
+    ${forSem && forSem !== NOW_TERM ? `<div class="cinfo-note">ⓘ ${NOW_TERM} 수강편람 기준이며, 다음 학기에는 달라질 수 있습니다.</div>` : ''}
     <dl class="cinfo-list">${rows.map(([a, b]) => `<div><dt>${a}</dt><dd>${b}</dd></div>`).join('')}</dl>
     <button type="button" class="btn weak" data-act="closeSheet">닫기</button>
   </div></div>`;
 }
 function vArea(p) {
   const a = p.a === 'U3000' ? U3() : areaById(R, p.a);
-  if (!a) return `${top('졸업요건')}<div class="scroll"><p class="note">이 영역을 찾을 수 없어요. 학적이 바뀌었을 수 있어요.</p></div>`;
+  if (!a) return `${top('졸업요건')}<div class="scroll"><p class="note">해당 영역을 찾을 수 없습니다. 학적 정보가 변경되었을 수 있습니다.</p></div>`;
   const d = pastCodes(), A0 = assign(R, d);
   const inArea = k => a.id === 'U3000' ? C(k).u >= 3000 : (A0.of[k] ? A0.of[k].id === a.id : false);
   const inAreaNew = k => a.id === 'U3000' ? C(k).u >= 3000 : ((areaOf(R, k) || {}).id === a.id);
@@ -318,14 +318,14 @@ function vArea(p) {
   const left = a.must.filter(k => !d.includes(k));
   const ok = n >= a.need && !left.length;
   const g = groupOf(R, a.g);
-  const rule = a.id === 'U3000' ? `3000·4000단위 과목을 전공·교양 구분 없이 ${a.need}학점 이상 이수해요.` : ruleText(a, R);
+  const rule = a.id === 'U3000' ? `3000·4000단위 과목을 전공·교양 구분 없이 ${a.need}학점 이상 이수해야 합니다.` : ruleText(a, R);
   return `${top((g ? g.n + ' · ' : '') + a.n)}<div class="scroll">
     <div class="card" style="display:flex;flex-direction:column;gap:8px">
       <div class="between"><span style="font-size:26px;font-weight:800" class="num bigval">${fmt(n)} / ${a.need}</span>${ok ? '<span class="pill ok">✓ 모두 이수했어요</span>' : `<span class="pill bad">${n < a.need ? fmt(a.need - n) + '학점 남음' : left.length + '과목 남음'}</span>`}</div>
       ${barHtml(n, n, a.need)}
     </div>
     <div><div class="h3">영역 규칙</div><p class="note" style="margin:4px 0 0">${esc(rule)}</p></div>
-    ${a.check ? `<div class="card" style="display:flex;flex-direction:column;gap:4px"><div class="row"><span class="pill gray">확인 중</span><b class="small">학교 자료에서 확인하고 있는 내용이에요</b></div><p class="note" style="margin:0">${esc(a.check)}</p></div>` : ''}
+    ${a.check ? `<div class="card" style="display:flex;flex-direction:column;gap:4px"><div class="row"><span class="pill gray">확인 중</span><b class="small">학교 자료에서 확인하고 있는 내용입니다</b></div><p class="note" style="margin:0">${esc(a.check)}</p></div>` : ''}
     ${left.length ? `<div class="card" style="display:flex;flex-direction:column;gap:8px;box-shadow:inset 0 0 0 1.5px var(--g900)"><div class="between"><div class="h3">남은 지정 과목</div><span class="muted small">${left.length}과목</span></div>
       ${left.map(k => { const st = statusOf(k); return `<div style="display:flex;flex-direction:column;gap:4px"><div class="between"><b>${esc(CC(k).n)}</b>${st ? badge(st) : '<span class="pill gray">미계획</span>'}</div><span class="muted small">${k} · ${CC(k).cr}학점 · ${D.secByCode[k] ? `${NOW_TERM} 개설 ${D.secByCode[k].length}개 분반` : `${NOW_TERM} 미개설`}</span></div>`; }).join('')}</div>` : ''}
     ${now.length ? `<div class="card" style="display:flex;flex-direction:column;gap:2px"><div class="h3">이번 학기 수강 중인 과목</div>${now.map(k => `<div class="li"><span class="grow"><b>${esc(CC(k).n)}</b><br><span class="muted small">${CC(k).cr}학점</span></span>${badge('now')}</div>`).join('')}</div>` : ''}
@@ -427,7 +427,7 @@ function groupFilter(f) {
 }
 function vAddPlan(p) {
   const fut = futureSems();
-  if (!fut.length) return `${top('계획 과목 추가')}<div class="scroll"><p class="note">목표 졸업 학기가 이번 학기라 계획할 다음 학기가 없어요. 내 정보에서 목표 졸업 학기를 바꿀 수 있어요.</p></div>`;
+  if (!fut.length) return `${top('계획 과목 추가')}<div class="scroll"><p class="note">목표 졸업 학기가 이번 학기여서 계획할 다음 학기가 없습니다. 내 정보에서 목표 졸업 학기를 변경할 수 있습니다.</p></div>`;
   const sem = p.sem && fut.includes(p.sem) ? p.sem : fut[0];
   const q = (p.q || '').trim(), sel = p.sel || [];
   const blocked = c => isTaken(c);
@@ -465,9 +465,9 @@ function vAddPlan(p) {
     <div style="display:flex;flex-direction:column;gap:8px">
     ${list.length ? list.map(c => {
       const pl = S.plan.find(x => x.c === c); const on = sel.includes(c); const pre = prereqInfo(c, sem); const a = areaOf(R, c); const isRec = recs().some(r => r.c === c);
-      return `<div class="opt-wrap"><button type="button" class="opt" role="checkbox" aria-checked="${on}" data-act="addToggle" data-c="${c}" ${pl ? 'disabled' : ''}><span class="check" aria-hidden="true">${on ? '✓' : ''}</span><span class="grow"><span class="between"><b>${esc(CC(c).n)}</b><span class="muted tiny opt-code">${c}</span></span><span class="muted small">${CC(c).cr}학점${C(c).u >= 3000 ? ' · 3000단위' : ''}${termTxt(c) ? ` · ${termTxt(c)}` : ''}</span>${fit(c) === 2 ? `<span class="small" style="color:var(--warn)">${smT}학기에는 열리지 않을 수 있어요</span>` : ''}
+      return `<div class="opt-wrap"><button type="button" class="opt" role="checkbox" aria-checked="${on}" data-act="addToggle" data-c="${c}" ${pl ? 'disabled' : ''}><span class="check" aria-hidden="true">${on ? '✓' : ''}</span><span class="grow"><span class="between"><b>${esc(CC(c).n)}</b><span class="muted tiny opt-code">${c}</span></span><span class="muted small">${CC(c).cr}학점${C(c).u >= 3000 ? ' · 3000단위' : ''}${termTxt(c) ? ` · ${termTxt(c)}` : ''}</span>${fit(c) === 2 ? `<span class="small" style="color:var(--warn)">${smT}학기에는 개설되지 않을 수 있습니다.</span>` : ''}
       <span class="tags">${pl ? `<span class="pill gray">이미 ${pl.sem} 계획에 있어요</span>` : isRec ? badge('rec') : ''}${a ? `<span class="pill ok">✓ ${esc(a.label)} 인정</span>` : '<span class="pill gray">일반선택</span>'}${pre.ok ? '' : '<span class="pill bad">! 선수과목 필요</span>'}</span></span></button><button type="button" class="opt-info" data-act="courseInfo" data-c="${c}" aria-label="${esc(CC(c).n)} 자세히 보기">ⓘ</button></div>`;
-    }).join('') : `<p class="note">${q ? '검색 결과가 없어요. 다른 이름으로 찾아보세요.' : reqA ? `${esc(reqA.label)}에서 더 담을 과목이 없어요. 남은 과목은 이미 이수했거나 이번 학기에 수강 중이에요.` : '담을 수 있는 과목이 없어요.'}</p>`}
+    }).join('') : `<p class="note">${q ? '검색 결과가 없습니다. 다른 이름으로 검색해 보세요.' : reqA ? `${esc(reqA.label)}에 더 추가할 과목이 없습니다. 남은 과목은 이미 이수했거나 이번 학기에 수강 중입니다.` : '추가할 수 있는 과목이 없습니다.'}</p>`}
     </div>
   </div>
   <div class="foot"><div class="sum">${sel.length ? `<b>${sel.map(c => esc(CC(c).n)).join(', ')}</b> · ${sel.length}과목 ${fmt(cr)}학점을 <b>${sem}</b>에 추가해요` : '추가할 과목을 골라 주세요'}</div>
@@ -478,8 +478,8 @@ function vAddPlan(p) {
 function vMe() {
   const pf = S.profile;
   const modeCard = S.mode === 'demo'
-    ? `<div class="card soft" style="display:flex;flex-direction:column;gap:10px"><div class="h3">예시 데이터로 체험 중이에요</div><p class="note" style="margin:0">체험 데이터는 내 정보와 따로 저장돼요. 체험을 끝내면 내 정보 화면으로 돌아가요.</p><button type="button" class="btn" data-act="demoEnd">체험 끝내기</button><button type="button" class="btn weak" data-act="demoReset">예시 데이터 처음 상태로 되돌리기</button></div>`
-    : S.mode === 'real' ? `<div class="card" style="display:flex;flex-direction:column;gap:10px"><div class="h3">먼저 둘러보고 싶다면</div><p class="note" style="margin:0">24학번 경제학 · 심리학 복수전공 학생의 예시 데이터로 모든 기능을 써 볼 수 있어요. 내 정보는 그대로 남아 있어요.</p><button type="button" class="btn weak" data-act="demo">예시 데이터로 체험하기</button></div>` : '';
+    ? `<div class="card soft" style="display:flex;flex-direction:column;gap:10px"><div class="h3">예시 데이터로 체험 중입니다</div><p class="note" style="margin:0">체험 데이터는 내 정보와 따로 저장되며, 체험을 끝내면 내 정보 화면으로 돌아갑니다.</p><button type="button" class="btn" data-act="demoEnd">체험 끝내기</button><button type="button" class="btn weak" data-act="demoReset">예시 데이터 처음 상태로 되돌리기</button></div>`
+    : S.mode === 'real' ? `<div class="card" style="display:flex;flex-direction:column;gap:10px"><div class="h3">먼저 둘러보고 싶다면</div><p class="note" style="margin:0">24학번 경제학 · 심리학 복수전공 학생의 예시 데이터로 모든 기능을 사용할 수 있습니다. 내 정보는 그대로 유지됩니다.</p><button type="button" class="btn weak" data-act="demo">예시 데이터로 체험하기</button></div>` : '';
   const B = import.meta.env.BASE_URL;
   const head = `<div class="f-me-top"><button type="button" class="f-me-back" data-tab="home" aria-label="홈으로"><img src="${B}figma/back.svg" alt="" width="10" height="17"></button><h1>내 정보</h1></div>`;
   if (!S.onboarded) return `<div class="scroll f-me">${head}
@@ -511,12 +511,12 @@ function vSource() {
   ];
   const notes = [
     '연플랜은 학교 공식 서비스가 아닙니다. 최종 졸업 판정은 학사지원팀과 학과 사무실 기준을 따릅니다.',
-    '‘확인 중’이 표시된 영역은 요람 원문만으로 확정하지 못한 부분입니다. 대학교양의 영역별 조건(필수 영역 등)은 아직 학점 합계로만 계산합니다.',
-    '입력한 정보는 로그인 없이 이 기기의 브라우저에만 저장됩니다. 런어스 캡처 사진도 이 기기 안에서만 글자를 읽으며, 서버로 보내지 않습니다.',
-    '런어스 과거강좌조회에는 수강철회·F 과목도 함께 나옵니다. 등록 전 확인 화면에서 빼 주세요.',
+    '‘확인 중’이 표시된 영역은 요람 원문만으로 확정하지 못한 부분입니다. 대학교양의 영역별 조건(필수 영역 등)은 현재 학점 합계로만 계산합니다.',
+    '입력한 정보는 로그인 없이 이 기기의 브라우저에만 저장됩니다. 런어스 캡처 사진도 이 기기 안에서만 읽으며, 서버로 보내지 않습니다.',
+    '런어스 과거강좌조회에는 수강철회·F 과목도 함께 표시됩니다. 등록 전 확인 화면에서 제외해 주세요.',
   ];
   return `${top('정보 출처 및 유의사항')}<div class="scroll">
-    ${S.mode === 'demo' ? `<div class="card soft" style="display:flex;flex-direction:column;gap:8px"><div class="h3">예시 데이터로 체험 중입니다</div><p class="note" style="margin:0">예시 학생(24학번, 경제학 1전공 · 심리학 2전공)의 학적과 이수 내역이 미리 들어 있습니다. 내 학적과 이수 과목으로 사용하려면 체험을 끝내고 내 정보를 입력해 주세요.</p></div>` : ''}
+    ${S.mode === 'demo' ? `<div class="card soft" style="display:flex;flex-direction:column;gap:8px"><div class="h3">예시 데이터로 체험 중입니다</div><p class="note" style="margin:0">예시 학생(24학번, 경제학 1전공 · 심리학 2전공)의 학적과 이수 내역이 미리 입력되어 있습니다. 본인 학적과 이수 과목으로 사용하려면 체험을 끝내고 내 정보를 입력해 주세요.</p></div>` : ''}
     <div class="card" style="display:flex;flex-direction:column;gap:10px">
       <div class="h3">데이터 출처</div>
       <dl class="src-list">${src.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl></div>
@@ -545,7 +545,7 @@ function tracksField(d) {
   const on = t => tr.some(x => x.t === t);
   return `<div class="field"><label>추가 이수과정 <span class="muted small" style="font-weight:400">여러 개 고를 수 있어요</span></label>
     <div class="chips track-chips" role="group" aria-label="추가 이수과정">${TRACK_TYPES.map(t => `<button type="button" class="chip" data-act="trackToggle" data-t="${t}" aria-pressed="${on(t)}">${t}</button>`).join('')}</div>
-    ${tr.length ? '' : '<span class="muted small">고르지 않으면 단일전공으로 계산해요</span>'}</div>
+    ${tr.length ? '' : '<span class="muted small">선택하지 않으면 단일전공으로 계산합니다.</span>'}</div>
     ${tr.map((x, i) => needsDept(x.t) ? `<div class="field"><label for="f-td${i}">${TRACK_DEPT_LABEL[x.t]}</label><select id="f-td${i}" data-tdept="${i}" class="${x.d ? '' : 'unset'}"><option value="" ${x.d ? '' : 'selected'} disabled>선택해 주세요</option>${trackDeptOptions(x.t, x.d, d.major)}</select></div>` : '').join('')}`;
 }
 function setupOptions(k, d) {
@@ -569,7 +569,7 @@ function gradField(d) {
   return `<div class="field"><label>목표 졸업 시기</label>
     <div class="row" style="gap:8px"><select id="f-gradG" data-field="gradG" class="${g ? '' : 'unset'}" style="flex:1" ${d.year ? '' : 'disabled'} aria-label="졸업 학년"><option value="" ${g ? '' : 'selected'} disabled>학년</option>${[1, 2, 3, 4, 5, 6].filter(ok).map(x => `<option value="${x}" ${String(x) === String(g) ? 'selected' : ''}>${x}학년</option>`).join('')}</select>
     <select id="f-gradS" data-field="gradS" class="${sm ? '' : 'unset'}" style="flex:1" ${d.year ? '' : 'disabled'} aria-label="졸업 학기"><option value="" ${sm ? '' : 'selected'} disabled>학기</option><option value="1" ${sm === '1' ? 'selected' : ''}>1학기</option><option value="2" ${sm === '2' ? 'selected' : ''}>2학기</option></select></div>
-    <span class="muted small">${!d.year ? '입학 연도를 먼저 골라 주세요' : res ? (res < NOW_TERM ? '이미 지난 학기예요. 다시 골라 주세요' : `${res.replace('-', '년 ')}학기에 졸업해요`) : '보통 4학년 2학기예요'}</span></div>`;
+    <span class="muted small">${!d.year ? '입학 연도를 먼저 선택해 주세요.' : res ? (res < NOW_TERM ? '이미 지난 학기입니다. 다시 선택해 주세요.' : `${res.replace('-', '년 ')}학기에 졸업합니다.`) : '보통 4학년 2학기에 졸업합니다.'}</span></div>`;
 }
 /* 홈 머리말용: "24학번 / 경제학 1전공 · 심리학 2전공(복수전공)" */
 function homeProfile(pf) {
@@ -591,10 +591,10 @@ function vSetup(p) {
   const unsupported = [d.major, ...tr.filter(x => ['복수전공', '부전공'].includes(x.t)).map(x => x.d)].filter(v => v && !SUPPORTED[v]);
   return `${top(onboarding ? '학적 정보 입력' : '학적 정보 수정')}<div class="scroll">
     ${onboarding ? '<div class="steps"><i class="on"></i><i></i><span>1 / 2</span></div>' : ''}
-    <div><div style="font-size:21px;font-weight:800">학적 정보를 입력해 주세요</div><div class="muted small">졸업요건은 입학 연도와 전공 기준으로 계산해요.</div></div>
+    <div><div style="font-size:21px;font-weight:800">학적 정보를 입력해 주세요</div><div class="muted small">졸업요건은 입학 연도와 전공을 기준으로 계산합니다.</div></div>
     <div class="field"><label for="f-name">이름 (선택)</label><input class="search" id="f-name" type="text" maxlength="12" placeholder="홈에서 부를 이름" value="${esc(p.name !== undefined ? p.name : S.name)}"></div>
     ${fields.map(([k, n]) => k === 'grad' ? gradField(d) : k === 'tracks' ? tracksField(d) : `<div class="field"><label for="f-${k}">${n}</label><select id="f-${k}" data-field="${k}" class="${d[k] ? '' : 'unset'}"><option value="" ${d[k] ? '' : 'selected'} disabled>선택해 주세요</option>${setupOptions(k, d)}</select></div>`).join('')}
-    ${unsupported.length ? `<div class="card" style="display:flex;flex-direction:column;gap:4px"><div class="row"><span class="pill gray">준비 중</span><b class="small">${unsupported.map(esc).join(', ')} 졸업요건은 준비 중이에요</b></div><p class="note" style="margin:0">학적은 그대로 저장돼요. 졸업요건은 지금 ${Object.keys(SUPPORTED).join(' · ')}만 계산하고, 이수 과목 등록과 로드맵은 모두 쓸 수 있어요.</p></div>` : ''}
+    ${unsupported.length ? `<div class="card" style="display:flex;flex-direction:column;gap:4px"><div class="row"><span class="pill gray">준비 중</span><b class="small">${unsupported.map(esc).join(', ')} 졸업요건은 준비 중입니다</b></div><p class="note" style="margin:0">학적은 그대로 저장됩니다. 졸업요건은 현재 ${Object.keys(SUPPORTED).join(' · ')}만 계산하며, 이수 과목 등록과 로드맵은 모두 사용할 수 있습니다.</p></div>` : ''}
   </div>
   <div class="foot"><div class="sum">${missing ? `${missing}개 항목을 더 골라 주세요` : '모두 입력했어요'}</div><button type="button" class="btn" data-act="setupNext" ${missing ? 'disabled' : ''}>${onboarding ? '다음' : '저장하기'}</button></div>`;
 }
@@ -606,10 +606,10 @@ function vRegister(p) {
   const manual = !!p.manual;
   return `${top(p.onboard ? '이수 과목 등록' : '이수 내역 관리')}<div class="scroll">
     ${p.onboard ? '<div class="steps"><i class="on"></i><i class="on"></i><span>2 / 2</span></div>' : ''}
-    <div><div style="font-size:21px;font-weight:800">${p.onboard ? '들은 과목을 등록해 주세요' : '등록한 과목'}</div><div class="muted small">런어스 '과거강좌조회' 화면을 캡처해 올리면 학기별로 한 번에 들어가요. ${NOW_TERM} 과목은 수강 중으로 들어가요.</div></div>
+    <div><div style="font-size:21px;font-weight:800">${p.onboard ? '들은 과목을 등록해 주세요' : '등록한 과목'}</div><div class="muted small">런어스 '과거강좌조회' 화면을 캡처해 올리면 학기별로 한 번에 등록됩니다. ${NOW_TERM} 과목은 수강 중으로 등록됩니다.</div></div>
     <div class="card soft" style="display:flex;flex-direction:column;gap:10px">
       <div class="h3">런어스 캡처로 등록하기</div>
-      <p class="note" style="margin:0">학기마다 한 장씩, 여러 장을 한 번에 올릴 수 있어요. 사진은 서버로 보내지 않고 이 기기 안에서만 읽습니다.</p>
+      <p class="note" style="margin:0">학기마다 한 장씩, 여러 장을 한 번에 올릴 수 있습니다. 사진은 서버로 보내지 않고 이 기기 안에서만 읽습니다.</p>
       <button type="button" class="btn" data-act="openGuide">캡처 방법 보고 사진 올리기</button>
     </div>
     ${bySem.length || other.length ? bySem.map(([s, l]) => `<div class="between"><div class="h3">${s.id} · ${s.g}</div><span class="muted small">${s.k === 'now' ? badge('now') : ''} ${l.length}과목 · ${fmt(sumCr(l.map(x => x.c)))}학점</span></div>
@@ -645,11 +645,11 @@ function manualAdd(p, sems) {
 /* 각 단계: 화면 전체(img)를 먼저 보여 주고 focus 영역으로 확대한 뒤 hi 영역을 강조해요.
    좌표는 그림 크기에 대한 비율 [x, y, 너비, 높이]예요. */
 const GUIDE = [
-  { t: '런어스에 로그인해요', d: '컴퓨터에서 런어스(ys.learnus.org)에 로그인하면 첫 화면에 "나의강좌"와 이번 학기 강좌가 보여요.', img: 'learnus-main.jpg', focus: [0, 0.02, 0.5, 0.5], hi: [0.02, 0.2, 0.12, 0.11] },
-  { t: '"과거강좌조회"를 눌러요', d: '"나의강좌" 제목 오른쪽 버튼 네 개 중 두 번째, "과거강좌조회"를 눌러요.', img: 'learnus-main.jpg', focus: [0.61, 0.17, 0.27, 0.15], hi: [0.682, 0.218, 0.095, 0.078] },
-  { t: '연도와 학기를 골라 검색해요', d: '"학위과정 조회" 화면에서 연도와 학기를 고르고 "검색"을 누르면 그 학기 강좌명과 학수번호가 표로 나와요. 1학년 1학기부터 이번 학기까지 차례로 해요.', img: 'learnus-past.jpg', focus: [0.2, 0.1, 0.34, 0.15], hi: [0.255, 0.145, 0.21, 0.09] },
-  { t: '표가 보이게 화면을 캡처해요', d: '강조한 표 전체가 들어가게 캡처해요. 윈도우는 Win + Shift + S, 맥은 Cmd + Shift + 4예요. 학기마다 한 장씩이에요.', img: 'learnus-past.jpg', focus: [0, 0.3, 0.6, 0.66], hi: [0.012, 0.345, 0.975, 0.625], keys: true, tips: ['강좌명 옆 학수번호(예: ABC1234.01-00)가 잘리지 않게', '휴대폰으로 모니터를 찍으면 잘 안 읽혀요', '글자가 작으면 화면을 확대한 뒤 캡처'] },
-  { t: '캡처를 올리고 확인해요', d: '여러 장을 한 번에 올릴 수 있어요. 이렇게 읽은 과목이 학기별로 나오면, 수강철회했거나 F를 받은 과목은 체크를 풀고 등록해요.', img: 'app-check.jpg', focus: [0, 0.4, 1, 0.33], hi: [0.04, 0.527, 0.92, 0.104], tips: ['사진은 서버로 보내지 않고 이 기기 안에서만 읽습니다', '처음 한 번 인식 엔진(약 7MB)을 내려받습니다'] }
+  { t: '런어스에 로그인해요', d: '컴퓨터에서 런어스(ys.learnus.org)에 로그인하면 첫 화면에 "나의강좌"와 이번 학기 강좌가 표시됩니다.', img: 'learnus-main.jpg', focus: [0, 0.02, 0.5, 0.5], hi: [0.02, 0.2, 0.12, 0.11] },
+  { t: '"과거강좌조회"를 눌러요', d: '"나의강좌" 제목 오른쪽 버튼 네 개 중 두 번째인 "과거강좌조회"를 누릅니다.', img: 'learnus-main.jpg', focus: [0.61, 0.17, 0.27, 0.15], hi: [0.682, 0.218, 0.095, 0.078] },
+  { t: '연도와 학기를 골라 검색해요', d: '"학위과정 조회" 화면에서 연도와 학기를 선택하고 "검색"을 누르면 해당 학기의 강좌명과 학수번호가 표로 나옵니다. 1학년 1학기부터 이번 학기까지 차례로 진행합니다.', img: 'learnus-past.jpg', focus: [0.2, 0.1, 0.34, 0.15], hi: [0.255, 0.145, 0.21, 0.09] },
+  { t: '표가 보이게 화면을 캡처해요', d: '강조한 표 전체가 들어가도록 캡처합니다. 윈도우는 Win + Shift + S, 맥은 Cmd + Shift + 4입니다. 학기마다 한 장씩 캡처합니다.', img: 'learnus-past.jpg', focus: [0, 0.3, 0.6, 0.66], hi: [0.012, 0.345, 0.975, 0.625], keys: true, tips: ['강좌명 옆 학수번호(예: ABC1234.01-00)가 잘리지 않아야 합니다.', '휴대폰으로 모니터를 찍으면 잘 인식되지 않습니다.', '글자가 작으면 화면을 확대한 뒤 캡처합니다.'] },
+  { t: '캡처를 올리고 확인해요', d: '여러 장을 한 번에 올릴 수 있습니다. 인식한 과목이 학기별로 표시되면, 수강철회했거나 F를 받은 과목은 체크를 해제하고 등록합니다.', img: 'app-check.jpg', focus: [0, 0.4, 1, 0.33], hi: [0.04, 0.527, 0.92, 0.104], tips: ['사진은 서버로 보내지 않고 이 기기 안에서만 읽습니다.', '처음 한 번 인식 엔진(약 7MB)을 내려받습니다.'] }
 ];
 function guideArt(i) {
   const g = GUIDE[i], src = import.meta.env.BASE_URL + 'guide/' + g.img;
@@ -706,7 +706,7 @@ function ocrAddBlock(p, sems, order) {
     <div class="field"><label for="oSem">들은 학기</label><select id="oSem">${sems.map(s => `<option value="${s}" ${s === def ? 'selected' : ''}>${semLabel(s)}${s === NOW_TERM ? ' (수강 중)' : ''}</option>`).join('')}</select></div>
     <input class="search" id="oQ" type="search" placeholder="과목명 또는 학수번호 (예: 기독교와세계문화, YCA1101)" value="${esc(q)}" aria-label="빠진 과목 검색">
     ${q ? (list.length ? `<div style="display:flex;flex-direction:column;gap:6px">${list.map(c => `<button type="button" class="opt" data-act="ocrAddPick" data-c="${c}" data-sem="${def}"><span class="grow"><span class="between"><b>${esc(CC(c).n)}</b><span class="muted tiny">${c}</span></span><span class="muted small">${CC(c).cr}학점 · ${esc(areaLabel(c))}</span></span><span class="pill info">+ 추가</span></button>`).join('')}</div>`
-      : /^[A-Za-z]{3}\d{4}$/.test(q) ? `<button type="button" class="opt" data-act="ocrAddPick" data-c="${q.toUpperCase()}" data-sem="${def}"><span class="grow"><b>${esc(q.toUpperCase())}</b><span class="muted small">데이터에 없는 학수번호예요. 추가한 뒤 이름과 학점을 적어 주세요.</span></span><span class="pill info">+ 추가</span></button>` : '<p class="note" style="margin:0">검색 결과가 없어요. 학수번호 7자리(예: YCA1101)로도 찾아보세요.</p>') : ''}
+      : /^[A-Za-z]{3}\d{4}$/.test(q) ? `<button type="button" class="opt" data-act="ocrAddPick" data-c="${q.toUpperCase()}" data-sem="${def}"><span class="grow"><b>${esc(q.toUpperCase())}</b><span class="muted small">데이터에 없는 학수번호입니다. 추가한 뒤 과목명과 학점을 입력해 주세요.</span></span><span class="pill info">+ 추가</span></button>` : '<p class="note" style="margin:0">검색 결과가 없습니다. 학수번호 7자리(예: YCA1101)로도 검색할 수 있습니다.</p>') : ''}
   </div>`;
 }
 
@@ -721,21 +721,21 @@ function vOcr(p) {
   const order = Object.keys(groups).sort();
   return `${top('캡처 읽기')}<div class="scroll">
     <div class="ocr-thumbs">${items.filter(im => !im.manual).map((im, i) => `<div class="ocr-thumb"><img src="${im.url}" alt="올린 캡처 ${i + 1}"><span>${im.state === 'done' ? `✓ ${im.rows.length}과목` : im.state === 'err' ? '! 읽지 못함' : im.state === 'run' ? `읽는 중 ${Math.round((im.prog || 0) * 100)}%` : '대기'}</span></div>`).join('')}</div>
-    ${busy ? `<div class="banner ok"><span aria-hidden="true">…</span><div><b>캡처를 읽고 있어요</b><p>${p.status || '처음에는 인식 엔진을 내려받느라 조금 걸려요.'}</p></div></div>` : ''}
-    ${!busy && !rows.length && items.some(im => !im.manual) ? `<div class="banner bad"><span>!</span><div><b>학수번호를 찾지 못했어요</b><p>표의 "강좌명 (ABC1234.01-00)" 부분이 잘리지 않게 다시 캡처해 주세요. 직접 찾아서 추가할 수도 있어요.</p></div></div>` : ''}
-    ${rows.length ? `<div class="card soft"><b>읽은 과목을 확인해 주세요</b><p class="note" style="margin:4px 0 0">과거강좌조회에는 수강철회했거나 F를 받은 과목도 나와요. 이런 과목은 체크를 풀어 주세요. 학기가 틀리면 학기를 바꿔 주세요.</p></div>` : ''}
-    ${order.map(sem => `<div class="between"><div class="field" style="flex:1"><label>${sem === '?' ? '학기를 읽지 못했어요. 골라 주세요' : '학기'}</label>
+    ${busy ? `<div class="banner ok"><span aria-hidden="true">…</span><div><b>캡처를 읽고 있어요</b><p>${p.status || '처음에는 인식 엔진을 내려받느라 시간이 걸립니다.'}</p></div></div>` : ''}
+    ${!busy && !rows.length && items.some(im => !im.manual) ? `<div class="banner bad"><span>!</span><div><b>학수번호를 찾지 못했습니다</b><p>표의 "강좌명 (ABC1234.01-00)" 부분이 잘리지 않게 다시 캡처해 주세요. 직접 검색해서 추가할 수도 있습니다.</p></div></div>` : ''}
+    ${rows.length ? `<div class="card soft"><b>인식한 과목을 확인해 주세요</b><p class="note" style="margin:4px 0 0">과거강좌조회에는 수강철회했거나 F를 받은 과목도 표시되므로 해당 과목은 체크를 해제해 주세요. 학기가 다르면 학기를 변경해 주세요.</p></div>` : ''}
+    ${order.map(sem => `<div class="between"><div class="field" style="flex:1"><label>${sem === '?' ? '학기를 인식하지 못했습니다. 학기를 선택해 주세요.' : '학기'}</label>
       <select data-ocrsem="${sem}"><option value="" ${sem === '?' ? 'selected' : ''} disabled>학기 선택</option>${sems.map(s => `<option value="${s}" ${s === sem ? 'selected' : ''}>${semLabel(s)}${s === NOW_TERM ? ' (수강 중)' : ''}</option>`).join('')}${sem !== '?' && !sems.includes(sem) ? `<option value="${sem}" selected>${sem} (입학 연도 밖)</option>` : ''}</select></div></div>
       <div style="display:flex;flex-direction:column;gap:8px">${groups[sem].map(r => {
         const dup = isTaken(r.code);
         return `<div class="opt ocr-row" role="checkbox" aria-checked="${r.on}" data-act="ocrToggle" data-ii="${r.ii}" data-ri="${r.ri}" tabindex="0"><span class="check" aria-hidden="true">${r.on ? '✓' : ''}</span><span class="grow">
           ${known(r) ? `<span class="between"><b>${esc(C(r.code).n)}</b><span class="muted tiny">${r.code}</span></span><span class="muted small">${C(r.code).cr}학점 · ${esc(areaLabel(r.code))}</span>`
-            : `<span class="between"><b>${r.code}</b><span class="pill gray">데이터에 없는 과목</span></span><span class="ocr-edit"><input type="text" data-ocrname="${r.ii}-${r.ri}" placeholder="과목명" value="${esc(r.name || '')}" aria-label="과목명"><input type="number" min="0" max="12" step="0.5" data-ocrcr="${r.ii}-${r.ri}" value="${r.cr || 3}" aria-label="학점"><span class="muted small">학점</span></span><span class="muted tiny">학수번호를 잘못 읽었다면 체크를 풀고 직접 추가해 주세요.</span>`}
-          ${dup ? `<span class="muted tiny">이미 ${semOf(r.code)}에 등록돼 있어요. 등록하면 학기가 바뀌어요.</span>` : ''}</span></div>`;
+            : `<span class="between"><b>${r.code}</b><span class="pill gray">데이터에 없는 과목</span></span><span class="ocr-edit"><input type="text" data-ocrname="${r.ii}-${r.ri}" placeholder="과목명" value="${esc(r.name || '')}" aria-label="과목명"><input type="number" min="0" max="12" step="0.5" data-ocrcr="${r.ii}-${r.ri}" value="${r.cr || 3}" aria-label="학점"><span class="muted small">학점</span></span><span class="muted tiny">학수번호를 잘못 인식했다면 체크를 해제하고 직접 추가해 주세요.</span>`}
+          ${dup ? `<span class="muted tiny">이미 ${semOf(r.code)}에 등록된 과목입니다. 등록하면 학기가 변경됩니다.</span>` : ''}</span></div>`;
       }).join('')}</div>`).join('')}
     ${busy ? '' : ocrAddBlock(p, sems, order)}
   </div>
-  <div class="foot">${rows.length ? `<div class="sum">${picked.length ? `<b>${picked.length}과목</b>을 등록해요${rows.some(r => r.on && !r.sem) ? ' · 학기를 고르지 않은 과목은 빠져요' : ''}` : '등록할 과목을 골라 주세요'}</div>` : ''}
+  <div class="foot">${rows.length ? `<div class="sum">${picked.length ? `<b>${picked.length}과목</b>을 등록해요${rows.some(r => r.on && !r.sem) ? ' · 학기를 선택하지 않은 과목은 제외됩니다.' : ''}` : '등록할 과목을 골라 주세요'}</div>` : ''}
     ${rows.length ? `<button type="button" class="btn" data-act="ocrSave" ${picked.length && !busy ? '' : 'disabled'}>${picked.length}과목 등록하기</button>` : ''}
     <button type="button" class="btn weak" data-act="pickImages">${items.length ? '캡처 더 올리기' : '캡처 사진 고르기'}</button></div>`;
 }
@@ -765,10 +765,10 @@ function welcome() {
   $layer.innerHTML = `<div class="dim center"><div class="sheet modal" role="dialog" aria-modal="true" aria-labelledby="wTitle">
     <div class="brand wbrand" aria-label="Yon-Plan"><img src="${import.meta.env.BASE_URL}logo.svg" alt="" class="brand-mark"><img src="${import.meta.env.BASE_URL}wordmark.svg" alt="Yon-Plan" class="brand-word"></div>
     <div class="h2" id="wTitle" style="margin:0">연플랜에 오신 걸 환영해요</div>
-    <p class="note" style="margin:0">내 졸업요건과 학기별 로드맵을 한 곳에서 관리해요. 어떻게 시작할까요?</p>
-    <button type="button" class="opt" data-act="startReal"><span class="grow"><b>처음부터 시작하기</b><span class="muted small">내 학적을 입력하고, 런어스 캡처로 들은 과목을 등록해요.</span></span><span class="chev">›</span></button>
-    <button type="button" class="opt" data-act="demo"><span class="grow"><b>예시 데이터로 체험하기</b><span class="muted small">24학번 경제학 · 심리학 복수전공 학생 데이터가 채워진 상태로 둘러봐요. 체험 데이터는 따로 저장돼요.</span></span><span class="chev">›</span></button>
-    <p class="note" style="margin:0">로그인 없이 이 기기의 브라우저에만 저장돼요.</p>
+    <p class="note" style="margin:0">졸업요건과 학기별 로드맵을 한 곳에서 관리합니다. 시작 방법을 선택해 주세요.</p>
+    <button type="button" class="opt" data-act="startReal"><span class="grow"><b>처음부터 시작하기</b><span class="muted small">학적을 입력하고, 런어스 캡처로 들은 과목을 등록합니다.</span></span><span class="chev">›</span></button>
+    <button type="button" class="opt" data-act="demo"><span class="grow"><b>예시 데이터로 체험하기</b><span class="muted small">24학번 경제학 · 심리학 복수전공 학생의 데이터로 둘러봅니다. 체험 데이터는 따로 저장됩니다.</span></span><span class="chev">›</span></button>
+    <p class="note" style="margin:0">로그인 없이 이 기기의 브라우저에만 저장됩니다.</p>
   </div></div>`;
 }
 
@@ -790,7 +790,7 @@ $file.addEventListener('change', async () => {
     try {
       const res = await readImage(im.file, (status, prog) => {
         im.prog = status === 'recognizing text' ? prog : 0;
-        p.status = status === 'recognizing text' ? '글자를 읽고 있어요.' : '인식 엔진을 준비하고 있어요. 처음 한 번만 조금 걸려요.';
+        p.status = status === 'recognizing text' ? '글자를 읽고 있습니다.' : '인식 엔진을 준비하고 있습니다. 처음 한 번만 시간이 걸립니다.';
         const el = document.querySelector(`.ocr-thumb img[src="${im.url}"] + span`); if (el) el.textContent = `읽는 중 ${Math.round((im.prog || 0) * 100)}%`;
       });
       im.rows = res.rows.map(r => {
@@ -804,7 +804,7 @@ $file.addEventListener('change', async () => {
     }
     if (cur().p === p) rerender();
   }
-  if (cur().p === p) { const n = p.items.reduce((a, x) => a + x.rows.length, 0); toast(n ? `캡처에서 ${n}과목을 읽었어요. 확인해 주세요` : '학수번호를 찾지 못했어요'); }
+  if (cur().p === p) { const n = p.items.reduce((a, x) => a + x.rows.length, 0); toast(n ? `캡처에서 ${n}과목을 인식했습니다. 확인해 주세요.` : '학수번호를 찾지 못했어요'); }
 });
 
 /* 데이터에 없는 학수번호는 헷갈리기 쉬운 글자를 한 자씩 바꿔 보고, 딱 하나 맞으면 그걸로 고쳐요 */
@@ -862,10 +862,10 @@ document.addEventListener('click', e => {
     case 'back': back(); break;
     case 'closeSheet': if (e.target === t || t.tagName === 'BUTTON') closeSheet(); break;
     case 'startReal': startMode('real', { go: store.get(KEY.real) && store.get(KEY.real).onboarded ? 'home' : 'setup' }); break;
-    case 'demo': startMode('demo'); toast('예시 데이터로 체험을 시작했어요'); break;
-    case 'demoReset': startMode('demo', { reset: true, go: 'me' }); toast('예시 데이터를 처음 상태로 되돌렸어요'); break;
-    case 'demoEnd': startMode('real', { go: 'me' }); toast('체험을 끝냈어요'); break;
-    case 'wipe': if (window.confirm('이 기기에 저장된 내 학적, 이수 과목, 계획을 모두 지울까요? 되돌릴 수 없어요.')) { store.del(KEY.real); startMode('real', { reset: true }); toast('저장된 내 정보를 지웠어요'); } break;
+    case 'demo': startMode('demo'); toast('예시 데이터로 체험을 시작합니다.'); break;
+    case 'demoReset': startMode('demo', { reset: true, go: 'me' }); toast('예시 데이터를 처음 상태로 되돌렸습니다.'); break;
+    case 'demoEnd': startMode('real', { go: 'me' }); toast('체험을 종료했습니다.'); break;
+    case 'wipe': if (window.confirm('이 기기에 저장된 학적, 이수 과목, 계획을 모두 삭제하시겠습니까? 되돌릴 수 없습니다.')) { store.del(KEY.real); startMode('real', { reset: true }); toast('저장된 내 정보를 삭제했습니다.'); } break;
     case 'toggleSem': S.open[t.dataset.sem] = t.dataset.open !== 'true'; rerender(); break;
     case 'rmFilter': S.rmFilter = t.dataset.f; rerender(); break;
     case 'togglePre': S.showPre = !S.showPre; rerender(); break;
@@ -886,12 +886,12 @@ document.addEventListener('click', e => {
     case 'courseInfo': courseInfoSheet(t.dataset.c, p.sem && futureSems().includes(p.sem) ? p.sem : futureSems()[0]); break;
     case 'addToggle': { const k = t.dataset.c; p.sel = p.sel || []; p.sel = p.sel.includes(k) ? p.sel.filter(x => x !== k) : p.sel.concat(k); rerender(); break; }
     case 'addPlan': if (p.sel && p.sel.length) addPlans(p.sel, p.sem && futureSems().includes(p.sem) ? p.sem : futureSems()[0]); break;
-    case 'removePlan': { const k = t.dataset.c; const old = S.plan.find(x => x.c === k); S.plan = S.plan.filter(x => x.c !== k); rerender(); toast(`${esc(CC(k).n)}을(를) 계획에서 뺐어요`, { t: '되돌리기', fn: () => { S.plan.push(old); rerender(); } }); break; }
+    case 'removePlan': { const k = t.dataset.c; const old = S.plan.find(x => x.c === k); S.plan = S.plan.filter(x => x.c !== k); rerender(); toast(`${esc(CC(k).n)}을(를) 계획에서 제외했습니다.`, { t: '되돌리기', fn: () => { S.plan.push(old); rerender(); } }); break; }
     case 'setupNext': {
       const d = Object.assign({}, p.draft || S.profile); d.tracks = tracksOf(d).filter(x => !needsDept(x.t) || x.d); delete d.track; delete d.second; delete d.gradG; delete d.gradS;
       const nm = document.getElementById('f-name'); S.name = nm ? nm.value.trim() : S.name;
       S.profile = d;
-      if (!S.onboarded) { S.onboarded = true; S.stack = [{ s: 'register', p: { onboard: true } }, { s: 'guide', p: { i: 0 } }]; render(0); } else { back(); toast('학적 정보를 저장했어요'); }
+      if (!S.onboarded) { S.onboarded = true; S.stack = [{ s: 'register', p: { onboard: true } }, { s: 'guide', p: { i: 0 } }]; render(0); } else { back(); toast('학적 정보를 저장했습니다.'); }
       break;
     }
     case 'manualToggle': p.manual = !p.manual; rerender(); break;
@@ -905,7 +905,7 @@ document.addEventListener('click', e => {
       toast(`${sem}에 ${sel.length}과목을 등록했어요`, { t: '되돌리기', fn: () => { S.taken = S.taken.filter(x => !(sel.includes(x.c) && x.sem === sem)); rerender(); } }); break;
     }
     case 'regRemove': { const k = t.dataset.c; const old = S.taken.find(x => x.c === k); S.taken = S.taken.filter(x => x.c !== k); rerender(); toast(`${esc(CC(k).n)}을(를) 이수 내역에서 뺐어요`, { t: '되돌리기', fn: () => { S.taken.push(old); rerender(); } }); break; }
-    case 'regFinish': if (p.onboard) { S.stack = [{ s: 'home' }]; render(0); toast(S.taken.length ? `${S.taken.length}과목을 바탕으로 졸업요건을 정리했어요` : '들은 과목은 내 정보에서 언제든 등록할 수 있어요'); } else back(); break;
+    case 'regFinish': if (p.onboard) { S.stack = [{ s: 'home' }]; render(0); toast(S.taken.length ? `${S.taken.length}과목을 기준으로 졸업요건을 정리했습니다.` : '들은 과목은 내 정보에서 언제든 등록할 수 있습니다.'); } else back(); break;
     case 'openGuide': go('guide', { i: 0 }); break;
     case 'guideReplay': animateGuide(); break;
     case 'guideNext': p.i = (p.i || 0) + 1; render(0); break;
@@ -972,12 +972,12 @@ document.addEventListener('input', e => {
 document.addEventListener('compositionend', e => { const el = e.target; if (['addQ', 'rQ'].includes(el.id)) { cur().p.q = el.value; rerender(); } if (el.id === 'oQ') { cur().p.oq = el.value; rerender(); } });
 
 /* ---------- 시작 ---------- */
-$screen.innerHTML = `<div class="empty" style="padding-top:160px"><div class="brand lg" aria-label="Yon-Plan"><img src="${import.meta.env.BASE_URL}logo.svg" alt="" class="brand-mark"><img src="${import.meta.env.BASE_URL}wordmark.svg" alt="Yon-Plan" class="brand-word"></div><p class="note">과목과 졸업요건 데이터를 불러오는 중이에요…</p></div>`;
+$screen.innerHTML = `<div class="empty" style="padding-top:160px"><div class="brand lg" aria-label="Yon-Plan"><img src="${import.meta.env.BASE_URL}logo.svg" alt="" class="brand-mark"><img src="${import.meta.env.BASE_URL}wordmark.svg" alt="Yon-Plan" class="brand-word"></div><p class="note">과목과 졸업요건 데이터를 불러오고 있습니다…</p></div>`;
 loadData().then(() => {
   const mode = store.get(KEY.mode);
   if (UT_MODE) { S = withUi(null, 'ut'); render(0); return; }
   if (mode === 'demo' || mode === 'real') { S = withUi(store.get(KEY[mode]), mode); render(0); return; }
   S = withUi(null, 'new'); render(0); welcome();
 }).catch(err => {
-  $screen.innerHTML = `<div class="empty" style="padding-top:120px"><div class="h3">데이터를 불러오지 못했어요</div><p class="note">네트워크를 확인하고 새로고침해 주세요. (${esc(err.message)})</p></div>`;
+  $screen.innerHTML = `<div class="empty" style="padding-top:120px"><div class="h3">데이터를 불러오지 못했습니다</div><p class="note">네트워크를 확인하고 새로고침해 주세요. (${esc(err.message)})</p></div>`;
 });

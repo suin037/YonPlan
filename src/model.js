@@ -108,12 +108,12 @@ export const allAreas = R => R.groups.flatMap(g => g.areas);
 export function ruleText(a, R) {
   const g = groupOf(R, a.g);
   const names = a.must.map(k => C(k).n).join(', ');
-  if (a.kind === 'BASIC') return `채플, 기독교의이해, 글쓰기 같은 교양기초 과목을 ${a.need}학점 이상 이수해요.`;
-  if (a.kind === 'GE') return `대학교양 과목을 ${a.need}학점 이상 이수해요. 필수 영역과 영역별 학점은 학과마다 달라서 요람에서 함께 확인해 주세요.`;
-  if (a.kind === 'RC') return `RC 교육 과목을 ${a.need}학점 이수해요.`;
-  if (a.all) return `지정 과목 ${a.must.length}개(${names})를 모두 이수해요.`;
+  if (a.kind === 'BASIC') return `채플, 기독교의이해, 글쓰기 같은 교양기초 과목을 ${a.need}학점 이상 이수해야 합니다.`;
+  if (a.kind === 'GE') return `대학교양 과목을 ${a.need}학점 이상 이수해야 합니다. 필수 영역과 영역별 학점은 학과마다 다르므로 요람에서 함께 확인해야 합니다.`;
+  if (a.kind === 'RC') return `RC 교육 과목을 ${a.need}학점 이수해야 합니다.`;
+  if (a.all) return `지정 과목 ${a.must.length}개(${names})를 모두 이수해야 합니다.`;
   const cat = a.cat.map(x => KIND_LABEL[x] || x).join('·');
-  return `${g ? g.n.split('(')[0] : ''} ${cat} 과목 중 ${a.need}학점 이상 이수해요.${a.must.length ? ` 지정 과목(${names})은 꼭 들어야 해요.` : ''}`;
+  return `${g ? g.n.split('(')[0] : ''} ${cat} 과목 중 ${a.need}학점 이상 이수해야 합니다.${a.must.length ? ` 지정 과목(${names})은 반드시 수강해야 합니다.` : ''}`;
 }
 
 /* ---------- 학기 ---------- */
