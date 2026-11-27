@@ -830,10 +830,8 @@ function addPlans(codes, sem) {
 }
 function startUT(n) {
   closeSheet();
-  // 2차 UT: T1·T2 = 복수전공 신청 전(경제학 단일전공, 같은 이수 내역), T3~T5 = 심리학 복수전공을 더한 뒤
-  const d = demoFresh();
-  if (n <= 2) { d.profile = { ...d.profile, tracks: [] }; d.plan = []; }
-  S = withUi(d, 'ut');
+  // 2차 UT: 모든 태스크를 같은 예시 데이터(경제학 1전공 + 심리학 복수전공)에서 시작
+  S = withUi(demoFresh(), 'ut');
   render(0);
   toast(`T${n} 시작 상태로 맞췄습니다.`);
 }
