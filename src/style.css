@@ -735,3 +735,16 @@ body{letter-spacing:0}
 .f-sem-t{display:flex;align-items:center;gap:8px;white-space:nowrap}
 .f-sem-y{font-size:13px;line-height:18px;font-weight:500;color:rgba(0,0,0,.5)}
 .f-sem-now{height:20px;padding:0 8px;border-radius:10px;background:var(--main);color:#fff;font-size:11px;line-height:20px;font-weight:700}
+/* 졸업요건 상단 요약 카드 */
+.card.rq-head{display:flex;flex-direction:column;gap:14px}
+.rq-who{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;font-size:14px;line-height:20px;font-weight:700;color:#111827}
+.rq-who i{font-style:normal;color:rgba(0,0,0,.3);margin:0 6px}
+.rq-who .link{flex:none;font-size:13px;line-height:20px}
+.rq-total{display:flex;flex-direction:column;gap:8px;padding-top:14px;border-top:1px solid rgba(32,52,109,.12)}
+.rq-l{font-size:12px;line-height:18px;color:#4B5568}
+.rq-v{font-size:20px;line-height:26px;font-weight:800;color:#111827;white-space:nowrap}
+.rq-v em{font-style:normal;color:var(--main)}
+.rq-v small{font-size:13px;font-weight:500;color:#4B5568;margin-left:1px}
+.rq-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rq-stats>div{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:12px;background:#fff}
+.rq-who>span{display:flex;flex-wrap:wrap;align-items:center;row-gap:2px}.rq-who b{white-space:nowrap;font-weight:700}
