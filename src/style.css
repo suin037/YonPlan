@@ -536,7 +536,7 @@ body{letter-spacing:0}
 .f-name-row h1{margin:0;font-size:25px;line-height:36px;font-weight:700;color:#000;white-space:nowrap}
 .f-grade{display:inline-flex;align-items:center;justify-content:center;min-width:56px;height:20px;padding:0 8px;border-radius:120px;background:var(--sub);color:#fff;font-size:10px;font-weight:500;line-height:20px}
 .f-profile-t p{margin:4px 0 0;font-size:12px;line-height:15px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.f-total{position:relative;height:132px;margin-top:24px;border-radius:20px;background:var(--main);color:#fff;overflow:hidden}
+.f-total{position:relative;height:112px;margin-top:24px;border-radius:20px;background:var(--main);color:#fff;overflow:hidden}
 .f-total-l{position:absolute;left:19px;top:16px;font-size:12px;line-height:15px}
 .f-total-pct{position:absolute;left:18px;top:38px;font-size:28px;line-height:35px;font-weight:800}
 .f-total-r{position:absolute;right:19px;top:38px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;font-size:12px;line-height:15px}

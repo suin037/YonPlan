@@ -173,18 +173,18 @@ function vHome() {
       <p class="note" style="margin:0">입학 연도, 전공, 이수과정을 입력하고 들은 과목을 등록하면<br>졸업요건 이수율과 남은 과목을 정리해 드립니다.</p>
       <button type="button" class="btn sm" data-go="setup">학적 정보 입력하기</button></div></div>`;
   }
-  const d = pastCodes(), t = nowCodes();
-  const A0 = assign(R, d), A1 = assign(R, d.concat(t));
-  const need = R.ok ? R.total : 0, tot = A0.total, after = A1.total;
+  // 연세포탈처럼 이미 이수한 과목만 셉니다(이번 학기 수강 중은 넣지 않음)
+  const d = pastCodes();
+  const A0 = assign(R, d);
+  const need = R.ok ? R.total : 0, tot = A0.total;
   // Figma 'LF/홈'(81:414) 그대로: 프로필 헤더 → 전체 이수율 박스 → 졸업요건 이수율 → 범례 → 놓치기 쉬운 항목
-  const fbar = (a, b, n) => n ? `<div class="f-bar"><i class="p" style="width:${Math.min(b, n) / n * 100}%"></i><i style="width:${Math.min(a, n) / n * 100}%"></i></div>` : '';
-  const reqRow = (label, a, b, n, go) => `<button type="button" class="f-req-row" ${go}><span class="f-req-l"><b>${label}</b><span>${fmt(a)} → ${fmt(b)} / ${n}학점</span></span>${fbar(a, b, n)}</button>`;
-  const legend = cls => `<div class="f-legend ${cls}"><span><i></i>이수</span><span><i class="p"></i>이번 학기 계획</span></div>`;
+  const fbar = (a, n) => n ? `<div class="f-bar"><i style="width:${Math.min(a, n) / n * 100}%"></i></div>` : '';
+  const reqRow = (label, a, n, go) => `<button type="button" class="f-req-row" ${go}><span class="f-req-l"><b>${label}</b><span>${fmt(a)} / ${n}학점</span></span>${fbar(a, n)}</button>`;
   const reqBlock = !R.ok ? pendingCard(R) : `<section class="f-req">
       <div class="f-title"><h2>졸업요건 이수율</h2><button type="button" class="f-more" data-go="req">졸업요건 자세히 <span>›</span></button></div>
-      ${R.groups.map(g => g.pending ? `<div class="f-req-row"><span class="f-req-l"><b>${esc(g.n)}</b><span>준비 중</span></span></div>` : reqRow(esc(g.n.includes(' · ') ? g.n.replace(' · ', ' (') + ')' : g.n), A0.groupCr[g.k], A1.groupCr[g.k], g.need, 'data-go="req"')).join('')}
-      ${reqRow('3·4000단위', A0.u3, A1.u3, R.u3000, 'data-go="area" data-a="U3000"')}
-    </section>${legend('f-legend-dark')}`;
+      ${R.groups.map(g => g.pending ? `<div class="f-req-row"><span class="f-req-l"><b>${esc(g.n)}</b><span>준비 중</span></span></div>` : reqRow(esc(g.n.includes(' · ') ? g.n.replace(' · ', ' (') + ')' : g.n), A0.groupCr[g.k] || 0, g.need, 'data-go="req"')).join('')}
+      ${reqRow('3·4000단위', A0.u3, R.u3000, 'data-go="area" data-a="U3000"')}
+    </section>`;
   const missAll = missList(), miss = missAll.slice(0, 3);
   const pct = need ? Math.round(tot / need * 100) : null;
   return `<div class="scroll f-home">
@@ -193,9 +193,8 @@ function vHome() {
     <div class="f-total">
       <span class="f-total-l">전체 이수율</span>
       <span class="f-total-pct">${pct === null ? '—' : pct + '%'}</span>
-      <span class="f-total-r"><b>${fmt(tot)}${after > tot ? '→' + fmt(after) : ''} / ${need || '—'}학점</b><span>목표 졸업 ${S.profile.grad}</span></span>
-      ${need ? `<div class="f-total-bar"><i class="p" style="width:${Math.min(after, need) / need * 100}%"></i><i style="width:${Math.min(tot, need) / need * 100}%"></i></div>` : ''}
-      ${legend('f-legend-light')}
+      <span class="f-total-r"><b>${fmt(tot)} / ${need || '—'}학점</b><span>목표 졸업 ${S.profile.grad}</span></span>
+      ${need ? `<div class="f-total-bar"><i style="width:${Math.min(tot, need) / need * 100}%"></i></div>` : ''}
     </div>
     ${S.taken.length ? '' : '<button type="button" class="btn" data-go="register">런어스 캡처로 들은 과목 등록하기</button>'}
     ${reqBlock}
@@ -207,17 +206,16 @@ function vHome() {
 function vReq(p = {}) {
   if (!S.onboarded) return needSetup('졸업요건', '졸업요건');
   const d = pastCodes(), A0 = assign(R, d);
-  const t = nowCodes(), dt = d.concat(t), A1 = assign(R, dt); // 이번 학기 수강 중(계획)까지 반영
-  // 충족 / 충족 예정(이번 학기까지 들으면 채움) / N학점 남음(이번 학기 반영 후 남는 양)
-  const stPill = (n, n1, need, left, left1) => (n >= need && !left) ? '<span class="pill ok">✓ 충족</span>'
-    : (n1 >= need && !left1) ? '<span class="pill soon" title="이번 학기 수강 중인 과목까지 마치면 채워져요">충족 예정</span>'
-    : `<span class="pill bad">${n1 < need ? fmt(need - n1) + '학점 남음' : left1 + '과목 남음'}</span>`;
-  const numTxt = (n, n1, need) => `${fmt(n)}${n1 > n ? ' → ' + fmt(n1) : ''} / ${need}`;
+  // 연세포탈처럼 이미 이수한 과목만 셉니다(이번 학기 수강 중은 넣지 않음)
+  const dt = d, A1 = A0;
+  const stPill = (n, n1, need, left) => (n >= need && !left) ? '<span class="pill ok">✓ 충족</span>'
+    : `<span class="pill bad">${n < need ? fmt(need - n) + '학점 남음' : left + '과목 남음'}</span>`;
+  const numTxt = (n, n1, need) => `${fmt(n)} / ${need}`;
   const lack = Math.max(0, R.total - A0.total);
   const unmetL = R.ok ? allAreas(R).filter(a => (A0.cr[a.id] || 0) < a.need || a.must.some(k => !d.includes(k))) : [], unmet = unmetL.length;
   const head = `<div class="card rq-head">
       <div class="rq-who"><span>${profileText(S.profile, '|').split('|').filter(x => !/학년/.test(x)).map(x => `<b>${esc(x.replace('(복수전공)', ''))}</b>`).join('<i>·</i>')}</span><button type="button" class="link" data-go="setup">학적 변경 ›</button></div>
-      ${R.ok ? `<div class="rq-total"><div class="between"><span class="rq-l">졸업 학점</span><span class="rq-v num">${fmt(A0.total)}${A1.total > A0.total ? `<em>→${fmt(A1.total)}</em>` : ''}<small> / ${R.total}학점</small></span></div>${barHtml(A0.total, A1.total, R.total)}</div>
+      ${R.ok ? `<div class="rq-total"><div class="between"><span class="rq-l">졸업 학점</span><span class="rq-v num">${fmt(A0.total)}<small> / ${R.total}학점</small></span></div>${barHtml(A0.total, A1.total, R.total)}</div>
       <div class="rq-stats"><div><span class="rq-l">부족 학점</span><span class="rq-v num">${fmt(lack)}<small>학점</small></span></div><button type="button" class="rq-stat-btn" data-act="unmetInfo" aria-expanded="${!!p.unmet}"><span class="rq-l">미충족 요건 <span class="rq-i" aria-hidden="true">ⓘ</span></span><span class="rq-v num">${unmet}<small>개 영역</small></span></button></div>
       ${p.unmet ? `<div class="rq-explain"><p>졸업하려면 전공기초·전공필수·교양기초 등 <b>영역별로</b> 정해진 학점과 필수 과목을 모두 채워야 합니다. 지금까지 이수한 과목 기준으로 아직 채우지 못한 영역입니다.</p>${unmet ? `<div class="rq-tags">${unmetL.map(a => `<span>${esc(a.label)}</span>`).join('')}</div>` : ''}</div>` : ''}` : ''}
     </div>`;
@@ -450,9 +448,9 @@ function vAddPlan(p) {
   const termTxt = c => { const t = C(c).t; return t === 3 ? '매 학기 개설' : t ? `${t}학기 개설` : ''; };
   // 2단 필터: 고른 전공(또는 교양)의 요건 영역 — 전공기초·전공필수·전공선택 등
   const fg = f !== 'all' ? groupOf(R, f) : null;
-  const A1 = assign(R, pastCodes().concat(nowCodes())); // 수강 중 과목까지 이수로 보고 ✓ 표시
+  const A1 = assign(R, pastCodes()); // 이미 이수한 과목만으로 ✓ 표시(연세포탈 기준)
   const areaChip = (id, n, done) => `<button type="button" class="chip" data-act="addReq" data-req="${id}" aria-pressed="${req === id}">${esc(n)}${done ? ' ✓' : ''}</button>`;
-  const subChips = fg ? areaSlots(fg).map(({ n, a }) => a ? areaChip(a.id, n, (A1.cr[a.id] || 0) >= a.need && !a.must.some(k => !isTaken(k)))
+  const subChips = fg ? areaSlots(fg).map(({ n, a }) => a ? areaChip(a.id, n, (A1.cr[a.id] || 0) >= a.need && !a.must.some(k => !isDone(k)))
       : `<button type="button" class="chip na" disabled title="이 전공은 요람에 ${n} 요건이 없어요">${n} 해당 없음</button>`).join('')
     : R.u3000 ? areaChip('U3000', '3·4000단위', false) : '';
   const cr = sel.reduce((a, c) => a + CC(c).cr, 0);
