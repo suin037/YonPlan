@@ -713,3 +713,4 @@ body{letter-spacing:0}
 .li.na-row{opacity:.75}
 /* 충족 예정: 서브색(이번 학기 계획 막대와 같은 색) */
 .pill.soon{background:var(--sub);color:#fff}
+.f-miss-all{margin:4px 0 0}

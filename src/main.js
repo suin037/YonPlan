@@ -123,7 +123,7 @@ function saveScroll() { const sc = $screen.querySelector('.scroll'); if (sc && c
 function go(s, p, opt) { saveScroll(); opt = opt || {}; if (opt.replace) S.stack.pop(); S.stack.push({ s, p: p || {} }); render(opt.toY); }
 function back() { saveScroll(); if (S.stack.length > 1) { S.stack.pop(); render(cur().y || 0); } }
 function tab(t) { saveScroll(); S.stack = [{ s: t }]; render(0); }
-const TAB_OF = { home: 'home', req: 'home', area: 'home', roadmap: 'roadmap', course: 'roadmap', addplan: 'roadmap', me: 'me', setup: 'me', register: 'me', guide: 'me', ocr: 'me', source: 'me' };
+const TAB_OF = { home: 'home', miss: 'home', req: 'home', area: 'home', roadmap: 'roadmap', course: 'roadmap', addplan: 'roadmap', me: 'me', setup: 'me', register: 'me', guide: 'me', ocr: 'me', source: 'me' };
 
 let toastTimer;
 function toast(msg, action) {
@@ -185,17 +185,7 @@ function vHome() {
       ${R.groups.map(g => g.pending ? `<div class="f-req-row"><span class="f-req-l"><b>${esc(g.n)}</b><span>준비 중</span></span></div>` : reqRow(esc(g.n.includes(' · ') ? g.n.replace(' · ', ' (') + ')' : g.n), A0.groupCr[g.k], A1.groupCr[g.k], g.need, 'data-go="req"')).join('')}
       ${reqRow('3·4000단위', A0.u3, A1.u3, R.u3000, 'data-go="area" data-a="U3000"')}
     </section>${legend('f-legend-dark')}`;
-  const miss = [];
-  const missItem = (go, t1, t2) => `<button type="button" class="f-miss-item" ${go}><img src="${import.meta.env.BASE_URL}figma/warn.svg" alt="" width="20" height="20"><span class="f-miss-t"><b>${t1}</b><span>${t2}</span></span><span class="f-chev">›</span></button>`;
-  if (R.ok) {
-    if (A0.u3 < R.u3000) miss.push(missItem('data-go="area" data-a="U3000"', `3·4000단위 과목 ${R.u3000}학점 중 ${fmt(A0.u3)}학점 이수`, '전공·교양 구분 없이 인정 가능'));
-    // 놓치기 쉬운 지정 과목: 이수·수강 중·로드맵 계획 어디에도 없는 것만 경고
-    allAreas(R).forEach(a => a.must.filter(k => !d.includes(k) && !t.includes(k) && !S.plan.some(x => x.c === k)).forEach(k => {
-      if (miss.length >= 3) return;
-      const gName = (groupOf(R, a.g) || { n: '' }).n.split(' (')[0];
-      miss.push(missItem(`data-go="area" data-a="${a.id}"`, `${esc(gName)} ${esc(a.n)} '${esc(CC(k).n)}' 미이수`, offered(k) ? '이번 학기 수강 가능' : '로드맵에 계획을 담아 두세요'));
-    }));
-  }
+  const missAll = missList(), miss = missAll.slice(0, 3);
   const pct = need ? Math.round(tot / need * 100) : null;
   return `<div class="scroll f-home">
     <header class="f-profile"><img class="f-avatar" src="${import.meta.env.BASE_URL}figma/profile.svg" alt="" width="49" height="49">
@@ -209,7 +199,7 @@ function vHome() {
     </div>
     ${S.taken.length ? '' : '<button type="button" class="btn" data-go="register">런어스 캡처로 들은 과목 등록하기</button>'}
     ${reqBlock}
-    ${miss.length ? `<div class="f-miss"><div class="f-title f-miss-title"><h2>놓치기 쉬운 항목</h2><button type="button" class="f-more" data-go="roadmap">로드맵에서 보기 <span>›</span></button></div>${miss.join('')}</div>` : ''}
+    ${miss.length ? `<div class="f-miss"><div class="f-title f-miss-title"><h2>놓치기 쉬운 항목</h2><button type="button" class="f-more" data-go="miss">더보기 <span>›</span></button></div>${miss.join('')}</div>` : ''}
   </div>`;
 }
 
@@ -260,6 +250,26 @@ function areaSlots(g) {
   const slots = MAJ_SLOTS.map(([n, c]) => { const a = g.areas.find(x => x.cat.join() === c); if (a) used.add(a.id); return { n, a: a || null }; });
   if (!used.size) return g.areas.map(a => ({ n: a.n, a })); // 영역 구분 자체가 없는 학과는 그대로
   return slots.concat(g.areas.filter(a => !used.has(a.id)).map(a => ({ n: a.n, a })));
+}
+/* 놓치기 쉬운 항목: 3·4000단위 부족 + 이수·수강 중·로드맵 계획 어디에도 없는 지정 과목 */
+const missItem = (go, t1, t2) => `<button type="button" class="f-miss-item" ${go}><img src="${import.meta.env.BASE_URL}figma/warn.svg" alt="" width="20" height="20"><span class="f-miss-t"><b>${t1}</b><span>${t2}</span></span><span class="f-chev">›</span></button>`;
+function missList() {
+  if (!R.ok) return [];
+  const d = pastCodes(), t = nowCodes(), A0 = assign(R, d), out = [];
+  if (A0.u3 < R.u3000) out.push(missItem('data-go="area" data-a="U3000"', `3·4000단위 과목 ${R.u3000}학점 중 ${fmt(A0.u3)}학점 이수`, '전공·교양 구분 없이 인정 가능'));
+  allAreas(R).forEach(a => a.must.filter(k => !d.includes(k) && !t.includes(k) && !S.plan.some(x => x.c === k)).forEach(k => {
+    const gName = (groupOf(R, a.g) || { n: '' }).n.split(' (')[0];
+    out.push(missItem(`data-go="area" data-a="${a.id}"`, `${esc(gName)} ${esc(a.n)} '${esc(CC(k).n)}' 미이수`, offered(k) ? '이번 학기 수강 가능' : '로드맵에 계획을 담아 두세요'));
+  }));
+  return out;
+}
+function vMiss() {
+  const list = missList();
+  return `${top('놓치기 쉬운 항목')}<div class="scroll">
+    <p class="note" style="margin:0">아직 이수하지 않았고, 이번 학기 수강이나 로드맵 계획에도 없는 항목이에요. 누르면 해당 요건으로 이동해요.</p>
+    ${list.length ? `<div class="f-miss f-miss-all">${list.join('')}</div>` : '<div class="card"><p class="note" style="margin:0">놓친 항목이 없어요. 필요한 과목이 모두 이수·수강 중이거나 계획에 들어 있어요.</p></div>'}
+    <button type="button" class="btn weak" data-tab="roadmap">로드맵에서 계획 담기</button>
+  </div>`;
 }
 function vArea(p) {
   const a = p.a === 'U3000' ? U3() : areaById(R, p.a);
@@ -663,7 +673,7 @@ function vOcr(p) {
     <button type="button" class="btn weak" data-act="pickImages">${items.length ? '캡처 더 올리기' : '캡처 사진 고르기'}</button></div>`;
 }
 
-const VIEWS = { home: vHome, req: vReq, area: vArea, roadmap: vRoadmap, addplan: vAddPlan, me: vMe, setup: vSetup, register: vRegister, guide: vGuide, ocr: vOcr, source: vSource };
+const VIEWS = { home: vHome, miss: vMiss, req: vReq, area: vArea, roadmap: vRoadmap, addplan: vAddPlan, me: vMe, setup: vSetup, register: vRegister, guide: vGuide, ocr: vOcr, source: vSource };
 
 function render(y) {
   R = buildReq(S.onboarded ? S.profile : null);
