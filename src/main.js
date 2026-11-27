@@ -12,7 +12,7 @@ if (UT_MODE) document.body.classList.add('ut-mode');
    로그인 없이 이 브라우저(localStorage)에만 저장해요.
    내 정보(real)와 체험 데이터(demo)는 따로 저장돼서 서로 덮어쓰지 않아요.
    taken: 등록한 과목 [{c: 학수번호, sem: '2025-1'}]. 이번 학기(2026-2) 과목은 '수강 중'이에요. */
-const KEY = { mode: 'yonplan.v1.mode', real: 'yonplan.v1.real', demo: 'yonplan.v3.demo' }; // 예시 데이터를 바꾸면 demo 버전을 올려 새로 불러오게 함
+const KEY = { mode: 'yonplan.v1.mode', real: 'yonplan.v1.real', demo: 'yonplan.v4.demo' }; // 예시 데이터를 바꾸면 demo 버전을 올려 새로 불러오게 함
 const store = {
   get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* 저장 불가 환경 */ } },
