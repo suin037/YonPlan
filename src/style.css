@@ -629,13 +629,10 @@ body{letter-spacing:0}
 .homebar{height:48px;background:#fff}
 @media (max-width:560px){.tabs{padding-bottom:0}.f-tab-l{}}
 
-/* 학기 펼침 상태 — Figma 353:3421 (배경 없음, 제목 10/0, 배지 72×26 r13 Medium, 화살표 320/4) */
+/* 학기 펼침 상태 */
 .f-sem.open{gap:8px}
-.f-sem.open+.f-sem{margin-top:14px}
-.f-sem.open .f-sem-h{height:30px;background:transparent;border-radius:0}
-.f-sem.open .f-sem-t{left:10px;top:0}
-.f-sem.open .f-sem-cr{right:46px;top:0;min-width:72px;height:26px;border-radius:13px;line-height:26px;font-weight:500}
-.f-sem.open .f-sem-h img{right:9px;top:4px}
+.f-sem.open+.f-sem{margin-top:8px}
+/* 펼쳐도 학기 헤더(연한 배경 박스)를 유지해 학기와 과목 목록의 경계를 분명하게 — UT 피드백 */
 .cr-wrap.pinned .f-info{background:rgba(95,129,171,.16)}
 
 /* 텍스트 로고 — Figma 'Yon-Plan'(2011:3232): Rubik Scribble 120, #3355B7, 566×91 */
