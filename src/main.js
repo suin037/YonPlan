@@ -262,7 +262,7 @@ function vArea(p) {
   const rule = a.id === 'U3000' ? `3000·4000단위 과목을 전공·교양 구분 없이 ${a.need}학점 이상 이수해요.` : ruleText(a, R);
   return `${top((g ? g.n + ' · ' : '') + a.n)}<div class="scroll">
     <div class="card" style="display:flex;flex-direction:column;gap:8px">
-      <div class="between"><span style="font-size:26px;font-weight:800" class="num">${fmt(n)} / ${a.need}</span>${ok ? '<span class="pill ok">✓ 모두 이수했어요</span>' : `<span class="pill bad">${n < a.need ? fmt(a.need - n) + '학점 남음' : left.length + '과목 남음'}</span>`}</div>
+      <div class="between"><span style="font-size:26px;font-weight:800" class="num bigval">${fmt(n)} / ${a.need}</span>${ok ? '<span class="pill ok">✓ 모두 이수했어요</span>' : `<span class="pill bad">${n < a.need ? fmt(a.need - n) + '학점 남음' : left.length + '과목 남음'}</span>`}</div>
       ${barHtml(n, n, a.need)}
     </div>
     <div><div class="h3">영역 규칙</div><p class="note" style="margin:4px 0 0">${esc(rule)}</p></div>
