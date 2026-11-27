@@ -217,6 +217,12 @@ function vHome() {
 function vReq() {
   if (!S.onboarded) return needSetup('졸업요건', '졸업요건');
   const d = pastCodes(), A0 = assign(R, d);
+  const t = nowCodes(), dt = d.concat(t), A1 = assign(R, dt); // 이번 학기 수강 중(계획)까지 반영
+  // 충족 / 충족 예정(이번 학기까지 들으면 채움) / N학점 남음(이번 학기 반영 후 남는 양)
+  const stPill = (n, n1, need, left, left1) => (n >= need && !left) ? '<span class="pill ok">✓ 충족</span>'
+    : (n1 >= need && !left1) ? '<span class="pill soon" title="이번 학기 수강 중인 과목까지 마치면 채워져요">충족 예정</span>'
+    : `<span class="pill bad">${n1 < need ? fmt(need - n1) + '학점 남음' : left1 + '과목 남음'}</span>`;
+  const numTxt = (n, n1, need) => `${fmt(n)}${n1 > n ? ' → ' + fmt(n1) : ''} / ${need}`;
   const head = `<div class="card" style="display:flex;flex-direction:column;gap:12px">
       <div class="between"><span class="muted small">내 기준</span><button type="button" class="link" data-go="setup">학적 변경 ›</button></div>
       <div class="chips">${profileText(S.profile, '|').split('|').filter(x => !/학년/.test(x)).map(x => `<span class="chip">${esc(x.replace('(복수전공)', ''))}</span>`).join('')}</div>
@@ -236,12 +242,12 @@ function vReq() {
       ${mustLeft.map(([a, k]) => { const st = statusOf(k); return `<button type="button" class="li" data-go="area" data-a="${a.id}"><span class="grow"><b>${esc(CC(k).n)}</b><br><span class="muted small">${esc(a.label)} · ${CC(k).cr}학점</span></span>${st ? badge(st) : '<span class="pill gray">미계획</span>'}<span class="chev">›</span></button>`; }).join('')}
     </div>` : ''}
     ${R.groups.map(g => g.pending ? `<div class="between gh"><div class="h2">${esc(g.n)}</div><span class="pill gray">준비 중</span></div><div class="card"><p class="note" style="margin:0">${esc(g.n.split(' (')[0])} ${S.profile.track === '연계전공' ? '연계전공' : ''} 요건은 준비 중이에요. 지금은 ${Object.keys(SUPPORTED).join(' · ')}을 지원해요.</p></div>`
-      : `<div class="between gh"><div class="h2">${esc(g.n)}</div><span class="muted small num">${fmt(A0.groupCr[g.k])} / ${g.need}학점</span></div>
-      <div class="card" style="padding:4px 16px">${areaSlots(g).map(({ n: sn, a }) => { if (!a) return `<div class="li na-row"><span class="grow"><b>${sn}</b><br><span class="muted small">이 전공 요람에는 없는 영역이에요</span></span><span class="pill gray">해당 없음</span></div>`; const n = A0.cr[a.id] || 0, left = a.must.filter(k => !d.includes(k)).length, ok = n >= a.need && !left; return `<button type="button" class="li" data-go="area" data-a="${a.id}">
-        <span class="grow" style="display:flex;flex-direction:column;gap:6px"><span class="between"><b>${esc(a.n)} ${checkPill(a)}</b><span class="num small">${fmt(n)} / ${a.need}</span></span>${barHtml(n, n, a.need)}</span>
-        ${ok ? '<span class="pill ok">✓ 충족</span>' : `<span class="pill bad">${n < a.need ? fmt(a.need - n) + '학점 남음' : left + '과목 남음'}</span>`}<span class="chev">›</span></button>`; }).join('')}</div>`).join('')}
+      : `<div class="between gh"><div class="h2">${esc(g.n)}</div><span class="muted small num">${numTxt(A0.groupCr[g.k] || 0, A1.groupCr[g.k] || 0, g.need)}학점</span></div>
+      <div class="card" style="padding:4px 16px">${areaSlots(g).map(({ n: sn, a }) => { if (!a) return `<div class="li na-row"><span class="grow"><b>${sn}</b><br><span class="muted small">이 전공 요람에는 없는 영역이에요</span></span><span class="pill gray">해당 없음</span></div>`; const n = A0.cr[a.id] || 0, n1 = A1.cr[a.id] || 0, left = a.must.filter(k => !d.includes(k)).length, left1 = a.must.filter(k => !dt.includes(k)).length; return `<button type="button" class="li" data-go="area" data-a="${a.id}">
+        <span class="grow" style="display:flex;flex-direction:column;gap:6px"><span class="between"><b>${esc(a.n)} ${checkPill(a)}</b><span class="num small">${numTxt(n, n1, a.need)}</span></span>${barHtml(n, n1, a.need)}</span>
+        ${stPill(n, n1, a.need, left, left1)}<span class="chev">›</span></button>`; }).join('')}</div>`).join('')}
     <div class="between"><div class="h2">공통 조건</div></div>
-    <div class="card" style="padding:4px 16px"><button type="button" class="li" data-go="area" data-a="U3000"><span class="grow" style="display:flex;flex-direction:column;gap:6px"><span class="between"><b>3·4000단위</b><span class="num small">${fmt(A0.u3)} / ${R.u3000}</span></span>${barHtml(A0.u3, A0.u3, R.u3000)}</span>${A0.u3 >= R.u3000 ? '<span class="pill ok">✓ 충족</span>' : `<span class="pill bad">${fmt(R.u3000 - A0.u3)}학점 남음</span>`}<span class="chev">›</span></button></div>
+    <div class="card" style="padding:4px 16px"><button type="button" class="li" data-go="area" data-a="U3000"><span class="grow" style="display:flex;flex-direction:column;gap:6px"><span class="between"><b>3·4000단위</b><span class="num small">${numTxt(A0.u3, A1.u3, R.u3000)}</span></span>${barHtml(A0.u3, A1.u3, R.u3000)}</span>${stPill(A0.u3, A1.u3, R.u3000, 0, 0)}<span class="chev">›</span></button></div>
     <button type="button" class="link" data-go="source" style="align-self:flex-start">정보 출처 및 유의사항 ›</button>
   </div>`;
 }

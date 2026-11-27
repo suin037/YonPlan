@@ -711,3 +711,5 @@ body{letter-spacing:0}
 .h3{line-height:24px}
 .chips.sub .chip.na{background:transparent;color:rgba(0,0,0,.35);box-shadow:inset 0 0 0 1px rgba(32,52,109,.12);cursor:default}
 .li.na-row{opacity:.75}
+/* 충족 예정: 서브색(이번 학기 계획 막대와 같은 색) */
+.pill.soon{background:var(--sub);color:#fff}
