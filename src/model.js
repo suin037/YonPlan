@@ -1,5 +1,5 @@
 /* 졸업요건 계산: 학적(profile)으로 요건을 고르고, 과목 목록을 영역에 나눠 담아요. */
-import { D, C, SUPPORTED, SHORT_DEPT, NOW_TERM, hasSecond } from './data.js';
+import { D, C, SUPPORTED, SHORT_DEPT, NOW_TERM, tracksOf, trackNames } from './data.js';
 
 const KIND_LABEL = { 전기: '전공기초', 전필: '전공필수', 전선: '전공선택' };
 
@@ -13,22 +13,23 @@ export function buildReq(pf) {
   const inRange = +y >= D.meta.cohorts[0] && +y <= D.meta.cohorts[1];
   if (!mCode) { out.reason = 'major'; return out; }
   if (!inRange) { out.reason = 'cohort'; return out; }
-  const dual = pf.track === '복수전공' && pf.second;
+  const dual = tracksOf(pf).some(x => x.t === '복수전공' && x.d);
   const prog = dual ? '복수1' : '단일';
   const dep = D.req[mCode];
   const rows = (dep.programs[prog] || {})[y] || [];
   const single = (dep.programs['단일'] || {})[y] || [];
   out.ok = true;
   out.groups.push(majorGroup('m1', mCode, rows, dual ? '1전공' : '전공'));
-  // 2전공·부전공
-  if (hasSecond(pf.track) && pf.second) {
-    const sCode = SUPPORTED[pf.second];
-    const label = pf.track === '복수전공' ? '2전공' : pf.track;
-    const p2 = pf.track === '복수전공' ? '복수2' : pf.track === '부전공' ? '부전공' : null;
+  // 추가 이수과정(여러 개): 복수전공·부전공은 요람 표로 계산, 나머지는 준비 중
+  trackNames(pf).forEach((x, i) => {
+    const k = 'm' + (i + 2);
+    const label = x.short.slice(x.d ? x.d.length + 2 : 0, -1) || x.t;
+    const sCode = SUPPORTED[x.d];
+    const p2 = x.t === '복수전공' ? '복수2' : x.t === '부전공' ? '부전공' : null;
     const rows2 = sCode && p2 ? ((D.req[sCode].programs[p2] || {})[y] || []) : [];
-    if (rows2.length) out.groups.push(majorGroup('m2', sCode, rows2, label, pf.second));
-    else out.groups.push({ k: 'm2', pending: true, n: `${pf.second} (${label})`, areas: [], need: 0 });
-  }
+    if (rows2.length) out.groups.push(majorGroup(k, sCode, rows2, label, x.d));
+    else out.groups.push({ k, pending: true, track: x.t, n: x.short, areas: [], need: 0 });
+  });
   // 교양 (단일전공 표 기준)
   const g = single.filter(a => ['BASIC', 'GE', 'RC'].includes(a.kind));
   out.groups.push({ k: 'gen', n: '교양', areas: g.map(a => area(a, 'gen', '')), need: g.reduce((t, a) => t + a.need, 0) });

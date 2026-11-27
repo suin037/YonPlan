@@ -5,7 +5,7 @@ const T = (sem, codes) => codes.map(c => ({ c, sem }));
 export function demoState() {
   return {
     name: '김연세',
-    profile: { year: '2024', grade: '3', major: '경제학', track: '복수전공', second: '심리학', grad: '2027-2' },
+    profile: { year: '2024', grade: '3', major: '경제학', tracks: [{ t: '복수전공', d: '심리학' }], grad: '2027-2' },
     taken: [
       ...T('2024-1', ['YCA1101', 'YCB1101', 'UCR1007', 'ECO1103', 'ECO1101', 'UCB1101', 'YCA1010']),
       ...T('2024-2', ['ECO1104', 'PSY2103', 'UCR1013', 'UCC1106', 'UCD1102', 'UCF1101', 'ECO1001']),

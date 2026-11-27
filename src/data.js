@@ -60,9 +60,23 @@ export const SETUP_FIELDS = [
   ['year', '입학 연도', Array.from({ length: NOW_YEAR - 2012 + 1 }, (_, i) => { const y = String(NOW_YEAR - i); return [y, `${y}년 (${y.slice(2)}학번)`]; })],
   ['grade', '현재 학년', [['1', '1학년'], ['2', '2학년'], ['3', '3학년'], ['4', '4학년'], ['5', '5학년 이상']]],
   ['major', '본전공', DEPTS],
-  ['track', '추가 이수과정', [['없음', '없음 (단일전공)'], ['복수전공', '복수전공'], ['부전공', '부전공'], ['연계전공', '연계전공']]],
-  ['second', '복수전공 학과', DEPTS],
+  ['tracks', '추가 이수과정', []],
   ['grad', '목표 졸업 학기', (() => { const o = [['2026-2', '2026년 2학기']]; for (let y = NOW_YEAR + 1; y <= NOW_YEAR + 6; y++) for (const s of [1, 2]) o.push([`${y}-${s}`, `${y}년 ${s}학기`]); return o; })()]
 ];
-export const SECOND_LABEL = { 복수전공: '복수전공 학과', 부전공: '부전공 학과', 연계전공: '연계전공' };
-export const hasSecond = t => !!SECOND_LABEL[t];
+/* 추가 이수과정: 여러 개 고를 수 있어요(다중 전공). 교직과정만 학과를 고르지 않아요. */
+export const TRACK_TYPES = ['복수전공', '융복합·연계전공', '부전공', '마이크로전공', '교직과정'];
+export const TRACK_DEPT_LABEL = { 복수전공: '복수전공 학과', '융복합·연계전공': '융복합·연계전공', 부전공: '부전공 학과', 마이크로전공: '마이크로전공 분야' };
+export const needsDept = t => !!TRACK_DEPT_LABEL[t];
+// 예전 저장 형식(track 하나 + second)을 새 형식(tracks 배열)으로 읽어요
+export function tracksOf(pf) {
+  if (!pf) return [];
+  if (Array.isArray(pf.tracks)) return pf.tracks;
+  if (!pf.track || pf.track === '없음') return [];
+  return [{ t: pf.track === '연계전공' ? '융복합·연계전공' : pf.track, d: pf.second || '' }];
+}
+// 화면에 쓰는 이름: "심리학 2전공(복수전공)", "통계학 부전공", "교직과정"
+export function trackNames(pf) {
+  let n = 2;
+  return tracksOf(pf).filter(x => x.t === '교직과정' || x.d).map(x => x.t === '복수전공' ? { ...x, short: `${x.d} (${n}전공)`, long: `${x.d} ${n++}전공(복수전공)` }
+    : x.t === '교직과정' ? { ...x, short: '교직과정', long: '교직과정' } : { ...x, short: `${x.d} (${x.t})`, long: `${x.d} ${x.t}` });
+}
