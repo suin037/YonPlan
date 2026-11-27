@@ -462,18 +462,28 @@ function vMe() {
   </div>`;
 }
 function vSource() {
+  const src = [
+    ['졸업요건', '연세대학교 대학요람 2020~2026학년도 (경제학, 응용통계학, 심리학)'],
+    ['과목 정보', `${NOW_TERM} 신촌캠퍼스 수강편람과 최근 개설 이력 (과목명, 학점, 이수구분)`],
+    ['선수과목', '대학요람과 강의계획서에 적힌 선수·권장 과목'],
+    ['기준일', esc(D.meta.built || '')],
+  ];
+  const notes = [
+    '연플랜은 학교 공식 서비스가 아닙니다. 최종 졸업 판정은 학사지원팀과 학과 사무실 기준을 따릅니다.',
+    '‘확인 중’이 표시된 영역은 요람 원문만으로 확정하지 못한 부분입니다. 대학교양의 영역별 조건(필수 영역 등)은 아직 학점 합계로만 계산합니다.',
+    '학점 정보가 없는 과목은 3학점으로 계산합니다.',
+    '로드맵의 ‘추천’은 아직 계획하지 않은 필수 과목을 선수과목 순서에 맞춰 놓아 둔 것입니다. 실제 개설 학기는 수강편람에서 확인해 주세요.',
+    '입력한 정보는 로그인 없이 이 기기의 브라우저에만 저장됩니다. 런어스 캡처 사진도 이 기기 안에서만 글자를 읽으며, 서버로 보내지 않습니다.',
+    '런어스 과거강좌조회에는 수강철회·F 과목도 함께 나옵니다. 등록 전 확인 화면에서 빼 주세요.',
+  ];
   return `${top('정보 출처 및 유의사항')}<div class="scroll">
-    ${S.mode === 'demo' ? `<div class="card soft" style="display:flex;flex-direction:column;gap:8px"><div class="h3">이 화면은 프로토타입이에요</div><p class="note" style="margin:0">체험하기는 예시 학생(24학번 경제학 · 심리학 복수전공)의 학적과 이수 내역을 미리 넣어 둔 상태예요. 내 학적과 이수 과목으로 처음부터 해 보려면 체험을 끝내고 내 정보를 입력해 주세요.</p></div>` : ''}
-    <div class="card" style="display:flex;flex-direction:column;gap:8px">
+    ${S.mode === 'demo' ? `<div class="card soft" style="display:flex;flex-direction:column;gap:8px"><div class="h3">예시 데이터로 체험 중입니다</div><p class="note" style="margin:0">예시 학생(24학번, 경제학 1전공 · 심리학 2전공)의 학적과 이수 내역이 미리 들어 있습니다. 내 학적과 이수 과목으로 사용하려면 체험을 끝내고 내 정보를 입력해 주세요.</p></div>` : ''}
+    <div class="card" style="display:flex;flex-direction:column;gap:10px">
       <div class="h3">데이터 출처</div>
-      <p class="note" style="margin:0">졸업요건: 연세대학교 대학요람 2020~2026 (경제학 · 응용통계학 · 심리학)<br>과목명·학점·이수구분: ${NOW_TERM} 수강편람 신촌캠퍼스와 최근 개설 이력<br>선수과목: 요람과 강의계획서의 선수·권장 과목<br>정리한 날: ${esc(D.meta.built || '')}</p></div>
-    <div class="card" style="display:flex;flex-direction:column;gap:8px">
+      <dl class="src-list">${src.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl></div>
+    <div class="card" style="display:flex;flex-direction:column;gap:10px">
       <div class="h3">유의사항</div>
-      <p class="note" style="margin:0">연플랜은 학교 공식 서비스가 아니에요. 졸업 판정은 학교 학사지원팀과 학과 사무실 기준을 따라요.</p>
-      <p class="note" style="margin:0">'확인 중'이 붙은 영역은 요람 원문만으로 확정하지 못한 부분이에요. 대학교양 영역별 조건(필수 영역 등)은 아직 학점만 계산해요.</p>
-      <p class="note" style="margin:0">개설 이력만 있는 과목은 학점을 3학점으로 계산해요. 미래 학기 계획은 지난 개설 이력을 참고한 잠정 계획이에요.</p>
-      <p class="note" style="margin:0">입력한 정보는 로그인 없이 이 기기의 브라우저에만 저장돼요. 런어스 캡처는 Tesseract.js(무료 오픈소스 OCR)로 이 기기 안에서 읽고, 서버로 보내지 않아요.</p>
-      <p class="note" style="margin:0">런어스 과거강좌조회에는 수강철회·F 과목도 나와요. 등록 전에 확인 화면에서 빼 주세요.</p></div>
+      <ul class="note-list">${notes.map(t => `<li>${t}</li>`).join('')}</ul></div>
   </div>`;
 }
 function profileText(pf, sep = ' · ') {
