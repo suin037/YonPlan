@@ -203,7 +203,7 @@ function vHome() {
     <div class="f-total">
       <span class="f-total-l">전체 이수율</span>
       <span class="f-total-pct">${pct === null ? '—' : pct + '%'}</span>
-      <span class="f-total-r"><b>${fmt(tot)} / ${need || '—'}학점</b><span>목표 졸업 ${S.profile.grad}</span></span>
+      <span class="f-total-r"><b>${fmt(tot)}${after > tot ? '→' + fmt(after) : ''} / ${need || '—'}학점</b><span>목표 졸업 ${S.profile.grad}</span></span>
       ${need ? `<div class="f-total-bar"><i class="p" style="width:${Math.min(after, need) / need * 100}%"></i><i style="width:${Math.min(tot, need) / need * 100}%"></i></div>` : ''}
       ${legend('f-legend-light')}
     </div>
@@ -226,8 +226,8 @@ function vReq() {
   const head = `<div class="card" style="display:flex;flex-direction:column;gap:12px">
       <div class="between"><span class="muted small">내 기준</span><button type="button" class="link" data-go="setup">학적 변경 ›</button></div>
       <div class="chips">${profileText(S.profile, '|').split('|').filter(x => !/학년/.test(x)).map(x => `<span class="chip">${esc(x.replace('(복수전공)', ''))}</span>`).join('')}</div>
-      ${R.ok ? `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;border-top:1px solid var(--line);padding-top:12px">
-        <div><div class="muted tiny">졸업 학점</div><b class="num" style="font-size:17px">${fmt(A0.total)} / ${R.total}</b></div>
+      ${R.ok ? `<div style="display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:8px;border-top:1px solid var(--line);padding-top:12px">
+        <div><div class="muted tiny">졸업 학점</div><b class="num" style="font-size:16px;white-space:nowrap">${fmt(A0.total)}${A1.total > A0.total ? '→' + fmt(A1.total) : ''} / ${R.total}</b></div>
         <div><div class="muted tiny">부족 학점</div><b class="num" style="font-size:17px">${fmt(Math.max(0, R.total - A0.total))}학점</b></div>
         <div><div class="muted tiny">미충족 영역</div><b class="num" style="font-size:17px">${allAreas(R).filter(a => (A0.cr[a.id] || 0) < a.need || a.must.some(k => !d.includes(k))).length}개</b></div>
       </div>` : ''}
