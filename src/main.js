@@ -1,5 +1,5 @@
 import './style.css';
-import { D, C, loadData, NOW_TERM, ST, badge, LINKED, SUPPORTED, SETUP_FIELDS, DEPTS, TRACK_TYPES, TRACK_DEPT_LABEL, needsDept, tracksOf, trackNames } from './data.js';
+import { D, C, loadData, NOW_TERM, ST, badge, LINKED, CONVERGENCE, MICRO, SUPPORTED, SETUP_FIELDS, DEPTS, TRACK_TYPES, TRACK_DEPT_LABEL, needsDept, tracksOf, trackNames } from './data.js';
 import { buildReq, assign, areaOf, areaById, groupOf, allAreas, ruleText, semesters, prereqs } from './model.js';
 import { demoState } from './demo.js';
 import { readImage } from './ocr.js';
@@ -530,7 +530,9 @@ function profileText(pf, sep = ' · ') {
 /* 추가 이수과정: 여러 개 고를 수 있어요. 고른 과정마다 학과(분야)를 골라요. */
 function trackDeptOptions(t, cur, major) {
   const sel = v => cur === v ? 'selected' : '';
-  if (t === '융복합·연계전공') return LINKED.map(v => `<option value="${v}" ${sel(v)}>${v} (준비 중)</option>`).join('');
+  if (t === '융복합·연계전공') return [['연계전공', LINKED], ['융합전공', CONVERGENCE]].map(([g, l]) => `<optgroup label="${g}">${l.map(v => `<option value="${v}" ${sel(v)}>${v} (준비 중)</option>`).join('')}</optgroup>`).join('');
+  // 마이크로전공: 학과가 아니라 과정 이름이 따로 있어요. 소속 학과가 여는 마이크로전공은 신청할 수 없어 빼요.
+  if (t === '마이크로전공') return MICRO.filter(([, dep]) => !(major && dep.split('·').some(x => x.replace(/과$|학부$/, '') === major.replace(/과$/, '')))).map(([v, dep]) => `<option value="${v}" ${sel(v)}>${v} · ${dep} (준비 중)</option>`).join('');
   return DEPTS.map(([g, list]) => `<optgroup label="${g}">${list.filter(v => v !== major).map(v => `<option value="${v}" ${sel(v)}>${v}${t === '마이크로전공' || !SUPPORTED[v] ? ' (준비 중)' : ''}</option>`).join('')}</optgroup>`).join('');
 }
 function tracksField(d) {
