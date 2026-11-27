@@ -830,11 +830,12 @@ function addPlans(codes, sem) {
 }
 function startUT(n) {
   closeSheet();
-  if (n === 1) S = withUi(null, 'ut');
-  else if (n === 2) { S = withUi({ onboarded: true, profile: demoFresh().profile }, 'ut'); S.stack = [{ s: 'register', p: { onboard: true } }]; }
-  else S = withUi(demoFresh(), 'ut');
+  // 2차 UT: T1·T2 = 복수전공 신청 전(경제학 단일전공, 같은 이수 내역), T3~T5 = 심리학 복수전공을 더한 뒤
+  const d = demoFresh();
+  if (n <= 2) { d.profile = { ...d.profile, tracks: [] }; d.plan = []; }
+  S = withUi(d, 'ut');
   render(0);
-  toast(`T${n} 시작 상태로 맞췄어요`);
+  toast(`T${n} 시작 상태로 맞췄습니다.`);
 }
 const ocrRow = t => { const p = cur().p; return p.items[+t.dataset.ii].rows[+t.dataset.ri]; };
 
