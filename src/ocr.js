@@ -24,10 +24,30 @@ async function getWorker(onProgress) {
   return workerPromise;
 }
 
+/* 흑백으로 바꿔 글자를 또렷하게 (휴대폰 캡처의 파란 링크 글자 인식이 좋아져요) */
+async function toBinary(file) {
+  const bmp = await createImageBitmap(file);
+  const c = document.createElement('canvas'); c.width = bmp.width; c.height = bmp.height;
+  const x = c.getContext('2d'); x.drawImage(bmp, 0, 0);
+  const d = x.getImageData(0, 0, c.width, c.height), a = d.data;
+  for (let i = 0; i < a.length; i += 4) { const v = 0.299 * a[i] + 0.587 * a[i + 1] + 0.114 * a[i + 2] > 170 ? 255 : 0; a[i] = a[i + 1] = a[i + 2] = v; }
+  x.putImageData(d, 0, 0);
+  return c;
+}
+
+/* 원본과 흑백본을 모두 읽고 합쳐요. 한쪽에서 놓친 학수번호를 다른 쪽이 잡아 줘요. */
 export async function readImage(file, onProgress) {
   const worker = await getWorker(onProgress);
-  const { data } = await worker.recognize(file);
-  return parseText(data.text || '');
+  const a = parseText((await worker.recognize(file)).data.text || '');
+  let b = { text: '', rows: [] };
+  try { b = parseText((await worker.recognize(await toBinary(file))).data.text || ''); } catch (e) { /* 흑백 변환이 안 되는 브라우저는 원본만 */ }
+  const rows = [...a.rows];
+  b.rows.forEach(r => {
+    // 숫자·분반이 같으면 같은 과목을 글자만 다르게 읽은 것으로 봐요(예: MAT1012 / ATL1012)
+    const same = rows.find(x => x.code === r.code || (x.code.slice(3) === r.code.slice(3) && x.section === r.section));
+    if (!same) rows.push(r); else if (!same.sem && r.sem) Object.assign(same, { year: r.year, sem: r.sem });
+  });
+  return { text: a.text + '\n' + b.text, rows };
 }
 
 /* OCR이 헷갈리기 쉬운 글자 바로잡기 */
@@ -46,7 +66,13 @@ export function fixCode(a, b) {
    과목명이 길어 학수번호가 다음 줄로 넘어가면 바로 앞 줄의 연도·학기를 써요. */
 export function parseText(text) {
   const rows = []; let last = null;
-  const lines = text.split(/\r?\n/);
+  // 휴대폰 화면처럼 학수번호가 줄바꿈으로 나뉘면("(CAS4151.01-" + "00)") 이어 붙여요
+  const raw = text.split(/\r?\n/), lines = [];
+  for (let i = 0; i < raw.length; i++) {
+    if (/[.,·:]\s?[0-9OoIlL]{2}\s?[-–~—]\s*$/.test(raw[i]) && i + 1 < raw.length) { lines.push(raw[i] + raw[i + 1].trim()); i++; }
+    else if (/[A-Za-z0-9|!]{3}\s?[0-9OoDQIlLi|!\]\[SsBZzAGbTgq]{4}\s?[.,·:]?\s*$/.test(raw[i]) && i + 1 < raw.length && /^\s*[.,·:]?\s?[0-9OoIlL]{2}\s?[-–~—]/.test(raw[i + 1])) { lines.push(raw[i] + raw[i + 1].trim()); i++; }
+    else lines.push(raw[i]);
+  }
   let header = null;
   for (const line of lines) {
     const ym = /(?<![A-Za-z0-9])(20[1-3]\d)(?![\d.])\s*[^\dA-Za-z]{0,2}\s*([^\s]{1,6})?/.exec(line);
