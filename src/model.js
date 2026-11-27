@@ -27,7 +27,7 @@ export function buildReq(pf) {
     const p2 = pf.track === '복수전공' ? '복수2' : pf.track === '부전공' ? '부전공' : null;
     const rows2 = sCode && p2 ? ((D.req[sCode].programs[p2] || {})[y] || []) : [];
     if (rows2.length) out.groups.push(majorGroup('m2', sCode, rows2, label, pf.second));
-    else out.groups.push({ k: 'm2', pending: true, n: `${pf.second} · ${label}`, areas: [], need: 0 });
+    else out.groups.push({ k: 'm2', pending: true, n: `${pf.second} (${label})`, areas: [], need: 0 });
   }
   // 교양 (단일전공 표 기준)
   const g = single.filter(a => ['BASIC', 'GE', 'RC'].includes(a.kind));
@@ -53,7 +53,7 @@ function majorGroup(k, code, rows, label, name) {
   if (major && major.need > sum) {
     areas.push(area({ id: major.id + '-REST', kind: 'MAJ', n: areas.length ? '그 외 전공 과목' : '전공 과목', need: major.need - sum, cat: '전기,전필,전선', must: [], rule: 'CREDITS', check: areas.length ? '' : '요람에서 영역 구분(전공기초·필수·선택)을 확인하지 못해 전공 과목 학점 합계로만 계산해요.' }, k, short));
   }
-  return { k, code, prefix: dep.prefix, short, n: `${name || dep.name} · ${label}`, areas, need: major ? major.need : areas.reduce((t, a) => t + a.need, 0) };
+  return { k, code, prefix: dep.prefix, short, n: `${name || dep.name} (${label})`, areas, need: major ? major.need : areas.reduce((t, a) => t + a.need, 0) };
 }
 
 /* 과목이 들어갈 수 있는 영역 후보 (지정 과목이 먼저) */
@@ -112,7 +112,7 @@ export function ruleText(a, R) {
   if (a.kind === 'RC') return `RC 교육 과목을 ${a.need}학점 이수해요.`;
   if (a.all) return `지정 과목 ${a.must.length}개(${names})를 모두 이수해요.`;
   const cat = a.cat.map(x => KIND_LABEL[x] || x).join('·');
-  return `${g ? g.n.split(' · ')[0] : ''} ${cat} 과목 중 ${a.need}학점 이상 이수해요.${a.must.length ? ` 지정 과목(${names})은 꼭 들어야 해요.` : ''}`;
+  return `${g ? g.n.split(' (')[0] : ''} ${cat} 과목 중 ${a.need}학점 이상 이수해요.${a.must.length ? ` 지정 과목(${names})은 꼭 들어야 해요.` : ''}`;
 }
 
 /* ---------- 학기 ---------- */
