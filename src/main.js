@@ -257,7 +257,7 @@ function missList() {
   const d = pastCodes(), t = nowCodes(), A0 = assign(R, d), out = [];
   if (A0.u3 < R.u3000) out.push(missItem('data-go="area" data-a="U3000"', `3·4000단위 과목 ${R.u3000}학점 중 ${fmt(A0.u3)}학점 이수`, '전공·교양 구분 없이 인정 가능'));
   allAreas(R).forEach(a => a.must.filter(k => !d.includes(k) && !t.includes(k) && !S.plan.some(x => x.c === k)).forEach(k => {
-    const gName = (groupOf(R, a.g) || { n: '' }).n.split(' (')[0];
+    const gName = (groupOf(R, a.g) || { n: '' }).n.split('(')[0];
     out.push(missItem(`data-go="area" data-a="${a.id}"`, `${esc(gName)} ${esc(a.n)} '${esc(CC(k).n)}' 미이수`, offered(k) ? '이번 학기 수강 가능' : '로드맵에 계획을 담아 두세요'));
   }));
   return out;
@@ -528,7 +528,7 @@ function profileText(pf, sep = ' · ') {
   if (!pf || !pf.year) return '';
   const a = [`${pf.year.slice(2)}학번`, `${pf.grade === '5' ? '5학년 이상' : pf.grade + '학년'}`];
   const tn = trackNames(pf);
-  if (tn.some(x => x.d)) a.push(`${pf.major} (1전공)`, ...tn.map(x => x.short)); else a.push(pf.major, ...tn.map(x => x.short));
+  if (tn.some(x => x.d)) a.push(`${pf.major}(1전공)`, ...tn.map(x => x.short)); else a.push(pf.major, ...tn.map(x => x.short));
   return a.map(esc).join(sep);
 }
 /* 추가 이수과정: 여러 개 고를 수 있어요. 고른 과정마다 학과(분야)를 골라요. */

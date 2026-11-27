@@ -94,6 +94,6 @@ export function tracksOf(pf) {
 // 화면에 쓰는 이름: "심리학 2전공(복수전공)", "통계학 부전공", "교직과정"
 export function trackNames(pf) {
   let n = 2;
-  return tracksOf(pf).filter(x => x.t === '교직과정' || x.d).map(x => x.t === '복수전공' ? { ...x, short: `${x.d} (${n}전공)`, long: `${x.d} ${n++}전공(복수전공)` }
-    : x.t === '교직과정' ? { ...x, short: '교직과정', long: '교직과정' } : { ...x, short: `${x.d} (${x.t})`, long: `${x.d} ${x.t}` });
+  return tracksOf(pf).filter(x => x.t === '교직과정' || x.d).map(x => x.t === '복수전공' ? { ...x, short: `${x.d}(${n}전공)`, long: `${x.d} ${n++}전공(복수전공)` }
+    : x.t === '교직과정' ? { ...x, short: '교직과정', long: '교직과정' } : { ...x, short: `${x.d}(${x.t})`, long: `${x.d} ${x.t}` });
 }
