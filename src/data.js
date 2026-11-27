@@ -18,7 +18,7 @@ export async function loadData() {
 export function C(code) {
   const x = D.courses[code];
   if (!x) return { code, n: code, cr: 3, d: '', k: '', g: '', u: unitOf(code) };
-  return { code, n: x[0], cr: x[1], d: x[2], k: x[3], g: x[4], guess: !!x[5], u: unitOf(code) };
+  return { code, n: x[0], cr: x[1], d: x[2], k: x[3], g: x[4], guess: !!x[5], t: x[6] || 0, u: unitOf(code) }; // t: 개설 학기 경향 1·2·3(둘 다)·0(모름)
 }
 export const unitOf = code => { const m = /(\d)\d{3}$/.exec(code); return m ? +m[1] * 1000 : 0; };
 export const SEC = id => D.secById[id];

@@ -192,7 +192,12 @@ def dump(name, obj):
     print(name, os.path.getsize(os.path.join(OUT, name)) // 1024, 'KB')
 
 
-cat_out = {k: [v['n'], v['cr'], v['d'], v['k'], v['g']] + ([1] if v.get('guess') else []) for k, v in sorted(catalog.items())}
+# 개설 학기 경향: 개설 이력(2025-1~2026-2)에서 1학기만 열렸으면 1, 2학기만이면 2, 둘 다면 3
+term_of = {}
+for h in rows('subject_history.csv'):
+    ts = {t.split('-')[1] for t in h['terms_offered'].split(';') if '-' in t}
+    term_of[h['subject_code']] = 3 if ts >= {'1', '2'} else int(ts.pop()) if ts else 0
+cat_out = {k: [v['n'], v['cr'], v['d'], v['k'], v['g'], 1 if v.get('guess') else 0, term_of.get(k, 0)] for k, v in sorted(catalog.items())}
 dump('courses.json', cat_out)
 dump('sections-2026-2.json', sections)
 dump('requirements.json', out_req)

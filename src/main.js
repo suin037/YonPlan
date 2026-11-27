@@ -443,6 +443,11 @@ function vAddPlan(p) {
     const rest = searchCatalog('', c => !blocked(c) && !first.includes(c) && groupFilter(f === 'all' && majorGroups.length ? majorGroups[0].k : f)(c) && (f === 'gen' || C(c).u >= 2000), 40);
     list = first.filter(groupFilter(f)).concat(rest);
   }
+  // 고른 학기(1·2학기)에 열릴 가능성이 높은 과목을 위로: 개설 이력이 그 학기와 맞음 → 모름 → 다른 학기에만 열림 (UT 피드백)
+  const smT = +String(sem).split('-')[1];
+  const fit = c => { const t = C(c).t; return t === 3 || t === smT ? 0 : t === 0 ? 1 : 2; };
+  list = list.map((c, i) => [c, i]).sort((a, b) => fit(a[0]) - fit(b[0]) || a[1] - b[1]).map(x => x[0]);
+  const termTxt = c => { const t = C(c).t; return t === 3 ? '매 학기 개설' : t ? `${t}학기 개설` : ''; };
   // 2단 필터: 고른 전공(또는 교양)의 요건 영역 — 전공기초·전공필수·전공선택 등
   const fg = f !== 'all' ? groupOf(R, f) : null;
   const A1 = assign(R, pastCodes().concat(nowCodes())); // 수강 중 과목까지 이수로 보고 ✓ 표시
@@ -460,7 +465,7 @@ function vAddPlan(p) {
     <div style="display:flex;flex-direction:column;gap:8px">
     ${list.length ? list.map(c => {
       const pl = S.plan.find(x => x.c === c); const on = sel.includes(c); const pre = prereqInfo(c, sem); const a = areaOf(R, c); const isRec = recs().some(r => r.c === c);
-      return `<div class="opt-wrap"><button type="button" class="opt" role="checkbox" aria-checked="${on}" data-act="addToggle" data-c="${c}" ${pl ? 'disabled' : ''}><span class="check" aria-hidden="true">${on ? '✓' : ''}</span><span class="grow"><span class="between"><b>${esc(CC(c).n)}</b><span class="muted tiny opt-code">${c}</span></span><span class="muted small">${CC(c).cr}학점${C(c).u >= 3000 ? ' · 3000단위' : ''}${offered(c) ? ` · ${NOW_TERM} 개설` : ''}</span>
+      return `<div class="opt-wrap"><button type="button" class="opt" role="checkbox" aria-checked="${on}" data-act="addToggle" data-c="${c}" ${pl ? 'disabled' : ''}><span class="check" aria-hidden="true">${on ? '✓' : ''}</span><span class="grow"><span class="between"><b>${esc(CC(c).n)}</b><span class="muted tiny opt-code">${c}</span></span><span class="muted small">${CC(c).cr}학점${C(c).u >= 3000 ? ' · 3000단위' : ''}${termTxt(c) ? ` · ${termTxt(c)}` : ''}</span>${fit(c) === 2 ? `<span class="small" style="color:var(--warn)">${smT}학기에는 열리지 않을 수 있어요</span>` : ''}
       <span class="tags">${pl ? `<span class="pill gray">이미 ${pl.sem} 계획에 있어요</span>` : isRec ? badge('rec') : ''}${a ? `<span class="pill ok">✓ ${esc(a.label)} 인정</span>` : '<span class="pill gray">일반선택</span>'}${pre.ok ? '' : '<span class="pill bad">! 선수과목 필요</span>'}</span></span></button><button type="button" class="opt-info" data-act="courseInfo" data-c="${c}" aria-label="${esc(CC(c).n)} 자세히 보기">ⓘ</button></div>`;
     }).join('') : `<p class="note">${q ? '검색 결과가 없어요. 다른 이름으로 찾아보세요.' : reqA ? `${esc(reqA.label)}에서 더 담을 과목이 없어요. 남은 과목은 이미 이수했거나 이번 학기에 수강 중이에요.` : '담을 수 있는 과목이 없어요.'}</p>`}
     </div>
