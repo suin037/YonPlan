@@ -615,7 +615,7 @@ function vRegister(p) {
     ${manual ? manualAdd(p, sems) : ''}
   </div>
   <div class="foot">${p.sel && p.sel.length ? `<button type="button" class="btn" data-act="regDone" data-sem="${manualSem(p, sems)}">${manualSem(p, sems)}에 ${p.sel.length}과목 추가하기</button>` : ''}
-  <button type="button" class="btn ${p.sel && p.sel.length ? 'weak' : p.onboard ? '' : 'weak'}" data-act="regFinish">${p.onboard ? (S.taken.length ? '다 했어요, 시작하기' : '나중에 등록하기') : '완료'}</button></div>`;
+  <button type="button" class="btn ${p.sel && p.sel.length ? 'weak' : p.onboard ? '' : 'weak'}" data-act="regFinish">${p.onboard ? (S.taken.length ? '완료' : '나중에 등록하기') : '완료'}</button></div>`;
 }
 const manualSem = (p, sems) => p.sem && sems.some(s => s.id === p.sem) ? p.sem : (sems.length ? sems[sems.length - 1].id : NOW_TERM);
 function manualAdd(p, sems) {
