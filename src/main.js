@@ -604,7 +604,7 @@ function vRegister(p) {
     <div><div style="font-size:21px;font-weight:800">${p.onboard ? '들은 과목을 등록해 주세요' : '등록한 과목'}</div><div class="muted small">런어스 '과거강좌조회' 화면을 캡처해 올리면 학기별로 한 번에 들어가요. ${NOW_TERM} 과목은 수강 중으로 들어가요.</div></div>
     <div class="card soft" style="display:flex;flex-direction:column;gap:10px">
       <div class="h3">런어스 캡처로 등록하기</div>
-      <p class="note" style="margin:0">학기마다 한 장씩, 여러 장을 한 번에 올릴 수 있어요. 사진은 서버로 보내지 않고 이 기기 안에서만 읽어요.</p>
+      <p class="note" style="margin:0">학기마다 한 장씩, 여러 장을 한 번에 올릴 수 있어요. 사진은 서버로 보내지 않고 이 기기 안에서만 읽습니다.</p>
       <button type="button" class="btn" data-act="openGuide">캡처 방법 보고 사진 올리기</button>
     </div>
     ${bySem.length || other.length ? bySem.map(([s, l]) => `<div class="between"><div class="h3">${s.id} · ${s.g}</div><span class="muted small">${s.k === 'now' ? badge('now') : ''} ${l.length}과목 · ${fmt(sumCr(l.map(x => x.c)))}학점</span></div>
@@ -644,7 +644,7 @@ const GUIDE = [
   { t: '"과거강좌조회"를 눌러요', d: '"나의강좌" 제목 오른쪽 버튼 네 개 중 두 번째, "과거강좌조회"를 눌러요.', img: 'learnus-main.jpg', focus: [0.61, 0.17, 0.27, 0.15], hi: [0.682, 0.218, 0.095, 0.078] },
   { t: '연도와 학기를 골라 검색해요', d: '"학위과정 조회" 화면에서 연도와 학기를 고르고 "검색"을 누르면 그 학기 강좌명과 학수번호가 표로 나와요. 1학년 1학기부터 이번 학기까지 차례로 해요.', img: 'learnus-past.jpg', focus: [0.2, 0.1, 0.34, 0.15], hi: [0.255, 0.145, 0.21, 0.09] },
   { t: '표가 보이게 화면을 캡처해요', d: '강조한 표 전체가 들어가게 캡처해요. 윈도우는 Win + Shift + S, 맥은 Cmd + Shift + 4예요. 학기마다 한 장씩이에요.', img: 'learnus-past.jpg', focus: [0, 0.3, 0.6, 0.66], hi: [0.012, 0.345, 0.975, 0.625], keys: true, tips: ['강좌명 옆 학수번호(예: ABC1234.01-00)가 잘리지 않게', '휴대폰으로 모니터를 찍으면 잘 안 읽혀요', '글자가 작으면 화면을 확대한 뒤 캡처'] },
-  { t: '캡처를 올리고 확인해요', d: '여러 장을 한 번에 올릴 수 있어요. 이렇게 읽은 과목이 학기별로 나오면, 수강철회했거나 F를 받은 과목은 체크를 풀고 등록해요.', img: 'app-check.jpg', focus: [0, 0.4, 1, 0.33], hi: [0.04, 0.527, 0.92, 0.104], tips: ['사진은 서버로 보내지 않고 이 기기 안에서만 읽어요', '처음 한 번 인식 엔진(약 7MB)을 내려받아요'] }
+  { t: '캡처를 올리고 확인해요', d: '여러 장을 한 번에 올릴 수 있어요. 이렇게 읽은 과목이 학기별로 나오면, 수강철회했거나 F를 받은 과목은 체크를 풀고 등록해요.', img: 'app-check.jpg', focus: [0, 0.4, 1, 0.33], hi: [0.04, 0.527, 0.92, 0.104], tips: ['사진은 서버로 보내지 않고 이 기기 안에서만 읽습니다', '처음 한 번 인식 엔진(약 7MB)을 내려받습니다'] }
 ];
 function guideArt(i) {
   const g = GUIDE[i], src = import.meta.env.BASE_URL + 'guide/' + g.img;
