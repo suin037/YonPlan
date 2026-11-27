@@ -721,3 +721,16 @@ body{letter-spacing:0}
 .src-list dd{margin:0;color:#4B5568}
 .note-list{margin:0;padding:0 0 0 16px;display:flex;flex-direction:column;gap:8px;font-size:13px;line-height:19px;color:#4B5568}
 .note-list li::marker{color:var(--sub)}
+/* 계획 과목 추가: 과목 상세 ⓘ (체크와 분리) */
+.opt-wrap{position:relative}
+.opt-wrap>.opt{width:100%}
+.opt-code{margin-right:30px}
+.opt-info{position:absolute;top:10px;right:10px;width:28px;height:28px;border:0;border-radius:8px;background:rgba(95,115,171,.16);color:#000;font:700 15px/28px var(--font);padding:0;cursor:pointer}
+.opt-info:hover{background:rgba(95,115,171,.26)}
+.sheet.cinfo{padding:12px 32px calc(24px + env(safe-area-inset-bottom,0px));gap:16px;animation:sheetUp .22s ease-out}
+.cinfo-grab{width:40px;height:4px;border-radius:2px;background:rgba(32,52,109,.18);align-self:center}
+.cinfo-list{margin:0;display:flex;flex-direction:column}
+.cinfo-list>div{display:grid;grid-template-columns:76px 1fr;gap:12px;padding:11px 0;border-top:1px solid rgba(32,52,109,.12);font-size:14px;line-height:20px}
+.cinfo-list dt{color:#4B5568}
+.cinfo-list dd{margin:0;color:#111827;font-weight:500}
+@keyframes sheetUp{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}

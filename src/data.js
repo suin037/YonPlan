@@ -10,7 +10,7 @@ export async function loadData() {
     get('courses.json'), get('sections-2026-2.json'), get('requirements.json'), get('prerequisites.json'), get('meta.json')
   ]);
   D.courses = courses; D.req = req; D.pre = pre; D.meta = meta;
-  D.sections = sections.map(([id, code, no, prof, room, meets, online]) => ({ id, code, no, prof, room, meets, online: !!online }));
+  D.sections = sections.map(([id, code, no, prof, room, meets, online, lang, grading]) => ({ id, code, no, prof, room, meets, online: !!online, lang: lang || '', grading: grading || '' }));
   D.sections.forEach(s => { D.secById[s.id] = s; (D.secByCode[s.code] = D.secByCode[s.code] || []).push(s); });
 }
 

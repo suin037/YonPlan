@@ -72,6 +72,7 @@ for x in courses:
     sections.append([
         x['course_id'], x['subject_code'], no, x['professor'].strip(), x['classroom'].strip(),
         sorted(times.get(x['course_id'], [])), 1 if x['has_online'] == 'Y' else 0,
+        x['language'].strip(), x['grading'].strip(),
     ])
 
 # ---------- 과목 개설 이력 ----------

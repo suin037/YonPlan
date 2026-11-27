@@ -271,6 +271,40 @@ function vMiss() {
     <button type="button" class="btn weak" data-tab="roadmap">로드맵에서 계획 담기</button>
   </div>`;
 }
+/* 과목 상세(계획 과목 추가의 ⓘ): 아래에서 올라오는 패널에 항목별로 보여 줘요. 체크 상태는 건드리지 않아요. */
+const LANG_NAME = { ko: '한국어', en: '영어', 기타외국어: '기타 외국어' };
+function sectionMode(x) {
+  const rooms = (x.room || '').split('/').map(r => r.trim()).filter(Boolean);
+  const real = rooms.filter(r => !/동영상|온라인|원격/.test(r));
+  if (!real.length && (x.online || rooms.length)) return '온라인';
+  return x.online ? '대면 + 온라인 콘텐츠' : '대면';
+}
+function uniq(a) { return [...new Set(a.filter(Boolean))]; }
+function courseInfoSheet(c) {
+  const k = CC(c), secs = D.secByCode[c] || [], raw = D.courses[c] || [];
+  const cat = raw[3], area = raw[4];
+  const per = (vals, unit) => vals.length > 1 ? `${vals.join(' · ')} <span class="muted small">(분반마다 달라요)</span>` : (vals[0] || unit);
+  const none = `${NOW_TERM} 미개설이라 확인할 수 없어요`;
+  const langs = uniq(secs.map(x => LANG_NAME[x.lang] || x.lang));
+  const modes = uniq(secs.map(sectionMode));
+  const grades = uniq(secs.map(x => ({ 절대: '절대평가', 상대: '상대평가', 'P/NP': 'P/NP' })[x.grading] || x.grading));
+  const pres = prereqs(c);
+  const rows = [
+    ['수업 언어', secs.length ? per(langs.map(l => l === '영어' ? '영어 강의' : l), '-') : none],
+    ['수업 방식', secs.length ? per(modes, '-') : none],
+    ['이수구분', esc([CAT_NAME[cat] || cat || '', area].filter(Boolean).join(' · ') || '-')],
+    ['내 요건', esc(areaOf(R, c) ? areaLabel(c) + ' 인정' : '일반선택')],
+    ['평가 방식', secs.length ? per(grades, '-') : none],
+    ['개설', secs.length ? `${NOW_TERM} ${secs.length}개 분반${uniq(secs.map(x => x.prof)).length ? ' · ' + esc(uniq(secs.map(x => x.prof)).slice(0, 3).join(', ')) + (uniq(secs.map(x => x.prof)).length > 3 ? ' 외' : '') : ''}` : `${NOW_TERM} 미개설`],
+    ['선수과목', pres.length ? pres.map(([q, t]) => `${esc(CC(q).n)}${t === 'R' ? '' : ' (권장)'} <span class="muted small">${isDone(q) ? '이수' : nowCodes().includes(q) ? '수강 중' : '미이수'}</span>`).join('<br>') : '등록된 선수과목 없음'],
+  ];
+  $layer.innerHTML = `<div class="dim" data-act="closeSheet"><div class="sheet cinfo" role="dialog" aria-modal="true" aria-labelledby="ciTitle">
+    <div class="cinfo-grab" aria-hidden="true"></div>
+    <div><div class="h2" id="ciTitle" style="margin:0">${esc(k.n)}</div><div class="muted small">${c} · ${k.cr}학점${C(c).u ? ' · ' + C(c).u + '단위' : ''}</div></div>
+    <dl class="cinfo-list">${rows.map(([a, b]) => `<div><dt>${a}</dt><dd>${b}</dd></div>`).join('')}</dl>
+    <button type="button" class="btn weak" data-act="closeSheet">닫기</button>
+  </div></div>`;
+}
 function vArea(p) {
   const a = p.a === 'U3000' ? U3() : areaById(R, p.a);
   if (!a) return `${top('졸업요건')}<div class="scroll"><p class="note">이 영역을 찾을 수 없어요. 학적이 바뀌었을 수 있어요.</p></div>`;
@@ -424,8 +458,8 @@ function vAddPlan(p) {
     <div style="display:flex;flex-direction:column;gap:8px">
     ${list.length ? list.map(c => {
       const pl = S.plan.find(x => x.c === c); const on = sel.includes(c); const pre = prereqInfo(c, sem); const a = areaOf(R, c); const isRec = recs().some(r => r.c === c);
-      return `<button type="button" class="opt" role="checkbox" aria-checked="${on}" data-act="addToggle" data-c="${c}" ${pl ? 'disabled' : ''}><span class="check" aria-hidden="true">${on ? '✓' : ''}</span><span class="grow"><span class="between"><b>${esc(CC(c).n)}</b><span class="muted tiny">${c}</span></span><span class="muted small">${CC(c).cr}학점${C(c).u >= 3000 ? ' · 3000단위' : ''}${offered(c) ? ` · ${NOW_TERM} 개설` : ''}</span>
-      <span class="tags">${pl ? `<span class="pill gray">이미 ${pl.sem} 계획에 있어요</span>` : isRec ? badge('rec') : ''}${a ? `<span class="pill ok">✓ ${esc(a.label)} 인정</span>` : '<span class="pill gray">일반선택</span>'}${pre.ok ? '' : '<span class="pill bad">! 선수과목 필요</span>'}</span></span></button>`;
+      return `<div class="opt-wrap"><button type="button" class="opt" role="checkbox" aria-checked="${on}" data-act="addToggle" data-c="${c}" ${pl ? 'disabled' : ''}><span class="check" aria-hidden="true">${on ? '✓' : ''}</span><span class="grow"><span class="between"><b>${esc(CC(c).n)}</b><span class="muted tiny opt-code">${c}</span></span><span class="muted small">${CC(c).cr}학점${C(c).u >= 3000 ? ' · 3000단위' : ''}${offered(c) ? ` · ${NOW_TERM} 개설` : ''}</span>
+      <span class="tags">${pl ? `<span class="pill gray">이미 ${pl.sem} 계획에 있어요</span>` : isRec ? badge('rec') : ''}${a ? `<span class="pill ok">✓ ${esc(a.label)} 인정</span>` : '<span class="pill gray">일반선택</span>'}${pre.ok ? '' : '<span class="pill bad">! 선수과목 필요</span>'}</span></span></button><button type="button" class="opt-info" data-act="courseInfo" data-c="${c}" aria-label="${esc(CC(c).n)} 자세히 보기">ⓘ</button></div>`;
     }).join('') : `<p class="note">${q ? '검색 결과가 없어요. 다른 이름으로 찾아보세요.' : reqA ? `${esc(reqA.label)}에서 더 담을 과목이 없어요. 남은 과목은 이미 이수했거나 이번 학기에 수강 중이에요.` : '담을 수 있는 과목이 없어요.'}</p>`}
     </div>
   </div>
@@ -816,6 +850,7 @@ document.addEventListener('click', e => {
     case 'addF': p.f = t.dataset.f; p.req = null; rerender(); break;
     case 'addReq': p.req = p.req === t.dataset.req ? null : t.dataset.req; rerender(); break;
     case 'addReqOff': p.req = null; rerender(); break;
+    case 'courseInfo': courseInfoSheet(t.dataset.c); break;
     case 'addToggle': { const k = t.dataset.c; p.sel = p.sel || []; p.sel = p.sel.includes(k) ? p.sel.filter(x => x !== k) : p.sel.concat(k); rerender(); break; }
     case 'addPlan': if (p.sel && p.sel.length) addPlans(p.sel, p.sem && futureSems().includes(p.sem) ? p.sem : futureSems()[0]); break;
     case 'removePlan': { const k = t.dataset.c; const old = S.plan.find(x => x.c === k); S.plan = S.plan.filter(x => x.c !== k); rerender(); toast(`${esc(CC(k).n)}을(를) 계획에서 뺐어요`, { t: '되돌리기', fn: () => { S.plan.push(old); rerender(); } }); break; }
