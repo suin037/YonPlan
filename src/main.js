@@ -266,7 +266,7 @@ function missList() {
 function vMiss() {
   const list = missList();
   return `${top('놓치기 쉬운 항목')}<div class="scroll">
-    <p class="note" style="margin:0">필수로 이수해야 하는 과목·학점 중에서 아직 이수하지 않았고, 이번 학기 수강이나 로드맵 계획에도 없는 항목이에요. 누르면 해당 요건으로 이동해요.</p>
+    <p class="note" style="margin:0">필수로 이수해야 하는 과목·학점 중에서 아직 이수하지 않았고, 이번 학기 수강이나 로드맵 계획에도 없는 항목입니다. 누르면 해당 요건으로 이동합니다.</p>
     ${list.length ? `<div class="f-miss f-miss-all">${list.join('')}</div>` : '<div class="card"><p class="note" style="margin:0">놓친 항목이 없어요. 필요한 과목이 모두 이수·수강 중이거나 계획에 들어 있어요.</p></div>'}
     <button type="button" class="btn weak" data-tab="roadmap">로드맵에서 계획 담기</button>
   </div>`;
