@@ -78,7 +78,7 @@ export const SETUP_FIELDS = [
   ['grade', '현재 학년', [['1', '1학년'], ['2', '2학년'], ['3', '3학년'], ['4', '4학년'], ['5', '5학년 이상']]],
   ['major', '본전공', DEPTS],
   ['tracks', '추가 이수과정', []],
-  ['grad', '목표 졸업 학기', (() => { const o = [['2026-2', '2026년 2학기']]; for (let y = NOW_YEAR + 1; y <= NOW_YEAR + 6; y++) for (const s of [1, 2]) o.push([`${y}-${s}`, `${y}년 ${s}학기`]); return o; })()]
+  ['grad', '졸업 예정', (() => { const o = [['2026-2', '2026년 2학기']]; for (let y = NOW_YEAR + 1; y <= NOW_YEAR + 6; y++) for (const s of [1, 2]) o.push([`${y}-${s}`, `${y}년 ${s}학기`]); return o; })()]
 ];
 /* 추가 이수과정: 여러 개 고를 수 있어요(다중 전공). 교직과정만 학과를 고르지 않아요. */
 export const TRACK_TYPES = ['복수전공', '융복합·연계전공', '부전공', '마이크로전공', '교직과정'];

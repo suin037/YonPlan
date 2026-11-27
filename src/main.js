@@ -193,7 +193,7 @@ function vHome() {
     <div class="f-total">
       <span class="f-total-l">전체 이수율</span>
       <span class="f-total-pct">${pct === null ? '—' : pct + '%'}</span>
-      <span class="f-total-r"><b>${fmt(tot)} / ${need || '—'}학점</b><span>목표 졸업 ${S.profile.grad}</span></span>
+      <span class="f-total-r"><b>${fmt(tot)} / ${need || '—'}학점</b><span>${gradDate(S.profile.grad)} 졸업 예정</span></span>
       ${need ? `<div class="f-total-bar"><i style="width:${Math.min(tot, need) / need * 100}%"></i></div>` : ''}
     </div>
     ${S.taken.length ? '' : '<button type="button" class="btn" data-go="register">런어스 캡처로 들은 과목 등록하기</button>'}
@@ -425,7 +425,7 @@ function groupFilter(f) {
 }
 function vAddPlan(p) {
   const fut = futureSems();
-  if (!fut.length) return `${top('계획 과목 추가')}<div class="scroll"><p class="note">목표 졸업 학기가 이번 학기여서 계획할 다음 학기가 없습니다. 내 정보에서 목표 졸업 학기를 변경할 수 있습니다.</p></div>`;
+  if (!fut.length) return `${top('계획 과목 추가')}<div class="scroll"><p class="note">이번 학기에 졸업 예정이어서 계획할 다음 학기가 없습니다. 내 정보에서 졸업 예정 시기를 변경할 수 있습니다.</p></div>`;
   const sem = p.sem && fut.includes(p.sem) ? p.sem : fut[0];
   const q = (p.q || '').trim(), sel = p.sel || [];
   const blocked = c => isTaken(c);
@@ -486,7 +486,7 @@ function vMe() {
     <button type="button" class="f-me-link one" data-go="source"><span class="f-me-link-t"><b>정보 출처 및 유의사항</b></span><span class="f-me-chev" aria-hidden="true">›</span></button>
   </div>`;
   const gp = gradParts(pf);
-  const rows = [['입학 연도', pf.year + '년'], ['현재 학년', pf.grade === '5' ? '5학년 이상' : pf.grade + '학년'], ['본전공', pf.major], ['추가 이수과정', tracksOf(pf).length ? tracksOf(pf).map(x => x.t).join(', ') : '없음 (단일전공)'], ...tracksOf(pf).filter(x => needsDept(x.t)).map(x => [TRACK_DEPT_LABEL[x.t], x.d || '-']), ['목표 졸업 학기', `${pf.grad.split('-')[0]}년 ${pf.grad.split('-')[1]}학기`]];
+  const rows = [['입학 연도', pf.year + '년'], ['현재 학년', pf.grade === '5' ? '5학년 이상' : pf.grade + '학년'], ['본전공', pf.major], ['추가 이수과정', tracksOf(pf).length ? tracksOf(pf).map(x => x.t).join(', ') : '없음 (단일전공)'], ...tracksOf(pf).filter(x => needsDept(x.t)).map(x => [TRACK_DEPT_LABEL[x.t], x.d || '-']), ['졸업 예정', gradDate(pf.grad)]];
   return `<div class="scroll f-me">${head}
     <div class="f-me-profile"><img class="f-me-avatar" src="${B}figma/profile.svg" alt="" width="49" height="49"><div class="f-me-pt"><div class="f-me-name"><b>${esc(S.name) || '내 학적'}</b><span class="f-me-grade">${pf.grade === '5' ? '5학년+' : pf.grade + '학년'}</span></div><p>${majorLine(pf, ' / ')}</p></div></div>
     <div class="f-me-sec"><h2>나의 학적 정보</h2><button type="button" class="f-me-edit" data-go="setup">정보 수정</button></div>
@@ -554,6 +554,8 @@ function setupOptions(k, d) {
   return opts.map(([v, t]) => `<option value="${v}" ${sel(v)}>${t}</option>`).join('');
 }
 /* 목표 졸업: 학년과 학기를 따로 고르면 입학 연도로 '2027년 2학기'를 계산해요 */
+/* 마지막 수강 학기 → 졸업 시기: 1학기까지면 그해 8월, 2학기까지면 다음 해 2월 */
+const gradDate = id => { if (!id) return ''; const [y, sm] = id.split('-'); return sm === '1' ? `${y}년 8월` : `${+y + 1}년 2월`; };
 const gradOf = (year, g, sm) => year && g && sm ? `${+year + +g - 1}-${sm}` : '';
 function gradParts(d) {
   if (!d.grad || !d.year) return { g: d.gradG || '', sm: d.gradS || '' };
@@ -561,13 +563,13 @@ function gradParts(d) {
   return { g: d.gradG || String(+gy - +d.year + 1), sm: d.gradS || gs };
 }
 function gradField(d) {
-  const { g, sm } = gradParts(d);
-  const ok = gr => !d.year || gradOf(d.year, gr, '2') >= NOW_TERM;
-  const res = gradOf(d.year, g, sm);
-  return `<div class="field"><label>목표 졸업 시기</label>
-    <div class="row" style="gap:8px"><select id="f-gradG" data-field="gradG" class="${g ? '' : 'unset'}" style="flex:1" ${d.year ? '' : 'disabled'} aria-label="졸업 학년"><option value="" ${g ? '' : 'selected'} disabled>학년</option>${[1, 2, 3, 4, 5, 6].filter(ok).map(x => `<option value="${x}" ${String(x) === String(g) ? 'selected' : ''}>${x}학년</option>`).join('')}</select>
-    <select id="f-gradS" data-field="gradS" class="${sm ? '' : 'unset'}" style="flex:1" ${d.year ? '' : 'disabled'} aria-label="졸업 학기"><option value="" ${sm ? '' : 'selected'} disabled>학기</option><option value="1" ${sm === '1' ? 'selected' : ''}>1학기</option><option value="2" ${sm === '2' ? 'selected' : ''}>2학기</option></select></div>
-    <span class="muted small">${!d.year ? '입학 연도를 먼저 선택해 주세요.' : res ? (res < NOW_TERM ? '이미 지난 학기입니다. 다시 선택해 주세요.' : `${res.replace('-', '년 ')}학기에 졸업합니다.`) : '보통 4학년 2학기에 졸업합니다.'}</span></div>`;
+  // 학생들이 쓰는 표현(2028년 2월 졸업)으로 고르고, 안에서는 마지막 수강 학기(2027-2)로 저장해요
+  const [ny] = NOW_TERM.split('-').map(Number);
+  const opts = []; for (let y = ny; y <= ny + 6; y++) for (const sm of ['1', '2']) { const id = `${y}-${sm}`; if (id >= NOW_TERM) opts.push(id); }
+  const gl = id => d.year ? ` (${+id.split('-')[0] - +d.year + 1}학년 ${id.split('-')[1]}학기까지)` : '';
+  return `<div class="field"><label for="f-grad">졸업 예정</label>
+    <select id="f-grad" data-field="grad" class="${d.grad ? '' : 'unset'}"><option value="" ${d.grad ? '' : 'selected'} disabled>졸업 예정 시기</option>${opts.map(id => `<option value="${id}" ${id === d.grad ? 'selected' : ''}>${gradDate(id)}${gl(id)}</option>`).join('')}</select>
+    <span class="muted small">${d.grad ? `${d.grad.replace('-', '년 ')}학기까지 수강하고 ${gradDate(d.grad)}에 졸업합니다.` : '2월 졸업은 2학기, 8월 졸업은 1학기까지 수강합니다.'}</span></div>`;
 }
 /* 홈 머리말용: "24학번 / 경제학 1전공 · 심리학 2전공(복수전공)" */
 function homeProfile(pf) {
@@ -957,7 +959,7 @@ document.addEventListener('change', e => {
     const f = el.dataset.field; p.draft = p.draft || Object.assign({}, S.profile); p.draft[f] = el.value;
     const nm = document.getElementById('f-name'); if (nm) p.name = nm.value;
     if (f === 'major') { p.draft.tracks = tracksOf(p.draft).map(x => x.d === el.value ? { ...x, d: '' } : x); delete p.draft.track; delete p.draft.second; }
-    if (f === 'gradG' || f === 'gradS' || f === 'year') { const gp = gradParts(Object.assign({}, p.draft, { grad: f === 'year' ? '' : p.draft.grad })); p.draft.gradG = gp.g; p.draft.gradS = gp.sm; p.draft.grad = gradOf(p.draft.year, gp.g, gp.sm); }
+    if (f === 'gradG' || f === 'gradS') { const gp = gradParts(Object.assign({}, p.draft, { grad: f === 'year' ? '' : p.draft.grad })); p.draft.gradG = gp.g; p.draft.gradS = gp.sm; p.draft.grad = gradOf(p.draft.year, gp.g, gp.sm); }
     rerender(); return;
   }
 });
