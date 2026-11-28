@@ -768,7 +768,7 @@ function render(y) {
   if (c.s === 'roadmap' && c.p && c.p.scrollTo) { const el = document.getElementById('sem-' + c.p.scrollTo); if (el && sc) { sc.scrollTop = el.offsetTop - sc.offsetTop - 8; } delete c.p.scrollTo; }
   if (S.flash.length) { setTimeout(() => { S.flash = []; }, 3500); }
   if (cur().s === 'guide') requestAnimationFrame(animateGuide);
-  if (c.s === 'home' && S.onboarded && S.mode !== 'ut' && S.mode !== 'new' && tourAt < 0 && !store.get(TOUR_KEY)) setTimeout(() => { if (tourAt < 0 && cur().s === 'home') tour(0); }, 400);
+  if (c.s === 'home' && S.onboarded && S.mode !== 'ut' && S.mode !== 'new' && tourAt < 0 && !store.get(TOUR_KEY)) setTimeout(() => { if (tourAt < 0 && cur().s === 'home') tourStart(); }, 400);
   save();
 }
 function rerender() { saveScroll(); render(cur().y); }
@@ -792,15 +792,25 @@ const TOUR = [
   { s: 'roadmap', q: () => { const f = semesters(S.profile).find(x => x.k === 'future'); return f && document.getElementById('sem-' + f.id); }, em: () => { const f = semesters(S.profile).find(x => x.k === 'future'); return f && document.querySelector(`#sem-${f.id} .f-add`); }, t: '다음 학기 계획', d: '"+ 과목 추가"로 다음 학기 계획을 세웁니다.' }
 ];
 let tourAt = -1;
-function tour(i = 0) {
-  // 화면에 없는 항목(예: 놓치기 쉬운 항목이 없을 때)은 건너뛰어요
+// 둘러보기는 언제나 예시 학생 데이터로 보여 줘요(내 데이터가 비어 있어도 모든 화면이 나오도록). 끝나면 원래 상태로 돌아가요.
+let tourSaved = null;
+function tourStart() {
+  if (tourAt >= 0) return;
+  tourSaved = { S, stack: S.stack.map(x => ({ ...x })) };
+  if (S.mode !== 'demo') S = withUi(demoFresh(), 'tour');
+  S.stack = [{ s: 'home', p: {} }]; render(0); tourAt = 0;
+  tour(0);
+}
+function tour(i = 0, dir = 1) {
+  // 화면에 없는 항목은 가던 방향으로 건너뛰어요(이전으로 갈 때는 앞쪽으로)
+  if (i < 0) return tour(0, 1);
   const step = TOUR[i]; if (!step) return tourEnd();
   tourAt = i;
   const want = step.from ? [{ s: step.from, p: {} }, { s: step.s, p: {} }] : [{ s: step.s, p: {} }];
   if (S.stack.map(x => x.s).join() !== want.map(x => x.s).join()) { S.stack = want; render(0); }
   // 기다리지 않고 바로 그려요(스크롤과 위치 계산은 같은 순간에 끝나서 어긋나지 않아요)
   const el = typeof step.q === 'function' ? step.q() : document.querySelector('#screen ' + step.q);
-  if (!el) return tour(i + 1 < TOUR.length ? i + 1 : TOUR.length);
+  if (!el) return tour(i + dir, dir);
   // 화면 안 스크롤 영역만 움직여요(바깥 페이지는 그대로)
   const sc = $screen.querySelector('.scroll');
   if (sc && $screen.contains(el)) { const a = sc.getBoundingClientRect(), r = el.getBoundingClientRect(); sc.scrollTop += r.top - a.top - Math.max(16, (a.height - r.height) / 2); }
@@ -834,7 +844,7 @@ function tourDraw(i, el) {
       // 이동 단계: 강조된 버튼을 직접 눌러도 넘어가요
       ? `<button type="button" class="tour-em tap" data-act="tourTap" data-i="${i + 1}" aria-label="${step.t}" style="left:${em.x}px;top:${em.y}px;width:${em.w}px;height:${em.h}px;border-radius:${em.rad}px"></button>`
       : `<div class="tour-em" style="left:${em.x}px;top:${em.y}px;width:${em.w}px;height:${em.h}px;border-radius:${em.rad}px"></div>`) : ''}
-    <div class="tour-tip" style="${tipPos}"><div class="between"><b id="tourT">${step.t}</b><span class="muted small">${i + 1} / ${TOUR.length}</span></div>
+    <div class="tour-tip" style="${tipPos}"><div class="between"><b id="tourT">${step.t}</b><span class="muted small">${S.mode === 'tour' ? '예시 화면 · ' : ''}${i + 1} / ${TOUR.length}</span></div>
       <p>${step.d}</p>
       <div class="tour-btns"><button type="button" class="link" data-act="tourEnd">건너뛰기</button><span class="grow"></span>${i ? `<button type="button" class="btn weak sm" data-act="tourGo" data-i="${i - 1}">이전</button>` : ''}<button type="button" class="btn sm" data-act="${last ? 'tourEnd' : step.tap ? 'tourTap' : 'tourGo'}" data-i="${i + 1}">${last ? '시작하기' : '다음'}</button></div></div>
   </div>`;
@@ -846,7 +856,12 @@ function tourTap(i) {
   if (em) { const d = document.createElement('i'); d.className = 'tour-ripple'; em.appendChild(d); }
   setTimeout(() => tour(i), 600);
 }
-function tourEnd() { tourAt = -1; store.set(TOUR_KEY, 1); $layer.innerHTML = ''; S.stack = [{ s: 'home', p: {} }]; render(0); }
+function tourEnd() {
+  tourAt = -1; store.set(TOUR_KEY, 1); $layer.innerHTML = '';
+  if (tourSaved) { S = tourSaved.S; S.stack = tourSaved.stack; tourSaved = null; } else S.stack = [{ s: 'home', p: {} }];
+  if (S.mode === 'demo' && cur().s !== 'me') S.stack = [{ s: 'home', p: {} }];
+  render(0);
+}
 window.addEventListener('resize', () => { if (tourAt >= 0) tour(tourAt); });
 
 /* ---------- 처음 방문 안내 ---------- */
@@ -950,10 +965,10 @@ document.addEventListener('click', e => {
     case 'back': back(); break;
     case 'closeSheet': if (e.target === t || t.tagName === 'BUTTON') closeSheet(); break;
     case 'startReal': startMode('real', { go: store.get(KEY.real) && store.get(KEY.real).onboarded ? 'home' : 'setup' }); break;
-    case 'tourGo': tour(+t.dataset.i); break;
+    case 'tourGo': tour(+t.dataset.i, +t.dataset.i < tourAt ? -1 : 1); break;
     case 'tourTap': tourTap(+t.dataset.i); break;
     case 'tourEnd': tourEnd(); break;
-    case 'tourShow': tour(0); break;
+    case 'tourShow': tourStart(); break;
     case 'demo': startMode('demo'); toast('예시 데이터로 체험을 시작합니다.'); break;
     case 'demoReset': startMode('demo', { reset: true, go: 'me' }); toast('예시 데이터를 처음 상태로 되돌렸습니다.'); break;
     case 'demoEnd': startMode('real', { go: 'me' }); toast('체험을 종료했습니다.'); break;
