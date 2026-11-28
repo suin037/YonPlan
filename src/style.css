@@ -759,7 +759,7 @@ body{letter-spacing:0}
 
 /* ---------- 사용법 둘러보기(코치마크) ---------- */
 .tour{position:absolute;inset:0;z-index:60}
-.tour-hole{position:absolute;border-radius:16px;box-shadow:0 0 0 9999px rgba(10,20,50,.6);outline:2px solid #fff;transition:all .25s ease;pointer-events:none}
+.tour-hole{position:absolute;border-radius:16px;box-shadow:0 0 0 9999px rgba(10,20,50,.6);transition:all .25s ease;pointer-events:none}
 .tour-tip{position:absolute;left:16px;right:16px;background:#fff;border-radius:18px;padding:16px 16px 12px;display:flex;flex-direction:column;gap:8px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
 .tour-tip b{font-size:16px;font-weight:800}
 .tour-tip p{margin:0;font-size:13.5px;line-height:21px;color:var(--g700)}

@@ -786,7 +786,10 @@ const TOUR = [
   { s: 'req', from: 'home', q: '.gh + .card .li', t: '영역별 요건', d: '영역마다 이수 학점과 남은 학점을 보여 줍니다. 누르면 인정된 과목과 남은 지정 과목을 확인할 수 있습니다.' },
   // 이동 과정: 하단 탭의 로드맵을 눌러 탭이 넘어가는 모습을 보여 줘요
   { s: 'req', from: 'home', q: () => document.querySelector('#tabs [data-tab="roadmap"]'), tap: true, t: '로드맵으로 이동', d: '하단 탭에서 "로드맵"을 누르면 학기별 로드맵으로 넘어갑니다.' },
-  { s: 'roadmap', q: () => { const f = semesters(S.profile).find(x => x.k === 'future'); return f && (document.querySelector(`#sem-${f.id} .f-add`) || document.getElementById('sem-' + f.id)); }, t: '학기별 로드맵', d: '지난 학기에는 이수한 과목과 남은 학기에는 들을 과목을 담아둘 수 있습니다. "+ 과목 추가"로 다음 학기 계획을 세웁니다.' }
+  // 로드맵 1: 학기에 과목이 담겨 있는 모습(이번 학기 펼침)
+  { s: 'roadmap', q: () => document.getElementById('sem-' + NOW_TERM), t: '학기별 로드맵', d: '지난 학기에는 이수한 과목과 남은 학기에는 들을 과목을 담아둘 수 있습니다.' },
+  // 로드맵 2: 다음 학기의 '+ 과목 추가' 버튼을 따로 강조
+  { s: 'roadmap', q: () => { const f = semesters(S.profile).find(x => x.k === 'future'); return f && document.getElementById('sem-' + f.id); }, em: () => { const f = semesters(S.profile).find(x => x.k === 'future'); return f && document.querySelector(`#sem-${f.id} .f-add`); }, t: '다음 학기 계획', d: '"+ 과목 추가"로 다음 학기 계획을 세웁니다.' }
 ];
 let tourAt = -1;
 function tour(i = 0) {
@@ -807,18 +810,21 @@ function tour(i = 0) {
 // 휴대폰 틀의 테두리(데스크톱 12px)를 뺀 안쪽 기준 좌표
 function tourRect(el, pad) {
   const phone = document.getElementById('phone'), pr = phone.getBoundingClientRect(), r = el.getBoundingClientRect();
-  return { x: r.left - pr.left - phone.clientLeft - pad, y: r.top - pr.top - phone.clientTop - pad, w: r.width + pad * 2, h: r.height + pad * 2, W: phone.clientWidth, H: phone.clientHeight };
+  // 배경이 있는 카드는 테두리에 딱 맞게, 배경 없는 묶음은 여백을 넉넉히 줘서 글자가 가장자리에 붙지 않게
+  const cs = getComputedStyle(el), hasBg = cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && cs.backgroundColor !== 'transparent';
+  const p = pad === undefined ? (hasBg ? 0 : 10) : pad, rad = (parseFloat(cs.borderTopLeftRadius) || 0) + p;
+  return { x: r.left - pr.left - phone.clientLeft - p, y: r.top - pr.top - phone.clientTop - p, w: r.width + p * 2, h: r.height + p * 2, rad: Math.max(rad, 10), W: phone.clientWidth, H: phone.clientHeight };
 }
 function tourDraw(i, el) {
   const step = TOUR[i], last = i === TOUR.length - 1;
-  const { x, y, w, h, W, H } = tourRect(el, 6), below = y + h / 2 < H / 2;
+  const { x, y, w, h, rad, W, H } = tourRect(el), below = y + h / 2 < H / 2;
   const tipPos = below ? `top:${Math.min(y + h + 12, H - 210)}px` : `bottom:${Math.max(H - y + 12, 20)}px`;
   // 눌러야 하는 버튼은 진하게 강조(깜빡이는 테두리)
-  const emEl = step.tap ? el : step.em ? document.querySelector('#screen ' + step.em) : null;
+  const emEl = step.tap ? el : typeof step.em === 'function' ? step.em() : step.em ? document.querySelector('#screen ' + step.em) : null;
   const em = emEl ? tourRect(emEl, 3) : null;
   $layer.innerHTML = `<div class="tour" role="dialog" aria-modal="true" aria-labelledby="tourT">
-    <div class="tour-hole" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px"></div>
-    ${em ? `<div class="tour-em ${step.tap ? 'tap' : ''}" style="left:${em.x}px;top:${em.y}px;width:${em.w}px;height:${em.h}px"></div>` : ''}
+    <div class="tour-hole" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;border-radius:${rad}px"></div>
+    ${em ? `<div class="tour-em ${step.tap ? 'tap' : ''}" style="left:${em.x}px;top:${em.y}px;width:${em.w}px;height:${em.h}px;border-radius:${em.rad}px"></div>` : ''}
     <div class="tour-tip" style="${tipPos}"><div class="between"><b id="tourT">${step.t}</b><span class="muted small">${i + 1} / ${TOUR.length}</span></div>
       <p>${step.d}</p>
       <div class="tour-btns"><button type="button" class="link" data-act="tourEnd">건너뛰기</button><span class="grow"></span>${i ? `<button type="button" class="btn weak sm" data-act="tourGo" data-i="${i - 1}">이전</button>` : ''}<button type="button" class="btn sm" data-act="${last ? 'tourEnd' : step.tap ? 'tourTap' : 'tourGo'}" data-i="${i + 1}">${last ? '시작하기' : step.tap ? '눌러 보기' : '다음'}</button></div></div>
