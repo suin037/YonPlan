@@ -67,9 +67,13 @@ const semLabel = id => { const x = semesters(S.profile).find(s => s.id === id); 
 const areaLabel = code => { const a = areaOf(R, code); return a ? a.label : '일반선택'; };
 const offered = code => D.secByCode[code] ? D.secByCode[code].length : 0;
 
-/* 아직 계획하지 않은 지정 과목을 추천해요. 선수과목이 있으면 그 다음 학기에 놓아요. */
+/* 추천 기능: 지금은 꺼 둠(피드백 반영). 다시 쓰려면 true로 바꾸거나 recommend-feature 브랜치를 보세요.
+   켜면 아직 계획하지 않은 지정 과목을 로드맵 남은 학기에 점선 '추천'으로 놓아요(선수과목이 있으면 그 다음 학기). */
+const RECOMMEND = false;
+/* 아직 듣지도 계획하지도 않은 지정(필수) 과목 — 계획 과목 추가 목록 맨 위에 보여 줘요 */
+const mustTodo = () => R.ok ? [...new Set(allAreas(R).flatMap(a => a.must))].filter(c => !isTaken(c) && !S.plan.some(p => p.c === c) && D.courses[c]) : [];
 function recs() {
-  if (!R.ok) return [];
+  if (!RECOMMEND || !R.ok) return [];
   const fut = futureSems(); if (!fut.length) return [];
   const planned = S.plan.map(p => p.c);
   const out = [];
@@ -227,7 +231,7 @@ function vReq(p = {}) {
     ${head}
     ${mustLeft.length ? `<div class="card soft" style="display:flex;flex-direction:column;gap:2px">
       <div class="h3">아직 듣지 않은 필수 과목</div>
-      ${mustLeft.map(([a, k]) => { const st = statusOf(k); return `<button type="button" class="li" data-go="area" data-a="${a.id}"><span class="grow"><b>${esc(CC(k).n)}</b><br><span class="muted small">${esc(a.label)} · ${CC(k).cr}학점</span></span>${st ? badge(st) : '<span class="pill gray">미계획</span>'}<span class="chev">›</span></button>`; }).join('')}
+      ${mustLeft.map(([a, k]) => { const st = statusOf(k); return `<button type="button" class="li" data-go="area" data-a="${a.id}"><span class="grow"><b>${esc(CC(k).n)}</b><br><span class="muted small">${esc(a.label)} · ${CC(k).cr}학점</span></span>${st ? badge(st) : '<span class="pill gray">미이수</span>'}<span class="chev">›</span></button>`; }).join('')}
     </div>` : ''}
     ${R.groups.map(g => g.pending ? `<div class="between gh"><div class="h2">${esc(g.n)}</div><span class="pill gray">준비 중</span></div><div class="card"><p class="note" style="margin:0">${esc(g.n)} 요건은 준비 중입니다. 현재 ${Object.keys(SUPPORTED).join(' · ')}을 지원합니다.</p></div>`
       : `<div class="between gh"><div class="h2">${esc(g.n)}</div><span class="muted small num">${numTxt(A0.groupCr[g.k] || 0, A1.groupCr[g.k] || 0, g.need)}학점</span></div>
@@ -326,7 +330,7 @@ function vArea(p) {
     <div><div class="h3">영역 규칙</div><p class="note" style="margin:4px 0 0">${esc(rule)}</p></div>
     ${a.check ? `<div class="card" style="display:flex;flex-direction:column;gap:4px"><div class="row"><span class="pill gray">확인 중</span><b class="small">학교 자료에서 확인하고 있는 내용입니다</b></div><p class="note" style="margin:0">${esc(a.check)}</p></div>` : ''}
     ${left.length ? `<div class="card" style="display:flex;flex-direction:column;gap:8px;box-shadow:inset 0 0 0 1.5px var(--g900)"><div class="between"><div class="h3">남은 지정 과목</div><span class="muted small">${left.length}과목</span></div>
-      ${left.map(k => { const st = statusOf(k); return `<div style="display:flex;flex-direction:column;gap:4px"><div class="between"><b>${esc(CC(k).n)}</b>${st ? badge(st) : '<span class="pill gray">미계획</span>'}</div><span class="muted small">${k} · ${CC(k).cr}학점 · ${D.secByCode[k] ? `${NOW_TERM} 개설 ${D.secByCode[k].length}개 분반` : `${NOW_TERM} 미개설`}</span></div>`; }).join('')}</div>` : ''}
+      ${left.map(k => { const st = statusOf(k); return `<div style="display:flex;flex-direction:column;gap:4px"><div class="between"><b>${esc(CC(k).n)}</b>${st ? badge(st) : '<span class="pill gray">미이수</span>'}</div><span class="muted small">${k} · ${CC(k).cr}학점 · ${D.secByCode[k] ? `${NOW_TERM} 개설 ${D.secByCode[k].length}개 분반` : `${NOW_TERM} 미개설`}</span></div>`; }).join('')}</div>` : ''}
     ${now.length ? `<div class="card" style="display:flex;flex-direction:column;gap:2px"><div class="h3">이번 학기 수강 중인 과목</div>${now.map(k => `<div class="li"><span class="grow"><b>${esc(CC(k).n)}</b><br><span class="muted small">${CC(k).cr}학점</span></span>${badge('now')}</div>`).join('')}</div>` : ''}
     ${plans.length ? `<div class="card" style="display:flex;flex-direction:column;gap:2px"><div class="h3">로드맵에 넣어 둔 과목</div>${plans.map(x => `<div class="li"><span class="grow"><b>${esc(CC(x.c).n)}</b><br><span class="muted small">${x.sem} · ${CC(x.c).cr}학점</span></span>${badge('plan')}<button type="button" class="link" data-act="removePlan" data-c="${x.c}">빼기</button></div>`).join('')}</div>` : ''}
     <div class="card" style="display:flex;flex-direction:column;gap:2px"><div class="between"><div class="h3">이수한 과목</div><span class="muted small">${done.length}과목</span></div>${done.length ? done.map(k => `<div class="li"><span class="grow"><b>${esc(CC(k).n)}</b><br><span class="muted small">${semOf(k)} · ${CC(k).cr}학점</span></span>${badge('done')}</div>`).join('') : '<p class="note">아직 이수한 과목이 없어요.</p>'}</div>
@@ -436,9 +440,9 @@ function vAddPlan(p) {
   const majorGroups = R.groups.filter(g => g.k !== 'gen' && !g.pending);
   let list;
   if (q) list = searchCatalog(q, c => !blocked(c) && inReq(c) && groupFilter(f)(c), 60);
-  else if (req) list = recs().map(r => r.c).filter(inReq).concat(searchCatalog('', c => !blocked(c) && inReq(c) && !recs().some(r => r.c === c) && (req === 'U3000' || D.courses[c][3]), 60).sort((x, y) => offered(y) - offered(x)));
+  else if (req) list = mustTodo().filter(inReq).concat(searchCatalog('', c => !blocked(c) && inReq(c) && !mustTodo().includes(c) && (req === 'U3000' || D.courses[c][3]), 60).sort((x, y) => offered(y) - offered(x)));
   else {
-    const first = recs().map(r => r.c);
+    const first = mustTodo();
     const rest = searchCatalog('', c => !blocked(c) && !first.includes(c) && groupFilter(f === 'all' && majorGroups.length ? majorGroups[0].k : f)(c) && (f === 'gen' || C(c).u >= 2000), 40);
     list = first.filter(groupFilter(f)).concat(rest);
   }
@@ -463,9 +467,9 @@ function vAddPlan(p) {
     <div class="h3">${q ? `"${esc(q)}" 검색 결과` : reqA ? `${esc(reqA.label)}에 인정되는 과목` : '내 졸업요건에 필요한 과목'}</div>
     <div style="display:flex;flex-direction:column;gap:8px">
     ${list.length ? list.map(c => {
-      const pl = S.plan.find(x => x.c === c); const on = sel.includes(c); const pre = prereqInfo(c, sem); const a = areaOf(R, c); const isRec = recs().some(r => r.c === c);
+      const pl = S.plan.find(x => x.c === c); const on = sel.includes(c); const pre = prereqInfo(c, sem); const a = areaOf(R, c); const isRec = mustTodo().includes(c);
       return `<div class="opt-wrap"><button type="button" class="opt" role="checkbox" aria-checked="${on}" data-act="addToggle" data-c="${c}" ${pl ? 'disabled' : ''}><span class="check" aria-hidden="true">${on ? '✓' : ''}</span><span class="grow"><span class="between"><b>${esc(CC(c).n)}</b><span class="muted tiny opt-code">${c}</span></span><span class="muted small">${CC(c).cr}학점${C(c).u >= 3000 ? ' · 3000단위' : ''}${termTxt(c) ? ` · ${termTxt(c)}` : ''}</span>${fit(c) === 2 ? `<span class="small" style="color:var(--warn)">${smT}학기에는 개설되지 않을 수 있습니다.</span>` : ''}
-      <span class="tags">${pl ? `<span class="pill gray">이미 ${pl.sem} 계획에 있어요</span>` : isRec ? badge('rec') : ''}${a ? `<span class="pill ok">✓ ${esc(a.label)} 인정</span>` : '<span class="pill gray">일반선택</span>'}${pre.ok ? '' : '<span class="pill bad">! 선수과목 필요</span>'}</span></span></button><button type="button" class="opt-info" data-act="courseInfo" data-c="${c}" aria-label="${esc(CC(c).n)} 자세히 보기">ⓘ</button></div>`;
+      <span class="tags">${pl ? `<span class="pill gray">이미 ${pl.sem} 계획에 있어요</span>` : isRec ? '<span class="pill gray">미이수 필수</span>' : ''}${a ? `<span class="pill ok">✓ ${esc(a.label)} 인정</span>` : '<span class="pill gray">일반선택</span>'}${pre.ok ? '' : '<span class="pill bad">! 선수과목 필요</span>'}</span></span></button><button type="button" class="opt-info" data-act="courseInfo" data-c="${c}" aria-label="${esc(CC(c).n)} 자세히 보기">ⓘ</button></div>`;
     }).join('') : `<p class="note">${q ? '검색 결과가 없습니다. 다른 이름으로 검색해 보세요.' : reqA ? `${esc(reqA.label)}에 더 추가할 과목이 없습니다. 남은 과목은 이미 이수했거나 이번 학기에 수강 중입니다.` : '추가할 수 있는 과목이 없습니다.'}</p>`}
     </div>
   </div>
