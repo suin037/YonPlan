@@ -778,7 +778,7 @@ function rerender() { saveScroll(); render(cur().y); }
 const TOUR_KEY = 'yonplan.v1.tour';
 const TOUR = [
   { s: 'home', q: '.f-total', t: '전체 이수율', d: '지금까지 이수한 학점의 이수율을 보여 줍니다.' },
-  { s: 'home', q: '.f-req', em: '.f-req .f-more', t: '졸업요건 이수율', d: '전공·교양별로 얼마나 이수했는지 보여 줍니다. "졸업요건 자세히 ›"를 누르면 영역별 졸업요건으로 이동합니다.' },
+  { s: 'home', q: '.f-req', em: '.f-req .f-more', t: '졸업요건 이수율', d: '전공·교양별로 얼마나 이수했는지 보여 줍니다. 졸업요건 자세히를 누르면 영역별 졸업요건으로 이동합니다.' },
   { s: 'home', q: '.f-miss', em: '.f-miss .f-miss-item', t: '놓치기 쉬운 항목', d: '아직 이수하지 않은 필수 과목과 부족한 학점을 모아서 알려 줍니다. 해당 항목을 누르면 상세 내용으로 이동합니다.' },
   // 이동 과정: 홈의 버튼을 눌러 졸업요건으로 들어가는 모습을 보여 줘요
   { s: 'home', q: '.f-req .f-more', tap: true, t: '졸업요건으로 이동', d: '홈에서 "졸업요건 자세히 ›"를 누르면 졸업요건 화면으로 들어갑니다.' },
@@ -809,11 +809,17 @@ function tour(i = 0) {
 }
 // 휴대폰 틀의 테두리(데스크톱 12px)를 뺀 안쪽 기준 좌표
 function tourRect(el, pad) {
-  const phone = document.getElementById('phone'), pr = phone.getBoundingClientRect(), r = el.getBoundingClientRect();
+  // 기준점은 덮개(#layer와 같은 자리) 자체의 위치 — 휴대폰 틀 테두리·소수점 위치와 상관없이 정확히 겹쳐요
+  const phone = document.getElementById('phone'), o = tourOrigin(), r = el.getBoundingClientRect();
   // 배경이 있는 카드는 테두리에 딱 맞게, 배경 없는 묶음은 여백을 넉넉히 줘서 글자가 가장자리에 붙지 않게
   const cs = getComputedStyle(el), hasBg = cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && cs.backgroundColor !== 'transparent';
   const p = pad === undefined ? (hasBg ? 0 : 10) : pad, rad = (parseFloat(cs.borderTopLeftRadius) || 0) + p;
-  return { x: r.left - pr.left - phone.clientLeft - p, y: r.top - pr.top - phone.clientTop - p, w: r.width + p * 2, h: r.height + p * 2, rad: Math.max(rad, 10), W: phone.clientWidth, H: phone.clientHeight };
+  return { x: r.left - o.left - p, y: r.top - o.top - p, w: r.width + p * 2, h: r.height + p * 2, rad: Math.max(rad, 10), W: phone.clientWidth, H: phone.clientHeight };
+}
+// 덮개가 그려질 자리(휴대폰 안쪽 왼쪽 위)를 실제로 재요
+function tourOrigin() {
+  const m = document.createElement('div'); m.style.cssText = 'position:absolute;left:0;top:0;width:0;height:0';
+  $layer.appendChild(m); const r = m.getBoundingClientRect(); m.remove(); return r;
 }
 function tourDraw(i, el) {
   const step = TOUR[i], last = i === TOUR.length - 1;
