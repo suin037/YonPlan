@@ -859,6 +859,10 @@ function tourDraw(i, el) {
 // '눌러 보기': 버튼을 누르는 모습(퍼지는 원)을 보여 준 뒤 다음 화면으로 넘어가요
 function tourTap(i) {
   const em = $layer.querySelector('.tour-em'); const tip = $layer.querySelector('.tour-tip');
+  // 실제 버튼(탭)도 눌렸다 올라오는 모습을 보여 줘요
+  const step = TOUR[tourAt], real = step && (typeof step.q === 'function' ? step.q() : document.querySelector('#screen ' + step.q));
+  if (real) { real.classList.add('is-press'); setTimeout(() => real.classList.remove('is-press'), 220); }
+  if (em) { em.classList.add('is-press'); setTimeout(() => em.classList.remove('is-press'), 220); }
   if (tip) tip.style.opacity = '0';
   if (em) { const d = document.createElement('i'); d.className = 'tour-ripple'; em.appendChild(d); }
   setTimeout(() => tour(i), 1100);

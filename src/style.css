@@ -772,3 +772,11 @@ body{letter-spacing:0}
 @keyframes tourRip{0%{transform:scale(.4);opacity:1}35%{transform:scale(.8);opacity:1}100%{transform:scale(2.2);opacity:0}}
 .tour-tip{transition:opacity .15s}
 button.tour-em{pointer-events:auto;background:transparent;border:0;padding:0;cursor:pointer}
+
+/* ---------- 누르는 느낌: 누르는 동안 살짝 작아지고 진해져요 ---------- */
+button,[data-go],[data-act],a.btn,label.chip{transition:transform .12s ease,filter .12s ease}
+button:not(:disabled):active,[data-go]:active,[data-act]:active,a.btn:active,label.chip:active,.is-press{transform:scale(.96);filter:brightness(.92)}
+.li:active,.f-req-row:active,.f-course:active,.is-press.li{transform:scale(.985)}
+.tour button:active{transform:scale(.96)}
+@media (prefers-reduced-motion:reduce){button:active,[data-go]:active,[data-act]:active,.is-press{transform:none}}
+.dim:active,.dim.is-press{transform:none;filter:none}
