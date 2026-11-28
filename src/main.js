@@ -787,7 +787,7 @@ const TOUR = [
   // 이동 과정: 하단 탭의 로드맵을 눌러 탭이 넘어가는 모습을 보여 줘요
   { s: 'req', from: 'home', q: () => document.querySelector('#tabs [data-tab="roadmap"]'), tap: true, t: '로드맵으로 이동', d: '하단 탭에서 로드맵을 누르면 학기별 로드맵으로 넘어갑니다. 강조된 탭을 눌러 보세요.' },
   // 로드맵 1: 학기에 과목이 담겨 있는 모습(이번 학기 펼침)
-  { s: 'roadmap', q: () => document.getElementById('sem-' + NOW_TERM), t: '학기별 로드맵', d: '지난 학기에는 이수한 과목과 남은 학기에는 들을 과목을 담아둘 수 있습니다.' },
+  { s: 'roadmap', q: () => document.getElementById('sem-' + NOW_TERM), t: '학기별 로드맵', d: '지난 학기에는 이수한 과목과 남은 학기에는 들을 과목을 담아서 관리할 수 있습니다.' },
   // 로드맵 2: 다음 학기의 '+ 과목 추가' 버튼을 따로 강조
   { s: 'roadmap', q: () => { const f = semesters(S.profile).find(x => x.k === 'future'); return f && document.getElementById('sem-' + f.id); }, em: () => { const f = semesters(S.profile).find(x => x.k === 'future'); return f && document.querySelector(`#sem-${f.id} .f-add`); }, t: '다음 학기 계획', d: '"+ 과목 추가"로 다음 학기 계획을 세웁니다.' }
 ];
