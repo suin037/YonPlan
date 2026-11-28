@@ -765,3 +765,9 @@ body{letter-spacing:0}
 .tour-tip p{margin:0;font-size:13.5px;line-height:21px;color:var(--g700)}
 .tour-btns{display:flex;align-items:center;gap:8px;margin-top:4px}
 .tour-btns .btn.sm{height:38px;padding:0 16px;font-size:14px;border-radius:12px;width:auto;flex:none}
+.tour-em{position:absolute;border-radius:10px;box-shadow:0 0 0 2.5px var(--main),0 0 0 6px rgba(37,75,185,.25);animation:tourPulse 1.4s ease-in-out infinite;pointer-events:none}
+.tour-em.tap{border-radius:16px}
+@keyframes tourPulse{0%,100%{box-shadow:0 0 0 2.5px var(--main),0 0 0 4px rgba(37,75,185,.35)}50%{box-shadow:0 0 0 2.5px var(--main),0 0 0 10px rgba(37,75,185,0)}}
+.tour-ripple{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:rgba(37,75,185,.55);border:3px solid #fff;animation:tourRip .75s ease-out forwards}
+@keyframes tourRip{0%{transform:scale(.4);opacity:1}35%{transform:scale(.8);opacity:1}100%{transform:scale(2.2);opacity:0}}
+.tour-tip{transition:opacity .15s}

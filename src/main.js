@@ -774,45 +774,62 @@ function render(y) {
 function rerender() { saveScroll(); render(cur().y); }
 
 /* ---------- 사용법 둘러보기: 실제 화면에서 한 곳씩 강조하며 설명해요 ----------
-   처음 홈에 들어오면 한 번 자동으로 보여 주고, 내 정보에서 다시 볼 수 있어요. */
+   처음 홈에 들어오면 한 번 자동으로 보여 주고, 내 정보의 '사용법 다시 보기'로 다시 볼 수 있어요. */
 const TOUR_KEY = 'yonplan.v1.tour';
 const TOUR = [
-  { s: 'home', q: '.f-total', t: '전체 이수율', d: '지금까지 이수한 학점이 졸업 학점 중 얼마인지 보여 줍니다. 연세포탈처럼 이미 이수한 과목만 셉니다.' },
-  { s: 'home', q: '.f-req', t: '졸업요건 이수율', d: '전공·교양별로 얼마나 채웠는지 보여 줍니다. 누르면 영역별 졸업요건으로 이동합니다.' },
-  { s: 'home', q: '.f-miss', t: '놓치기 쉬운 항목', d: '아직 듣지 않은 필수 과목과 채우지 못한 학점을 모아 알려 줍니다. 항목을 누르면 해당 요건으로 이동합니다.' },
-  { s: 'req', q: '.rq-head', t: '졸업요건 요약', d: '졸업 학점, 부족 학점, 아직 채우지 못한 영역 수를 한눈에 봅니다. 복수전공 등은 "학적 변경 ›"에서 바꿀 수 있습니다.' },
-  { s: 'req', q: '.gh + .card .li', t: '영역별 요건', d: '영역마다 이수 학점과 남은 학점을 보여 줍니다. 누르면 인정된 과목과 남은 지정 과목을 확인할 수 있습니다.' },
-  { s: 'roadmap', q: () => { const f = semesters(S.profile).find(x => x.k === 'future'); return f && (document.querySelector(`#sem-${f.id} .f-add`) || document.getElementById('sem-' + f.id)); }, t: '학기별 로드맵', d: '지난 학기에는 이수한 과목이, 남은 학기에는 계획한 과목이 담깁니다. "+ 과목 추가"로 다음 학기 계획을 세웁니다.' },
-  { s: 'me', q: '.f-me-link[data-go="register"]', t: '이수 내역 관리', d: '런어스 캡처로 들은 과목을 등록하거나 고칠 수 있습니다. 학적 정보와 사용법 다시 보기도 내 정보에 있습니다.' }
+  { s: 'home', q: '.f-total', t: '전체 이수율', d: '지금까지 이수한 학점의 이수율을 보여 줍니다.' },
+  { s: 'home', q: '.f-req', em: '.f-req .f-more', t: '졸업요건 이수율', d: '전공·교양별로 얼마나 이수했는지 보여 줍니다. "졸업요건 자세히 ›"를 누르면 영역별 졸업요건으로 이동합니다.' },
+  { s: 'home', q: '.f-miss', em: '.f-miss .f-miss-item', t: '놓치기 쉬운 항목', d: '아직 이수하지 않은 필수 과목과 부족한 학점을 모아서 알려 줍니다. 해당 항목을 누르면 상세 내용으로 이동합니다.' },
+  // 이동 과정: 홈의 버튼을 눌러 졸업요건으로 들어가는 모습을 보여 줘요
+  { s: 'home', q: '.f-req .f-more', tap: true, t: '졸업요건으로 이동', d: '홈에서 "졸업요건 자세히 ›"를 누르면 졸업요건 화면으로 들어갑니다.' },
+  { s: 'req', from: 'home', q: '.rq-head', em: '.rq-head [data-go="setup"]', t: '졸업요건 요약', d: '졸업 학점, 부족 학점, 미이수 영역 수를 한눈에 볼 수 있습니다. 복수전공 등은 "학적 변경 ›"에서 바꿀 수 있습니다.' },
+  { s: 'req', from: 'home', q: '.gh + .card .li', t: '영역별 요건', d: '영역마다 이수 학점과 남은 학점을 보여 줍니다. 누르면 인정된 과목과 남은 지정 과목을 확인할 수 있습니다.' },
+  // 이동 과정: 하단 탭의 로드맵을 눌러 탭이 넘어가는 모습을 보여 줘요
+  { s: 'req', from: 'home', q: () => document.querySelector('#tabs [data-tab="roadmap"]'), tap: true, t: '로드맵으로 이동', d: '하단 탭에서 "로드맵"을 누르면 학기별 로드맵으로 넘어갑니다.' },
+  { s: 'roadmap', q: () => { const f = semesters(S.profile).find(x => x.k === 'future'); return f && (document.querySelector(`#sem-${f.id} .f-add`) || document.getElementById('sem-' + f.id)); }, t: '학기별 로드맵', d: '지난 학기에는 이수한 과목과 남은 학기에는 들을 과목을 담아둘 수 있습니다. "+ 과목 추가"로 다음 학기 계획을 세웁니다.' }
 ];
 let tourAt = -1;
 function tour(i = 0) {
   // 화면에 없는 항목(예: 놓치기 쉬운 항목이 없을 때)은 건너뛰어요
   const step = TOUR[i]; if (!step) return tourEnd();
   tourAt = i;
-  if (cur().s !== step.s || S.stack.length > 1) { S.stack = [{ s: step.s, p: {} }]; render(0); }
+  const want = step.from ? [{ s: step.from, p: {} }, { s: step.s, p: {} }] : [{ s: step.s, p: {} }];
+  if (S.stack.map(x => x.s).join() !== want.map(x => x.s).join()) { S.stack = want; render(0); }
   requestAnimationFrame(() => {
     const el = typeof step.q === 'function' ? step.q() : document.querySelector('#screen ' + step.q);
     if (!el) return tour(i + 1 < TOUR.length ? i + 1 : TOUR.length);
     // 화면 안 스크롤 영역만 움직여요(바깥 페이지는 그대로)
     const sc = $screen.querySelector('.scroll');
-    if (sc) { const a = sc.getBoundingClientRect(), r = el.getBoundingClientRect(); sc.scrollTop += r.top - a.top - Math.max(16, (a.height - r.height) / 2); }
+    if (sc && $screen.contains(el)) { const a = sc.getBoundingClientRect(), r = el.getBoundingClientRect(); sc.scrollTop += r.top - a.top - Math.max(16, (a.height - r.height) / 2); }
     setTimeout(() => tourDraw(i, el), 60);
   });
 }
-function tourDraw(i, el) {
-  // 강조 위치는 휴대폰 틀의 테두리(데스크톱 12px)를 뺀 안쪽 기준으로 계산해요
+// 휴대폰 틀의 테두리(데스크톱 12px)를 뺀 안쪽 기준 좌표
+function tourRect(el, pad) {
   const phone = document.getElementById('phone'), pr = phone.getBoundingClientRect(), r = el.getBoundingClientRect();
-  const ox = pr.left + phone.clientLeft, oy = pr.top + phone.clientTop, W = phone.clientWidth, H = phone.clientHeight;
-  const pad = 6, x = r.left - ox - pad, y = r.top - oy - pad, w = r.width + pad * 2, h = r.height + pad * 2;
-  const step = TOUR[i], below = y + h / 2 < H / 2, last = i === TOUR.length - 1;
+  return { x: r.left - pr.left - phone.clientLeft - pad, y: r.top - pr.top - phone.clientTop - pad, w: r.width + pad * 2, h: r.height + pad * 2, W: phone.clientWidth, H: phone.clientHeight };
+}
+function tourDraw(i, el) {
+  const step = TOUR[i], last = i === TOUR.length - 1;
+  const { x, y, w, h, W, H } = tourRect(el, 6), below = y + h / 2 < H / 2;
   const tipPos = below ? `top:${Math.min(y + h + 12, H - 210)}px` : `bottom:${Math.max(H - y + 12, 20)}px`;
+  // 눌러야 하는 버튼은 진하게 강조(깜빡이는 테두리)
+  const emEl = step.tap ? el : step.em ? document.querySelector('#screen ' + step.em) : null;
+  const em = emEl ? tourRect(emEl, 3) : null;
   $layer.innerHTML = `<div class="tour" role="dialog" aria-modal="true" aria-labelledby="tourT">
     <div class="tour-hole" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px"></div>
+    ${em ? `<div class="tour-em ${step.tap ? 'tap' : ''}" style="left:${em.x}px;top:${em.y}px;width:${em.w}px;height:${em.h}px"></div>` : ''}
     <div class="tour-tip" style="${tipPos}"><div class="between"><b id="tourT">${step.t}</b><span class="muted small">${i + 1} / ${TOUR.length}</span></div>
       <p>${step.d}</p>
-      <div class="tour-btns"><button type="button" class="link" data-act="tourEnd">건너뛰기</button><span class="grow"></span>${i ? `<button type="button" class="btn weak sm" data-act="tourGo" data-i="${i - 1}">이전</button>` : ''}<button type="button" class="btn sm" data-act="${last ? 'tourEnd' : 'tourGo'}" data-i="${i + 1}">${last ? '시작하기' : '다음'}</button></div></div>
+      <div class="tour-btns"><button type="button" class="link" data-act="tourEnd">건너뛰기</button><span class="grow"></span>${i ? `<button type="button" class="btn weak sm" data-act="tourGo" data-i="${i - 1}">이전</button>` : ''}<button type="button" class="btn sm" data-act="${last ? 'tourEnd' : step.tap ? 'tourTap' : 'tourGo'}" data-i="${i + 1}">${last ? '시작하기' : step.tap ? '눌러 보기' : '다음'}</button></div></div>
   </div>`;
+}
+// '눌러 보기': 버튼을 누르는 모습(퍼지는 원)을 보여 준 뒤 다음 화면으로 넘어가요
+function tourTap(i) {
+  const em = $layer.querySelector('.tour-em'); const tip = $layer.querySelector('.tour-tip');
+  if (tip) tip.style.opacity = '0';
+  if (em) { const d = document.createElement('i'); d.className = 'tour-ripple'; em.appendChild(d); }
+  setTimeout(() => tour(i), 800);
 }
 function tourEnd() { tourAt = -1; store.set(TOUR_KEY, 1); $layer.innerHTML = ''; S.stack = [{ s: 'home', p: {} }]; render(0); }
 window.addEventListener('resize', () => { if (tourAt >= 0) tour(tourAt); });
@@ -919,6 +936,7 @@ document.addEventListener('click', e => {
     case 'closeSheet': if (e.target === t || t.tagName === 'BUTTON') closeSheet(); break;
     case 'startReal': startMode('real', { go: store.get(KEY.real) && store.get(KEY.real).onboarded ? 'home' : 'setup' }); break;
     case 'tourGo': tour(+t.dataset.i); break;
+    case 'tourTap': tourTap(+t.dataset.i); break;
     case 'tourEnd': tourEnd(); break;
     case 'tourShow': tour(0); break;
     case 'demo': startMode('demo'); toast('예시 데이터로 체험을 시작합니다.'); break;
