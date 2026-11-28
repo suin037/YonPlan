@@ -781,11 +781,11 @@ const TOUR = [
   { s: 'home', q: '.f-req', em: '.f-req .f-more', t: '졸업요건 이수율', d: '전공·교양별로 얼마나 이수했는지 보여 줍니다. 졸업요건 자세히를 누르면 영역별 졸업요건으로 이동합니다.' },
   { s: 'home', q: '.f-miss', em: '.f-miss .f-miss-item', t: '놓치기 쉬운 항목', d: '아직 이수하지 않은 필수 과목과 부족한 학점을 모아서 알려 줍니다. 해당 항목을 누르면 상세 내용으로 이동합니다.' },
   // 이동 과정: 홈의 버튼을 눌러 졸업요건으로 들어가는 모습을 보여 줘요
-  { s: 'home', q: '.f-req .f-more', tap: true, t: '졸업요건으로 이동', d: '홈에서 "졸업요건 자세히 ›"를 누르면 졸업요건 화면으로 들어갑니다.' },
-  { s: 'req', from: 'home', q: '.rq-head', em: '.rq-head [data-go="setup"]', t: '졸업요건 요약', d: '졸업 학점, 부족 학점, 미이수 영역 수를 한눈에 볼 수 있습니다. 복수전공 등은 "학적 변경 ›"에서 바꿀 수 있습니다.' },
-  { s: 'req', from: 'home', q: '.gh + .card .li', t: '영역별 요건', d: '영역마다 이수 학점과 남은 학점을 보여 줍니다. 누르면 인정된 과목과 남은 지정 과목을 확인할 수 있습니다.' },
+  { s: 'home', q: '.f-req .f-more', tap: true, t: '졸업요건으로 이동', d: '홈에서 졸업요건 자세히를 누르면 졸업요건 화면으로 들어갑니다. 강조된 버튼을 눌러 보세요.' },
+  { s: 'req', from: 'home', q: '.rq-head', em: '.rq-head [data-go="setup"]', t: '졸업요건 요약', d: '졸업 학점, 부족 학점, 미이수 영역 수를 한눈에 볼 수 있습니다. 복수전공 등은 학적 변경에서 바꿀 수 있습니다.' },
+  { s: 'req', from: 'home', q: '.gh + .card', em: '.gh + .card .li', t: '영역별 요건', d: '영역마다 이수 학점과 남은 학점을 보여 줍니다. 누르면 인정된 과목과 남은 지정 과목을 확인할 수 있습니다.' },
   // 이동 과정: 하단 탭의 로드맵을 눌러 탭이 넘어가는 모습을 보여 줘요
-  { s: 'req', from: 'home', q: () => document.querySelector('#tabs [data-tab="roadmap"]'), tap: true, t: '로드맵으로 이동', d: '하단 탭에서 "로드맵"을 누르면 학기별 로드맵으로 넘어갑니다.' },
+  { s: 'req', from: 'home', q: () => document.querySelector('#tabs [data-tab="roadmap"]'), tap: true, t: '로드맵으로 이동', d: '하단 탭에서 로드맵을 누르면 학기별 로드맵으로 넘어갑니다. 강조된 탭을 눌러 보세요.' },
   // 로드맵 1: 학기에 과목이 담겨 있는 모습(이번 학기 펼침)
   { s: 'roadmap', q: () => document.getElementById('sem-' + NOW_TERM), t: '학기별 로드맵', d: '지난 학기에는 이수한 과목과 남은 학기에는 들을 과목을 담아둘 수 있습니다.' },
   // 로드맵 2: 다음 학기의 '+ 과목 추가' 버튼을 따로 강조
@@ -798,14 +798,13 @@ function tour(i = 0) {
   tourAt = i;
   const want = step.from ? [{ s: step.from, p: {} }, { s: step.s, p: {} }] : [{ s: step.s, p: {} }];
   if (S.stack.map(x => x.s).join() !== want.map(x => x.s).join()) { S.stack = want; render(0); }
-  requestAnimationFrame(() => {
-    const el = typeof step.q === 'function' ? step.q() : document.querySelector('#screen ' + step.q);
-    if (!el) return tour(i + 1 < TOUR.length ? i + 1 : TOUR.length);
-    // 화면 안 스크롤 영역만 움직여요(바깥 페이지는 그대로)
-    const sc = $screen.querySelector('.scroll');
-    if (sc && $screen.contains(el)) { const a = sc.getBoundingClientRect(), r = el.getBoundingClientRect(); sc.scrollTop += r.top - a.top - Math.max(16, (a.height - r.height) / 2); }
-    setTimeout(() => tourDraw(i, el), 60);
-  });
+  // 기다리지 않고 바로 그려요(스크롤과 위치 계산은 같은 순간에 끝나서 어긋나지 않아요)
+  const el = typeof step.q === 'function' ? step.q() : document.querySelector('#screen ' + step.q);
+  if (!el) return tour(i + 1 < TOUR.length ? i + 1 : TOUR.length);
+  // 화면 안 스크롤 영역만 움직여요(바깥 페이지는 그대로)
+  const sc = $screen.querySelector('.scroll');
+  if (sc && $screen.contains(el)) { const a = sc.getBoundingClientRect(), r = el.getBoundingClientRect(); sc.scrollTop += r.top - a.top - Math.max(16, (a.height - r.height) / 2); }
+  tourDraw(i, el);
 }
 // 휴대폰 틀의 테두리(데스크톱 12px)를 뺀 안쪽 기준 좌표
 function tourRect(el, pad) {
@@ -822,6 +821,7 @@ function tourOrigin() {
   $layer.appendChild(m); const r = m.getBoundingClientRect(); m.remove(); return r;
 }
 function tourDraw(i, el) {
+  document.querySelectorAll('.toast').forEach(t => t.remove()); // 안내 말풍선과 겹치지 않게
   const step = TOUR[i], last = i === TOUR.length - 1;
   const { x, y, w, h, rad, W, H } = tourRect(el), below = y + h / 2 < H / 2;
   const tipPos = below ? `top:${Math.min(y + h + 12, H - 210)}px` : `bottom:${Math.max(H - y + 12, 20)}px`;
@@ -830,10 +830,13 @@ function tourDraw(i, el) {
   const em = emEl ? tourRect(emEl, 3) : null;
   $layer.innerHTML = `<div class="tour" role="dialog" aria-modal="true" aria-labelledby="tourT">
     <div class="tour-hole" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;border-radius:${rad}px"></div>
-    ${em ? `<div class="tour-em ${step.tap ? 'tap' : ''}" style="left:${em.x}px;top:${em.y}px;width:${em.w}px;height:${em.h}px;border-radius:${em.rad}px"></div>` : ''}
+    ${em ? (step.tap
+      // 이동 단계: 강조된 버튼을 직접 눌러도 넘어가요
+      ? `<button type="button" class="tour-em tap" data-act="tourTap" data-i="${i + 1}" aria-label="${step.t}" style="left:${em.x}px;top:${em.y}px;width:${em.w}px;height:${em.h}px;border-radius:${em.rad}px"></button>`
+      : `<div class="tour-em" style="left:${em.x}px;top:${em.y}px;width:${em.w}px;height:${em.h}px;border-radius:${em.rad}px"></div>`) : ''}
     <div class="tour-tip" style="${tipPos}"><div class="between"><b id="tourT">${step.t}</b><span class="muted small">${i + 1} / ${TOUR.length}</span></div>
       <p>${step.d}</p>
-      <div class="tour-btns"><button type="button" class="link" data-act="tourEnd">건너뛰기</button><span class="grow"></span>${i ? `<button type="button" class="btn weak sm" data-act="tourGo" data-i="${i - 1}">이전</button>` : ''}<button type="button" class="btn sm" data-act="${last ? 'tourEnd' : step.tap ? 'tourTap' : 'tourGo'}" data-i="${i + 1}">${last ? '시작하기' : step.tap ? '눌러 보기' : '다음'}</button></div></div>
+      <div class="tour-btns"><button type="button" class="link" data-act="tourEnd">건너뛰기</button><span class="grow"></span>${i ? `<button type="button" class="btn weak sm" data-act="tourGo" data-i="${i - 1}">이전</button>` : ''}<button type="button" class="btn sm" data-act="${last ? 'tourEnd' : step.tap ? 'tourTap' : 'tourGo'}" data-i="${i + 1}">${last ? '시작하기' : '다음'}</button></div></div>
   </div>`;
 }
 // '눌러 보기': 버튼을 누르는 모습(퍼지는 원)을 보여 준 뒤 다음 화면으로 넘어가요
@@ -841,7 +844,7 @@ function tourTap(i) {
   const em = $layer.querySelector('.tour-em'); const tip = $layer.querySelector('.tour-tip');
   if (tip) tip.style.opacity = '0';
   if (em) { const d = document.createElement('i'); d.className = 'tour-ripple'; em.appendChild(d); }
-  setTimeout(() => tour(i), 800);
+  setTimeout(() => tour(i), 600);
 }
 function tourEnd() { tourAt = -1; store.set(TOUR_KEY, 1); $layer.innerHTML = ''; S.stack = [{ s: 'home', p: {} }]; render(0); }
 window.addEventListener('resize', () => { if (tourAt >= 0) tour(tourAt); });
