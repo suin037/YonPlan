@@ -364,7 +364,7 @@ function courseRow(code, st, opt) {
 /* Figma '전체 이수율' 원(98:1080): 72px, 두께 20%, 3시 방향부터 시계 방향 */
 function ring(pct) {
   const v = Math.max(0, Math.min(1, pct)), r = 32.4, c = 2 * Math.PI * r;
-  return `<div class="f-ring" role="img" aria-label="전체 이수율 ${Math.round(v * 100)}%"><svg width="72" height="72" viewBox="0 0 72 72"><circle cx="36" cy="36" r="${r}" fill="none" stroke="rgba(124,159,219,.6)" stroke-width="7.2"/><circle cx="36" cy="36" r="${r}" fill="none" stroke="#fff" stroke-width="7.2" stroke-dasharray="${c * v} ${c}"/></svg><span>${Math.round(v * 100)}%</span></div>`;
+  return `<div class="f-ring" role="img" aria-label="전체 이수율 ${Math.round(v * 100)}%"><svg width="72" height="72" viewBox="0 0 72 72"><circle cx="36" cy="36" r="${r}" fill="none" stroke="rgba(133,170,238,.6)" stroke-width="7.2"/><circle cx="36" cy="36" r="${r}" fill="none" stroke="#fff" stroke-width="7.2" stroke-dasharray="${c * v} ${c}"/></svg><span>${Math.round(v * 100)}%</span></div>`;
 }
 function vRoadmap() {
   if (!S.onboarded) return needSetup('학사 로드맵', '학기별 로드맵');
