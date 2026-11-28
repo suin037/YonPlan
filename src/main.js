@@ -794,15 +794,19 @@ function tour(i = 0) {
   requestAnimationFrame(() => {
     const el = typeof step.q === 'function' ? step.q() : document.querySelector('#screen ' + step.q);
     if (!el) return tour(i + 1 < TOUR.length ? i + 1 : TOUR.length);
-    el.scrollIntoView({ block: 'center' });
+    // 화면 안 스크롤 영역만 움직여요(바깥 페이지는 그대로)
+    const sc = $screen.querySelector('.scroll');
+    if (sc) { const a = sc.getBoundingClientRect(), r = el.getBoundingClientRect(); sc.scrollTop += r.top - a.top - Math.max(16, (a.height - r.height) / 2); }
     setTimeout(() => tourDraw(i, el), 60);
   });
 }
 function tourDraw(i, el) {
-  const step = TOUR[i], ph = document.getElementById('phone').getBoundingClientRect(), r = el.getBoundingClientRect();
-  const pad = 6, x = r.left - ph.left - pad, y = r.top - ph.top - pad, w = r.width + pad * 2, h = r.height + pad * 2;
-  const below = y + h / 2 < ph.height / 2, last = i === TOUR.length - 1;
-  const tipPos = below ? `top:${Math.min(y + h + 12, ph.height - 210)}px` : `bottom:${Math.max(ph.height - y + 12, 20)}px`;
+  // 강조 위치는 휴대폰 틀의 테두리(데스크톱 12px)를 뺀 안쪽 기준으로 계산해요
+  const phone = document.getElementById('phone'), pr = phone.getBoundingClientRect(), r = el.getBoundingClientRect();
+  const ox = pr.left + phone.clientLeft, oy = pr.top + phone.clientTop, W = phone.clientWidth, H = phone.clientHeight;
+  const pad = 6, x = r.left - ox - pad, y = r.top - oy - pad, w = r.width + pad * 2, h = r.height + pad * 2;
+  const step = TOUR[i], below = y + h / 2 < H / 2, last = i === TOUR.length - 1;
+  const tipPos = below ? `top:${Math.min(y + h + 12, H - 210)}px` : `bottom:${Math.max(H - y + 12, 20)}px`;
   $layer.innerHTML = `<div class="tour" role="dialog" aria-modal="true" aria-labelledby="tourT">
     <div class="tour-hole" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px"></div>
     <div class="tour-tip" style="${tipPos}"><div class="between"><b id="tourT">${step.t}</b><span class="muted small">${i + 1} / ${TOUR.length}</span></div>
