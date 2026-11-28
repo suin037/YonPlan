@@ -783,7 +783,7 @@ const TOUR = [
   // 이동 과정: 홈의 버튼을 눌러 졸업요건으로 들어가는 모습을 보여 줘요
   { s: 'home', q: '.f-req .f-more', tap: true, t: '졸업요건으로 이동', d: '홈에서 졸업요건 자세히를 누르면 졸업요건 화면으로 들어갑니다. 강조된 버튼을 눌러 보세요.' },
   { s: 'req', from: 'home', q: '.rq-head', em: '.rq-head [data-go="setup"]', t: '졸업요건 요약', d: '졸업 학점, 부족 학점, 미이수 영역 수를 한눈에 볼 수 있습니다. 복수전공 등은 학적 변경에서 바꿀 수 있습니다.' },
-  { s: 'req', from: 'home', q: '.gh + .card', em: '.gh + .card .li', t: '영역별 요건', d: '영역마다 이수 학점과 남은 학점을 보여 줍니다. 누르면 인정된 과목과 남은 지정 과목을 확인할 수 있습니다.' },
+  { s: 'req', from: 'home', q: '.gh + .card', em: '.gh + .card .li', emFit: true, t: '영역별 요건', d: '영역마다 이수 학점과 남은 학점을 보여 줍니다. 누르면 인정된 과목과 남은 지정 과목을 확인할 수 있습니다.' },
   // 이동 과정: 하단 탭의 로드맵을 눌러 탭이 넘어가는 모습을 보여 줘요
   { s: 'req', from: 'home', q: () => document.querySelector('#tabs [data-tab="roadmap"]'), tap: true, t: '로드맵으로 이동', d: '하단 탭에서 로드맵을 누르면 학기별 로드맵으로 넘어갑니다. 강조된 탭을 눌러 보세요.' },
   // 로드맵 1: 학기에 과목이 담겨 있는 모습(이번 학기 펼침)
@@ -825,6 +825,13 @@ function tourRect(el, pad) {
   const p = pad === undefined ? (hasBg ? 0 : 10) : pad, rad = (parseFloat(cs.borderTopLeftRadius) || 0) + p;
   return { x: r.left - o.left - p, y: r.top - o.top - p, w: r.width + p * 2, h: r.height + p * 2, rad: Math.max(rad, 10), W: phone.clientWidth, H: phone.clientHeight };
 }
+// 줄 안의 내용(글자·막대·배지·›)에 딱 맞춘 상자 — 줄 자체의 여백이 위아래로 달라 비뚤어 보일 때 써요
+function tourFit(el, pad) {
+  const o = tourOrigin(); let L = 1e9, T = 1e9, R = -1e9, B = -1e9;
+  el.querySelectorAll('*').forEach(c => { if (c.children.length) return; const r = c.getBoundingClientRect(); if (!r.width || !r.height) return; L = Math.min(L, r.left); T = Math.min(T, r.top); R = Math.max(R, r.right); B = Math.max(B, r.bottom); });
+  if (L > R) return tourRect(el, 3);
+  return { x: L - o.left - pad, y: T - o.top - pad, w: R - L + pad * 2, h: B - T + pad * 2, rad: 12 };
+}
 // 덮개가 그려질 자리(휴대폰 안쪽 왼쪽 위)를 실제로 재요
 function tourOrigin() {
   const m = document.createElement('div'); m.style.cssText = 'position:absolute;left:0;top:0;width:0;height:0';
@@ -837,7 +844,7 @@ function tourDraw(i, el) {
   const tipPos = below ? `top:${Math.min(y + h + 12, H - 210)}px` : `bottom:${Math.max(H - y + 12, 20)}px`;
   // 눌러야 하는 버튼은 진하게 강조(깜빡이는 테두리)
   const emEl = step.tap ? el : typeof step.em === 'function' ? step.em() : step.em ? document.querySelector('#screen ' + step.em) : null;
-  const em = emEl ? tourRect(emEl, 3) : null;
+  const em = emEl ? (step.emFit ? tourFit(emEl, 8) : tourRect(emEl, 3)) : null;
   $layer.innerHTML = `<div class="tour" role="dialog" aria-modal="true" aria-labelledby="tourT">
     <div class="tour-hole" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;border-radius:${rad}px"></div>
     ${em ? (step.tap
@@ -854,7 +861,7 @@ function tourTap(i) {
   const em = $layer.querySelector('.tour-em'); const tip = $layer.querySelector('.tour-tip');
   if (tip) tip.style.opacity = '0';
   if (em) { const d = document.createElement('i'); d.className = 'tour-ripple'; em.appendChild(d); }
-  setTimeout(() => tour(i), 600);
+  setTimeout(() => tour(i), 1100);
 }
 function tourEnd() {
   tourAt = -1; store.set(TOUR_KEY, 1); $layer.innerHTML = '';
